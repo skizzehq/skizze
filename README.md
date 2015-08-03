@@ -4,7 +4,7 @@ A domain-counter data store
 ### Problem
 * How many unique users visited my website last week? (once visited can't take it back)
 * Is this URI in my spam list? (spam list over a million entries)
-* How many users are like my post? (a like being subject to change)
+* How many users like my post? (a like being subject to change)
 * How may times did oliver watch this video? (counting frequencies)
 
 ### TODO
