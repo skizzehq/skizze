@@ -2,10 +2,11 @@
 A domain-counter data store
 
 ### Problem
-* How many unique users visited my website last week? (once visited can't take it back)
 * Is this URI in my spam list? (spam list over a million entries)
 * How many users like my post? (a like being subject to change)
 * How may times did oliver watch this video? (counting frequencies)
+* How many unique users visited my website in the last 3 hours? (sliding hyperloglog)
+
 
 ### TODO
 - [ ] Design and implement REST API 
