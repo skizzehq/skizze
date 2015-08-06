@@ -2,6 +2,7 @@ package server
 
 import (
 	"counts/counters"
+	"counts/utils"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -101,6 +102,8 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 Run ...
 */
 func (srv *Server) Run() {
+	utils.InitLog(os.Stdout, os.Stdout, os.Stderr)
+	utils.Info.Println("Server up and running...")
 	http.ListenAndServe(":7596", srv)
 }
 
