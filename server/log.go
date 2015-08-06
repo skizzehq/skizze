@@ -12,7 +12,7 @@ var (
 )
 
 /*
-Provides a simple logging system
+InitLog initializes a simple logging system
 */
 func InitLog(infoHandle io.Writer, warningHandle io.Writer,
 	errorHandle io.Writer) {
