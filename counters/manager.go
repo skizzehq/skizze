@@ -6,6 +6,8 @@ Manager is responsible for manipulating the counters and syncing to disk
 type Manager struct {
 }
 
+var manager *Manager
+
 /*
 CreateDomain ...
 */
@@ -42,10 +44,12 @@ func (m *Manager) DeleteFromDomain(domain string, values []string) error {
 	return nil
 }
 
-func newManager() *Manager {
-	return &Manager{}
+/*
+GetManager returns a singleton Manager
+*/
+func GetManager() *Manager {
+	if manager == nil {
+		manager = &Manager{}
+	}
+	return manager
 }
-
-// Manager handles creation counters of all types and
-// adding/removing from them
-var ManagerProxy = newManager()

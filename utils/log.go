@@ -17,10 +17,9 @@ type Logger struct {
 var logger *Logger
 
 /*
-GetLog returns a singleton Logger
+GetLogger returns a singleton Logger
 */
-func GetLog() *Logger {
-
+func GetLogger() *Logger {
 	if logger == nil {
 		info := log.New(os.Stdout,
 			"INFO: ",
@@ -37,5 +36,4 @@ func GetLog() *Logger {
 		logger = &Logger{info, warning, err}
 	}
 	return logger
-
 }

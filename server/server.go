@@ -17,7 +17,7 @@ type requestData struct {
 	values     []string
 }
 
-var logger = utils.GetLog()
+var logger = utils.GetLogger()
 
 /*
 Server manages the http connections and communciates with the counters manager

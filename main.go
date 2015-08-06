@@ -3,9 +3,14 @@ package main
 import (
 	"counts/counters"
 	"counts/server"
+	"counts/utils"
 )
 
+var logger = utils.GetLogger()
+
 func main() {
-	server := server.New(counters.ManagerProxy)
+	logger.Info.Println("Starting counts...")
+	manager := counters.GetManager()
+	server := server.New(manager)
 	server.Run()
 }
