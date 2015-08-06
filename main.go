@@ -1,8 +1,11 @@
 package main
 
-import server "counts/server"
+import (
+	"counts/counters"
+	"counts/server"
+)
 
 func main() {
-	server := server.New()
+	server := server.New(counters.ManagerProxy)
 	server.Run()
 }
