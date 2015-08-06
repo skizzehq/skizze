@@ -1,6 +1,8 @@
 package main
 
+import server "counts/server"
+
 func main() {
-	server := newServer()
+	server := server.New()
 	server.Run()
 }

@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/json"
@@ -15,15 +15,21 @@ type requestData struct {
 	values     []string
 }
 
-type server struct {
+/*
+Server managed the http connections and communciates with the counters manager
+*/
+type Server struct {
 }
 
-func newServer() *server {
-	server := server{}
+/*
+New returns a new Server
+*/
+func New() *Server {
+	server := Server{}
 	return &server
 }
 
-func (svr *server) handleTopRequest(w http.ResponseWriter, method string, data requestData) {
+func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data requestData) {
 	switch {
 	case method == "GET":
 		// Get all counters
@@ -38,7 +44,7 @@ func (svr *server) handleTopRequest(w http.ResponseWriter, method string, data r
 	fmt.Fprintf(w, "Huh?")
 }
 
-func (svr *server) handleDomainRequest(w http.ResponseWriter, method string, data requestData) {
+func (srv *Server) handleDomainRequest(w http.ResponseWriter, method string, data requestData) {
 	switch {
 	case method == "GET":
 		// Get a count for a specific domain
@@ -53,7 +59,7 @@ func (svr *server) handleDomainRequest(w http.ResponseWriter, method string, dat
 	fmt.Fprintf(w, "Huh?")
 }
 
-func (svr *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	domain := strings.TrimSpace(r.URL.Path[1:])
 	method := r.Method
 	body, _ := ioutil.ReadAll(r.Body)
@@ -62,23 +68,23 @@ func (svr *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_ = json.Unmarshal(body, &data)
 
 	if len(domain) == 0 {
-		svr.handleTopRequest(w, method, data)
+		srv.handleTopRequest(w, method, data)
 	} else {
 		data.domain = domain
-		svr.handleDomainRequest(w, method, data)
+		srv.handleDomainRequest(w, method, data)
 	}
 }
 
 /*
 Run ...
 */
-func (svr *server) Run() {
-	http.ListenAndServe(":8080", svr)
+func (srv *Server) Run() {
+	http.ListenAndServe(":8080", srv)
 }
 
 /*
 Stop ...
 */
-func (svr *server) Stop() {
+func (srv *Server) Stop() {
 	os.Exit(0)
 }
