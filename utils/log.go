@@ -1,31 +1,41 @@
 package utils
 
 import (
-	"io"
 	"log"
-)
-
-var (
-	Info    *log.Logger
-	Warning *log.Logger
-	Error   *log.Logger
+	"os"
 )
 
 /*
-InitLog initializes a simple logging system
+Logger is responsible for populating the logs
 */
-func InitLog(infoHandle io.Writer, warningHandle io.Writer,
-	errorHandle io.Writer) {
+type Logger struct {
+	Info    *log.Logger
+	Warning *log.Logger
+	Error   *log.Logger
+}
 
-	Info = log.New(infoHandle,
-		"INFO: ",
-		log.Ldate|log.Ltime)
+var logger *Logger
 
-	Warning = log.New(warningHandle,
-		"WARNING: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
+/*
+GetLog returns a singleton Logger
+*/
+func GetLog() *Logger {
 
-	Error = log.New(errorHandle,
-		"ERROR: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
+	if logger == nil {
+		info := log.New(os.Stdout,
+			"INFO: ",
+			log.Ldate|log.Ltime)
+
+		warning := log.New(os.Stdout,
+			"WARNING: ",
+			log.Ldate|log.Ltime|log.Lshortfile)
+
+		err := log.New(os.Stderr,
+			"ERROR: ",
+			log.Ldate|log.Ltime|log.Lshortfile)
+
+		logger = &Logger{info, warning, err}
+	}
+	return logger
+
 }

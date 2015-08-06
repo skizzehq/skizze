@@ -17,6 +17,8 @@ type requestData struct {
 	values     []string
 }
 
+var logger = utils.GetLog()
+
 /*
 Server manages the http connections and communciates with the counters manager
 */
@@ -102,8 +104,7 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 Run ...
 */
 func (srv *Server) Run() {
-	utils.InitLog(os.Stdout, os.Stdout, os.Stderr)
-	utils.Info.Println("Server up and running...")
+	logger.Info.Println("Server up and running...")
 	http.ListenAndServe(":7596", srv)
 }
 
