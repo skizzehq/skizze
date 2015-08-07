@@ -48,8 +48,12 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 		res = result{domains, err}
 	case method == "POST":
 		// Create new counter
+		err := srv.manager.CreateDomain(data.domain, data.domainType)
+		res = result{data.domain, err}
 	case method == "DELETE":
 		// Remove values from domain
+		err := srv.manager.DeleteDomain(data.domain)
+		res = result{data.domain, err}
 	}
 
 	// Somebody tried a PUT request (ignore)
@@ -70,18 +74,35 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 }
 
 func (srv *Server) handleDomainRequest(w http.ResponseWriter, method string, data requestData) {
+	var res result
 	switch {
 	case method == "GET":
 		// Get a count for a specific domain
-		return
+		count, err := srv.manager.GetCountForDomain(data.domain)
+		res = result{count, err}
 	case method == "POST":
 		// Add values to domain
-		return
+		err := srv.manager.AddToDomain(data.domain, data.values)
+		res = result{nil, err}
 	case method == "DELETE":
 		// Delete Counter
+		err := srv.manager.DeleteFromDomain(data.domain, data.values)
+		res = result{nil, err}
+	}
+	// Somebody tried a PUT request (ignore)
+	if res.Result == nil && res.Error == nil {
+		fmt.Fprintf(w, "Huh?")
 		return
 	}
-	fmt.Fprintf(w, "Huh?")
+
+	js, err := json.Marshal(res)
+
+	if err == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	} else {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

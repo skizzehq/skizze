@@ -4,12 +4,12 @@ package abstract
 Counter ...
 */
 type Counter interface {
-	Add([]byte) bool
-	AddMultiple([][]byte) bool
-	Remove([]byte) bool
-	RemoveMultiple([][]byte) bool
+	Add([]byte) (bool, error)
+	AddMultiple([][]byte) (bool, error)
+	Remove([]byte) (bool, error)
+	RemoveMultiple([][]byte) (bool, error)
 	GetCount() uint
-	Clear() bool
+	Clear() (bool, error)
 }
 
 /*
