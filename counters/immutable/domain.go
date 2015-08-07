@@ -2,8 +2,12 @@ package immutable
 
 import (
 	"counts/counters/abstract"
+	"counts/utils"
+	"errors"
 	"hllpp"
 )
+
+var logger = utils.GetLogger()
 
 /*
 Domain is the toplevel domain to control the HLL implementation
@@ -23,33 +27,35 @@ func NewDomain(info abstract.Info) Domain {
 /*
 Add ...
 */
-func (d Domain) Add(value []byte) bool {
+func (d Domain) Add(value []byte) (bool, error) {
 	d.impl.Add(value)
-	return true
+	return true, nil
 }
 
 /*
 AddMultiple ...
 */
-func (d Domain) AddMultiple(values [][]byte) bool {
+func (d Domain) AddMultiple(values [][]byte) (bool, error) {
 	for _, value := range values {
 		d.impl.Add(value)
 	}
-	return true
+	return true, nil
 }
 
 /*
 Remove ...
 */
-func (d Domain) Remove(value []byte) bool {
-	return true
+func (d Domain) Remove(value []byte) (bool, error) {
+	logger.Error.Println("This operation does not deletion of counters")
+	return false, errors.New("This operation does not deletion of counters")
 }
 
 /*
 RemoveMultiple ...
 */
-func (d Domain) RemoveMultiple(values [][]byte) bool {
-	return true
+func (d Domain) RemoveMultiple(values [][]byte) (bool, error) {
+	logger.Error.Println("This operation does not deletion of counters")
+	return false, errors.New("This operation does not deletion of counters")
 }
 
 /*
@@ -62,6 +68,6 @@ func (d Domain) GetCount() uint {
 /*
 Clear ...
 */
-func (d Domain) Clear() bool {
-	return true
+func (d Domain) Clear() (bool, error) {
+	return true, nil
 }
