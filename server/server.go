@@ -126,7 +126,7 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 Run ...
 */
 func (srv *Server) Run() {
-	logger.Info.Println("Server up and running...")
+	logger.Info.Println("Server up and running at :7596...")
 	http.ListenAndServe(":7596", srv)
 }
 
