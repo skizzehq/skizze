@@ -2,9 +2,9 @@ package immutable
 
 import (
 	"counts/counters/abstract"
+	"counts/counters/immutable/hllpp"
 	"counts/utils"
 	"errors"
-	"hllpp"
 )
 
 var logger = utils.GetLogger()

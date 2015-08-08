@@ -2,8 +2,8 @@ package mutable
 
 import (
 	"counts/counters/abstract"
+	"counts/counters/mutable/cuckoofilter"
 	"counts/utils"
-	"cuckoofilter"
 )
 
 var logger = utils.GetLogger()

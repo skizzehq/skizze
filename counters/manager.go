@@ -12,16 +12,16 @@ import (
 /*
 Manager is responsible for manipulating the counters and syncing to disk
 */
-type Manager struct {
+type managerStruct struct {
 	cache *lru.Cache
 }
 
-var manager *Manager
+var manager *managerStruct
 
 /*
 CreateDomain ...
 */
-func (m *Manager) CreateDomain(domainID string, domainType string, capacity uint64) error {
+func (m *managerStruct) CreateDomain(domainID string, domainType string, capacity uint64) error {
 	//TODO: spit errir uf domainType is invalid
 	//FIXME: no hardcoding of immutable here
 
@@ -38,7 +38,7 @@ func (m *Manager) CreateDomain(domainID string, domainType string, capacity uint
 /*
 DeleteDomain ...
 */
-func (m *Manager) DeleteDomain(domainID string) error {
+func (m *managerStruct) DeleteDomain(domainID string) error {
 	m.cache.Remove(domainID)
 	return nil
 }
@@ -46,7 +46,7 @@ func (m *Manager) DeleteDomain(domainID string) error {
 /*
 GetDomains ...
 */
-func (m *Manager) GetDomains() ([]string, error) {
+func (m *managerStruct) GetDomains() ([]string, error) {
 	// TODO: Remove dummy data and implement proper result
 	values := manager.cache.Keys()
 	domains := make([]string, len(values), len(values))
@@ -59,7 +59,7 @@ func (m *Manager) GetDomains() ([]string, error) {
 /*
 AddToDomain ...
 */
-func (m *Manager) AddToDomain(domainID string, values []string) error {
+func (m *managerStruct) AddToDomain(domainID string, values []string) error {
 	var val, ok = m.cache.Get(domainID)
 	if ok == false {
 		return errors.New("No such domain: " + domainID)
@@ -78,7 +78,7 @@ func (m *Manager) AddToDomain(domainID string, values []string) error {
 /*
 DeleteFromDomain ...
 */
-func (m *Manager) DeleteFromDomain(domainID string, values []string) error {
+func (m *managerStruct) DeleteFromDomain(domainID string, values []string) error {
 	var val, ok = m.cache.Get(domainID)
 	if ok == false {
 		return errors.New("No such domain: " + domainID)
@@ -97,7 +97,7 @@ func (m *Manager) DeleteFromDomain(domainID string, values []string) error {
 /*
 GetCountForDomain ...
 */
-func (m *Manager) GetCountForDomain(domainID string) (uint, error) {
+func (m *managerStruct) GetCountForDomain(domainID string) (uint, error) {
 
 	var val, ok = m.cache.Get(domainID)
 	if ok == false {
@@ -110,12 +110,17 @@ func (m *Manager) GetCountForDomain(domainID string) (uint, error) {
 }
 
 /*
-GetManager returns a singleton Manager
+getManager returns a singleton Manager
 */
-func GetManager() *Manager {
+func getManager() *managerStruct {
 	if manager == nil {
 		cache, _ := lru.New(100)
-		manager = &Manager{cache}
+		manager = &managerStruct{cache}
 	}
 	return manager
 }
+
+/*
+Manager
+*/
+var Manager = getManager()

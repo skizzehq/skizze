@@ -1,7 +1,6 @@
 package main
 
 import (
-	"counts/counters"
 	"counts/server"
 	"counts/utils"
 	"flag"
@@ -14,7 +13,6 @@ func main() {
 	flag.Parse()
 
 	logger.Info.Println("Starting counts...")
-	manager := counters.GetManager()
-	server := server.New(manager)
+	server := server.New()
 	server.Run(*port)
 }

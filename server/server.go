@@ -19,12 +19,12 @@ type requestData struct {
 }
 
 var logger = utils.GetLogger()
+var counterManager = counters.Manager
 
 /*
 Server manages the http connections and communciates with the counters manager
 */
 type Server struct {
-	manager *counters.Manager
 }
 
 type result struct {
@@ -35,8 +35,8 @@ type result struct {
 /*
 New returns a new Server
 */
-func New(manager *counters.Manager) *Server {
-	server := Server{manager}
+func New() *Server {
+	server := Server{}
 	return &server
 }
 
@@ -45,15 +45,15 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 	switch {
 	case method == "GET":
 		// Get all counters
-		domains, err := srv.manager.GetDomains()
+		domains, err := counterManager.GetDomains()
 		res = result{domains, err}
 	case method == "POST":
 		// Create new counter
-		err := srv.manager.CreateDomain(data.domain, data.domainType, data.capacity)
+		err := counterManager.CreateDomain(data.domain, data.domainType, data.capacity)
 		res = result{data.domain, err}
 	case method == "DELETE":
 		// Remove values from domain
-		err := srv.manager.DeleteDomain(data.domain)
+		err := counterManager.DeleteDomain(data.domain)
 		res = result{data.domain, err}
 	}
 
@@ -79,15 +79,15 @@ func (srv *Server) handleDomainRequest(w http.ResponseWriter, method string, dat
 	switch {
 	case method == "GET":
 		// Get a count for a specific domain
-		count, err := srv.manager.GetCountForDomain(data.domain)
+		count, err := counterManager.GetCountForDomain(data.domain)
 		res = result{count, err}
 	case method == "POST":
 		// Add values to domain
-		err := srv.manager.AddToDomain(data.domain, data.values)
+		err := counterManager.AddToDomain(data.domain, data.values)
 		res = result{nil, err}
 	case method == "DELETE":
 		// Delete Counter
-		err := srv.manager.DeleteFromDomain(data.domain, data.values)
+		err := counterManager.DeleteFromDomain(data.domain, data.values)
 		res = result{nil, err}
 	}
 	// Somebody tried a PUT request (ignore)
