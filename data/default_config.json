@@ -1,0 +1,7 @@
+{
+  "InfoDir" : "Data",
+  "DataDir" : "Data",
+  "SliceSize" : 5,
+  "CacheSize" : 2,
+  "SliceCacheSize" : 1
+}

@@ -16,6 +16,5 @@ func main() {
 	logger.Info.Println("Starting counts...")
 	manager := counters.GetManager()
 	server := server.New(manager)
-
 	server.Run(*port)
 }
