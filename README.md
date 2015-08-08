@@ -11,9 +11,10 @@ A domain-counter data store
 ### TODO
 - [x] Design and implement REST API 
 - [x] Create counter manager
-- [x] Integrate Immutable Counter (Hyperloglog++)
-- [x] Integrate Mutable Counter (CuckooFilter and possibly play with the idea of CuckooLogLog)
-- [ ] Integrate Frequency Counter (minCount)
-- [ ] Integrate Expiring Counter (Sliding Hyperloglog)
+- [x] Integrate UniqueIncremental Counter (Hyperloglog++)
+- [x] Integrate Unique (CuckooFilter and possibly play with the idea of CuckooLogLog)
+- [ ] Integrate UniqueFrequency Counter (minCount)
+- [ ] Integrate UniqueExpiring (Sliding Hyperloglog)
+- [ ] Integrate Free (Just a plain +1 and -1 Counter)
 - [ ] Store to Disk
 - [ ] Replication on multiple servers
