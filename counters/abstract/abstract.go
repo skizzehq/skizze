@@ -16,6 +16,7 @@ type Counter interface {
 Info ...
 */
 type Info struct {
-	ID   string
-	Type string
+	ID       string
+	Type     string
+	Capacity uint64
 }

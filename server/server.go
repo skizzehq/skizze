@@ -14,6 +14,7 @@ import (
 type requestData struct {
 	domain     string
 	domainType string
+	capacity   uint64
 	values     []string
 }
 
@@ -48,7 +49,7 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 		res = result{domains, err}
 	case method == "POST":
 		// Create new counter
-		err := srv.manager.CreateDomain(data.domain, data.domainType)
+		err := srv.manager.CreateDomain(data.domain, data.domainType, data.capacity)
 		res = result{data.domain, err}
 	case method == "DELETE":
 		// Remove values from domain

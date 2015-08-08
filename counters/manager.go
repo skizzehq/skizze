@@ -3,6 +3,7 @@ package counters
 import (
 	"counts/counters/abstract"
 	"counts/counters/immutable"
+	"counts/counters/mutable"
 	"errors"
 
 	"github.com/hashicorp/golang-lru"
@@ -20,14 +21,16 @@ var manager *Manager
 /*
 CreateDomain ...
 */
-func (m *Manager) CreateDomain(domainID string, domainType string) error {
+func (m *Manager) CreateDomain(domainID string, domainType string, capacity uint64) error {
 	//TODO: spit errir uf domainType is invalid
 	//FIXME: no hardcoding of immutable here
 
-	info := abstract.Info{ID: domainID, Type: domainType}
+	info := abstract.Info{ID: domainID, Type: domainType, Capacity: capacity}
 	switch domainType {
 	case "immutable":
 		m.cache.Add(info.ID, immutable.NewDomain(info))
+	case "mutable":
+		m.cache.Add(info.ID, mutable.NewDomain(info))
 	}
 	return nil
 }
@@ -36,6 +39,7 @@ func (m *Manager) CreateDomain(domainID string, domainType string) error {
 DeleteDomain ...
 */
 func (m *Manager) DeleteDomain(domainID string) error {
+	m.cache.Remove(domainID)
 	return nil
 }
 
@@ -75,7 +79,19 @@ func (m *Manager) AddToDomain(domainID string, values []string) error {
 DeleteFromDomain ...
 */
 func (m *Manager) DeleteFromDomain(domainID string, values []string) error {
-	return nil
+	var val, ok = m.cache.Get(domainID)
+	if ok == false {
+		return errors.New("No such domain: " + domainID)
+	}
+	var counter abstract.Counter
+	counter = val.(abstract.Counter)
+
+	bytes := make([][]byte, len(values), len(values))
+	for i, value := range values {
+		bytes[i] = []byte(value)
+	}
+	ok, err := counter.RemoveMultiple(bytes)
+	return err
 }
 
 /*
