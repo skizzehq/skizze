@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -75,7 +74,7 @@ func getConfig() *configStruct {
 	if config == nil {
 		configPath := os.Getenv("COUNTS_CONFIG")
 		if configPath == "" {
-			dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+			dir, err := os.Getwd()
 			if err != nil {
 				logger.Error.Println("error:", err)
 			}
@@ -92,7 +91,6 @@ func getConfig() *configStruct {
 			tempConfig.CacheSize,
 			tempConfig.SliceCacheSize,
 		}
-		fmt.Println(config)
 		if err != nil {
 			logger.Error.Println("error:", err)
 		}
