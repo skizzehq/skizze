@@ -1,7 +1,9 @@
 package storage
 
 import (
+	"bytes"
 	"counts/utils"
+	"encoding/binary"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -35,12 +37,16 @@ func onFileEvicted(k interface{}, v interface{}) {
 	f.Close()
 }
 
+func newManager() *managerStruct {
+	//FIXME: size of cache should be read from config
+	cache, err := lru.NewWithEvict(250, onFileEvicted)
+	utils.PanicOnError(err)
+	return &managerStruct{cache}
+}
+
 func getManager() *managerStruct {
 	if manager == nil {
-		//FIXME: size of cache should be read from config
-		cache, err := lru.NewWithEvict(250, onFileEvicted)
-		utils.PanicOnError(err)
-		manager = &managerStruct{cache}
+		manager = newManager()
 	}
 	return manager
 }
@@ -56,13 +62,22 @@ func (m *managerStruct) Create(ID string) {
 
 func (m *managerStruct) SaveData(ID string, data []byte, offset int64) {
 	f := m.getFileFromCache(ID)
-	_, err := f.WriteAt(data, offset)
+	buf := new(bytes.Buffer)
+	err := binary.Write(buf, binary.BigEndian, data)
+	utils.PanicOnError(err)
+	_, err = f.WriteAt(buf.Bytes(), offset)
 	utils.PanicOnError(err)
 }
 
-func (m *managerStruct) LoadData(ID string, offset int64) []byte {
+func (m *managerStruct) LoadData(ID string, offset int64, length int64) []byte {
 	f := m.getFileFromCache(ID)
-	data := []byte{}
+	if length == 0 {
+		info, err := f.Stat()
+		utils.PanicOnError(err)
+		length = info.Size()
+		length -= offset
+	}
+	data := make([]byte, length)
 	_, err := f.ReadAt(data, offset)
 	utils.PanicOnError(err)
 	return data
@@ -73,12 +88,18 @@ func (m *managerStruct) getFileFromCache(ID string) *os.File {
 	var f *os.File
 	var err error
 	if !ok {
-		f, err = os.Create(ID)
+		f, err = os.Open(filepath.Join(dataPath, ID))
 		utils.PanicOnError(err)
 	} else {
 		f = v.(*os.File)
 	}
 	return f
+}
+
+func (m *managerStruct) forceFlush(ID string) {
+	f := m.getFileFromCache(ID)
+	m.cache.Remove(ID)
+	f.Close()
 }
 
 /*
