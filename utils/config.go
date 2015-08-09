@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -9,7 +10,7 @@ import (
 /*
 Configuration stores all configuration parameters for Go
 */
-type configurationStruct struct {
+type tempConfigStruct struct {
 	// this is where top level info is stored for the counter manager we could also use a boltDB in the DataDir but this would make it harder to sync over replicas since not all replicas will hold the all the counters.
 	InfoDir string `json:"InfoDir"`
 	// this is where the data is stored either as json or .count (pure bytes)
@@ -22,63 +23,78 @@ type configurationStruct struct {
 	SliceCacheSize uint `json:"SliceCacheSize"`
 }
 
-var config *configurationStruct
-var logg = GetLogger()
+type configStruct struct {
+	infoDir        string
+	dataDir        string
+	sliceSize      uint
+	cacheSize      uint
+	sliceCacheSize uint
+}
+
+var config *configStruct
 
 /*
 GetInfoDir returns the top level info
 */
-func (c configurationStruct) GetInfoDir() string {
-	return config.InfoDir
+func (c *configStruct) GetInfoDir() string {
+	return c.infoDir
 }
 
 /*
 GetDataDir returns the top level info
 */
-func (c configurationStruct) GetDataDir() string {
-	return config.DataDir
+func (c *configStruct) GetDataDir() string {
+	return c.dataDir
 }
 
 /*
 GetSliceSize returns the top level info
 */
-func (c configurationStruct) GetSliceSize() uint {
-	return config.SliceSize
+func (c *configStruct) GetSliceSize() uint {
+	return c.sliceSize
 }
 
 /*
 GetCacheSize returns the top level info
 */
-func (c configurationStruct) GetCacheSize() uint {
-	return config.CacheSize
+func (c *configStruct) GetCacheSize() uint {
+	return c.cacheSize
 }
 
 /*
 GetSliceCacheSize returns the top level info
 */
-func (c configurationStruct) GetSliceCacheSize() uint {
-	return config.SliceCacheSize
+func (c *configStruct) GetSliceCacheSize() uint {
+	return c.sliceCacheSize
 }
 
 /*
 GetConfig returns a singleton Configuration
 */
-func getConfig() *configurationStruct {
+func getConfig() *configStruct {
 	if config == nil {
 		configPath := os.Getenv("COUNTS_CONFIG")
 		if configPath == "" {
 			dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 			if err != nil {
-				logg.Error.Println("error:", err)
+				logger.Error.Println("error:", err)
 			}
 			configPath = filepath.Join(dir, "data/default_config.json")
 		}
 		file, _ := os.Open(configPath)
 		decoder := json.NewDecoder(file)
-		config = &configurationStruct{}
-		err := decoder.Decode(&config)
+		tempConfig := &tempConfigStruct{}
+		err := decoder.Decode(&tempConfig)
+		config = &configStruct{
+			tempConfig.InfoDir,
+			tempConfig.DataDir,
+			tempConfig.SliceSize,
+			tempConfig.CacheSize,
+			tempConfig.SliceCacheSize,
+		}
+		fmt.Println(config)
 		if err != nil {
-			logg.Error.Println("error:", err)
+			logger.Error.Println("error:", err)
 		}
 	}
 
