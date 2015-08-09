@@ -131,7 +131,7 @@ Run ...
 */
 func (srv *Server) Run(port string) {
 	logger.Info.Println("Server up and running on port :" + port + " ...")
-	http.ListenAndServe(":" + port, srv)
+	http.ListenAndServe(":"+port, srv)
 }
 
 /*
