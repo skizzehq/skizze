@@ -9,6 +9,7 @@ import (
 )
 
 var logger = utils.GetLogger()
+var manager *storage.ManagerStruct
 
 /*
 Domain is the toplevel domain to control the HLL implementation
@@ -22,7 +23,8 @@ type Domain struct {
 NewDomain ...
 */
 func NewDomain(info abstract.Info) Domain {
-	storage.Manager.Create(info.ID)
+	manager = storage.GetManager()
+	manager.Create(info.ID)
 	return Domain{info, hllpp.New()}
 }
 
@@ -79,5 +81,5 @@ Save ...
 */
 func (d Domain) Save() {
 	serialized := d.impl.Marshal()
-	storage.Manager.SaveData(d.Info.ID, serialized, 0)
+	manager.SaveData(d.Info.ID, serialized, 0)
 }

@@ -1,10 +1,13 @@
 package server
 
 import (
+	"counts/utils"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -12,6 +15,15 @@ import (
 type domainsResult struct {
 	Result []string `json:"result"`
 	Error  error    `json:"error"`
+}
+
+func setupTests() {
+	os.Setenv("COUNTS_DATA_DIR", "/tmp/count_data")
+	path, err := os.Getwd()
+	utils.PanicOnError(err)
+	path = filepath.Dir(path)
+	configPath := filepath.Join(path, "data/default_config.json")
+	os.Setenv("COUNTS_CONFIG", configPath)
 }
 
 func request(s *Server, t *testing.T, method string, domain string, body string) *httptest.ResponseRecorder {
@@ -33,6 +45,7 @@ func unmarschal(resp *httptest.ResponseRecorder) domainsResult {
 }
 
 func TestDomainsInitiallyEmpty(t *testing.T) {
+	setupTests()
 	s := New()
 	resp := request(s, t, "GET", "", "{}")
 	if resp.Code != 200 {
@@ -46,6 +59,7 @@ func TestDomainsInitiallyEmpty(t *testing.T) {
 }
 
 func TestCreateDomain(t *testing.T) {
+	setupTests()
 	s := New()
 	resp := request(s, t, "POST", "", `{
 		"domain": "marvel",

@@ -19,7 +19,7 @@ type requestData struct {
 }
 
 var logger = utils.GetLogger()
-var counterManager = counters.Manager
+var counterManager *counters.ManagerStruct
 
 /*
 Server manages the http connections and communciates with the counters manager
@@ -36,6 +36,7 @@ type result struct {
 New returns a new Server
 */
 func New() *Server {
+	counterManager = counters.GetManager()
 	server := Server{}
 	return &server
 }
@@ -112,10 +113,12 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 
 	var data requestData
-	err := json.Unmarshal(body, &data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	if len(body) > 0 {
+		err := json.Unmarshal(body, &data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 	}
 
 	if len(domain) == 0 {

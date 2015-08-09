@@ -13,6 +13,8 @@ func main() {
 	flag.Parse()
 
 	logger.Info.Println("Starting counts...")
+	config := utils.GetConfig()
+	logger.Info.Println("Using data dir: ", config.GetDataDir())
 	server := server.New()
 	server.Run(*port)
 }

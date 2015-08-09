@@ -10,18 +10,18 @@ import (
 )
 
 /*
-Manager is responsible for manipulating the counters and syncing to disk
+ManagerStruct is responsible for manipulating the counters and syncing to disk
 */
-type managerStruct struct {
+type ManagerStruct struct {
 	cache *lru.Cache
 }
 
-var manager *managerStruct
+var manager *ManagerStruct
 
 /*
 CreateDomain ...
 */
-func (m *managerStruct) CreateDomain(domainID string, domainType string, capacity uint64) error {
+func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacity uint64) error {
 	//TODO: spit errir uf domainType is invalid
 	//FIXME: no hardcoding of immutable here
 
@@ -40,7 +40,7 @@ func (m *managerStruct) CreateDomain(domainID string, domainType string, capacit
 /*
 DeleteDomain ...
 */
-func (m *managerStruct) DeleteDomain(domainID string) error {
+func (m *ManagerStruct) DeleteDomain(domainID string) error {
 	m.cache.Remove(domainID)
 	return nil
 }
@@ -48,7 +48,7 @@ func (m *managerStruct) DeleteDomain(domainID string) error {
 /*
 GetDomains ...
 */
-func (m *managerStruct) GetDomains() ([]string, error) {
+func (m *ManagerStruct) GetDomains() ([]string, error) {
 	// TODO: Remove dummy data and implement proper result
 	values := manager.cache.Keys()
 	domains := make([]string, len(values), len(values))
@@ -61,7 +61,7 @@ func (m *managerStruct) GetDomains() ([]string, error) {
 /*
 AddToDomain ...
 */
-func (m *managerStruct) AddToDomain(domainID string, values []string) error {
+func (m *ManagerStruct) AddToDomain(domainID string, values []string) error {
 	var val, ok = m.cache.Get(domainID)
 	if ok == false {
 		return errors.New("No such domain: " + domainID)
@@ -80,7 +80,7 @@ func (m *managerStruct) AddToDomain(domainID string, values []string) error {
 /*
 DeleteFromDomain ...
 */
-func (m *managerStruct) DeleteFromDomain(domainID string, values []string) error {
+func (m *ManagerStruct) DeleteFromDomain(domainID string, values []string) error {
 	var val, ok = m.cache.Get(domainID)
 	if ok == false {
 		return errors.New("No such domain: " + domainID)
@@ -99,7 +99,7 @@ func (m *managerStruct) DeleteFromDomain(domainID string, values []string) error
 /*
 GetCountForDomain ...
 */
-func (m *managerStruct) GetCountForDomain(domainID string) (uint, error) {
+func (m *ManagerStruct) GetCountForDomain(domainID string) (uint, error) {
 
 	var val, ok = m.cache.Get(domainID)
 	if ok == false {
@@ -112,17 +112,12 @@ func (m *managerStruct) GetCountForDomain(domainID string) (uint, error) {
 }
 
 /*
-getManager returns a singleton Manager
+GetManager returns a singleton Manager
 */
-func getManager() *managerStruct {
+func GetManager() *ManagerStruct {
 	if manager == nil {
 		cache, _ := lru.New(100)
-		manager = &managerStruct{cache}
+		manager = &ManagerStruct{cache}
 	}
 	return manager
 }
-
-/*
-Manager
-*/
-var Manager = getManager()

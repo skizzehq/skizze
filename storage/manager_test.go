@@ -2,11 +2,23 @@ package storage
 
 import (
 	"bytes"
+	"counts/utils"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
-func TestNoCounters(t *testing.T) {
+func initTest() {
+	os.Setenv("COUNTS_DATA_DIR", "/tmp/count_data")
+	path, err := os.Getwd()
+	utils.PanicOnError(err)
+	path = filepath.Dir(path)
+	configPath := filepath.Join(path, "data/default_config.json")
+	os.Setenv("COUNTS_CONFIG", configPath)
+}
 
+func TestNoCounters(t *testing.T) {
+	initTest()
 	//FIXME: size of cache should be read from config
 	m1 := newManager()
 	m2 := newManager()

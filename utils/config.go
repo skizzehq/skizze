@@ -3,7 +3,9 @@ package utils
 import (
 	"encoding/json"
 	"os"
+	"os/user"
 	"path/filepath"
+	"strings"
 )
 
 /*
@@ -79,16 +81,40 @@ func GetConfig() *ConfigStruct {
 		if configPath == "" {
 			path, err := os.Getwd()
 			PanicOnError(err)
+			path, err = filepath.Abs(path)
+			PanicOnError(err)
 			configPath = filepath.Join(path, "data/default_config.json")
 		}
+
 		file, err := os.Open(configPath)
 		PanicOnError(err)
 		decoder := json.NewDecoder(file)
 		tempConfig := &tempConfigStruct{}
 		err = decoder.Decode(&tempConfig)
+
+		usr, err := user.Current()
+		PanicOnError(err)
+		dir := usr.HomeDir
+
+		infoDir := strings.TrimSpace(os.Getenv("COUNTS_INFO_DIR"))
+		if len(infoDir) == 0 {
+			if tempConfig.InfoDir[:2] == "~/" {
+				infoDir = strings.Replace(tempConfig.InfoDir, "~", dir, 1)
+			}
+		}
+		os.Mkdir(infoDir, 0777)
+
+		dataDir := strings.TrimSpace(os.Getenv("COUNTS_DATA_DIR"))
+		if len(dataDir) == 0 {
+			if tempConfig.DataDir[:2] == "~/" {
+				dataDir = strings.Replace(tempConfig.DataDir, "~", dir, 1)
+			}
+		}
+		os.Mkdir(dataDir, 0777)
+
 		config = &ConfigStruct{
-			tempConfig.InfoDir,
-			tempConfig.DataDir,
+			infoDir,
+			dataDir,
 			tempConfig.SliceSize,
 			tempConfig.CacheSize,
 			tempConfig.SliceCacheSize,
@@ -97,6 +123,5 @@ func GetConfig() *ConfigStruct {
 			logger.Error.Println("error:", err)
 		}
 	}
-
 	return config
 }

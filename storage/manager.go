@@ -20,31 +20,37 @@ func getPath(path string) string {
 	return dataPath
 }
 
-var dataPath = getPath("~/.counts/storage")
+var config *utils.ConfigStruct
+var dataPath string
 
-// the storage should deal with 2 types of on disk files, info and data
+// ManagerStruct the storage should deal with 2 types of on disk files, info and data
 // info describes a domain and can be used to load back from disk the settings
 // of a counter to reinitialize it
 // the data is to refill the counters from disk
-type managerStruct struct {
+type ManagerStruct struct {
 	cache *lru.Cache
 }
 
-var manager *managerStruct
+var manager *ManagerStruct
 
 func onFileEvicted(k interface{}, v interface{}) {
 	f := v.(*os.File)
 	f.Close()
 }
 
-func newManager() *managerStruct {
+func newManager() *ManagerStruct {
+	config = utils.GetConfig()
+	dataPath = config.GetDataDir()
 	//FIXME: size of cache should be read from config
 	cache, err := lru.NewWithEvict(250, onFileEvicted)
 	utils.PanicOnError(err)
-	return &managerStruct{cache}
+	return &ManagerStruct{cache}
 }
 
-func getManager() *managerStruct {
+/*
+GetManager ...
+*/
+func GetManager() *ManagerStruct {
 	if manager == nil {
 		manager = newManager()
 	}
@@ -54,13 +60,16 @@ func getManager() *managerStruct {
 /*
 Create storage
 */
-func (m *managerStruct) Create(ID string) {
+func (m *ManagerStruct) Create(ID string) {
 	f, err := os.Create(filepath.Join(dataPath, ID))
 	utils.PanicOnError(err)
 	m.cache.Add(ID, f)
 }
 
-func (m *managerStruct) SaveData(ID string, data []byte, offset int64) {
+/*
+SaveData ...
+*/
+func (m *ManagerStruct) SaveData(ID string, data []byte, offset int64) {
 	f := m.getFileFromCache(ID)
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, data)
@@ -69,7 +78,10 @@ func (m *managerStruct) SaveData(ID string, data []byte, offset int64) {
 	utils.PanicOnError(err)
 }
 
-func (m *managerStruct) LoadData(ID string, offset int64, length int64) []byte {
+/*
+LoadData ...
+*/
+func (m *ManagerStruct) LoadData(ID string, offset int64, length int64) []byte {
 	f := m.getFileFromCache(ID)
 	if length == 0 {
 		info, err := f.Stat()
@@ -83,7 +95,7 @@ func (m *managerStruct) LoadData(ID string, offset int64, length int64) []byte {
 	return data
 }
 
-func (m *managerStruct) getFileFromCache(ID string) *os.File {
+func (m *ManagerStruct) getFileFromCache(ID string) *os.File {
 	v, ok := m.cache.Get(ID)
 	var f *os.File
 	var err error
@@ -96,13 +108,8 @@ func (m *managerStruct) getFileFromCache(ID string) *os.File {
 	return f
 }
 
-func (m *managerStruct) forceFlush(ID string) {
+func (m *ManagerStruct) forceFlush(ID string) {
 	f := m.getFileFromCache(ID)
 	m.cache.Remove(ID)
 	f.Close()
 }
-
-/*
-Manager is responsible for manipulating the counters and syncing to disk
-*/
-var Manager = getManager()
