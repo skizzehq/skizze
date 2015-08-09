@@ -11,7 +11,7 @@ import (
 
 
 type domainsResult struct {
-	Result []string      `json:"result"`
+	Result []string    `json:"result"`
 	Error  error       `json:"error"`
 }
 
@@ -79,6 +79,6 @@ func TestCreateDomain(t *testing.T) {
 
 	result := unmarschal(resp)
 	if len(result.Result) != 1 {
-		t.Fatalf("after add resultCount != 1. Got %s", len(result.Result))
+		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
 	}
 }
