@@ -112,7 +112,11 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 
 	var data requestData
-	_ = json.Unmarshal(body, &data)
+	err := json.Unmarshal(body, &data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	if len(domain) == 0 {
 		srv.handleTopRequest(w, method, data)
@@ -127,7 +131,7 @@ Run ...
 */
 func (srv *Server) Run(port string) {
 	logger.Info.Println("Server up and running on port :" + port + " ...")
-	http.ListenAndServe(":"+port, srv)
+	http.ListenAndServe(":" + port, srv)
 }
 
 /*
