@@ -1,7 +1,7 @@
 {
-  "InfoDir" : "Data",
-  "DataDir" : "Data",
-  "SliceSize" : 5,
-  "CacheSize" : 2,
-  "SliceCacheSize" : 1
+  "infoDir" : "~/.counts/info",
+  "dataDir" : "~/.counts/data",
+  "sliceSize" : 5,
+  "cacheSize" : 2,
+  "sliceCacheSize" : 1
 }
