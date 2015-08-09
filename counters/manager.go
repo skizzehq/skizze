@@ -31,6 +31,8 @@ func (m *managerStruct) CreateDomain(domainID string, domainType string, capacit
 		m.cache.Add(info.ID, immutable.NewDomain(info))
 	case "mutable":
 		m.cache.Add(info.ID, mutable.NewDomain(info))
+	default:
+		return errors.New("invalid domain type: " + domainType)
 	}
 	return nil
 }

@@ -22,7 +22,10 @@ type tempConfigStruct struct {
 	SliceCacheSize uint `json:"SliceCacheSize"`
 }
 
-type configStruct struct {
+/*
+ConfigStruct ...
+*/
+type ConfigStruct struct {
 	infoDir        string
 	dataDir        string
 	sliceSize      uint
@@ -30,61 +33,60 @@ type configStruct struct {
 	sliceCacheSize uint
 }
 
-var config *configStruct
+var config *ConfigStruct
 
 /*
 GetInfoDir returns the top level info
 */
-func (c *configStruct) GetInfoDir() string {
+func (c *ConfigStruct) GetInfoDir() string {
 	return c.infoDir
 }
 
 /*
 GetDataDir returns the top level info
 */
-func (c *configStruct) GetDataDir() string {
+func (c *ConfigStruct) GetDataDir() string {
 	return c.dataDir
 }
 
 /*
 GetSliceSize returns the top level info
 */
-func (c *configStruct) GetSliceSize() uint {
+func (c *ConfigStruct) GetSliceSize() uint {
 	return c.sliceSize
 }
 
 /*
 GetCacheSize returns the top level info
 */
-func (c *configStruct) GetCacheSize() uint {
+func (c *ConfigStruct) GetCacheSize() uint {
 	return c.cacheSize
 }
 
 /*
 GetSliceCacheSize returns the top level info
 */
-func (c *configStruct) GetSliceCacheSize() uint {
+func (c *ConfigStruct) GetSliceCacheSize() uint {
 	return c.sliceCacheSize
 }
 
 /*
 GetConfig returns a singleton Configuration
 */
-func getConfig() *configStruct {
+func GetConfig() *ConfigStruct {
 	if config == nil {
 		configPath := os.Getenv("COUNTS_CONFIG")
 		if configPath == "" {
-			dir, err := os.Getwd()
-			if err != nil {
-				logger.Error.Println("error:", err)
-			}
-			configPath = filepath.Join(dir, "data/default_config.json")
+			path, err := os.Getwd()
+			PanicOnError(err)
+			configPath = filepath.Join(path, "data/default_config.json")
 		}
-		file, _ := os.Open(configPath)
+		file, err := os.Open(configPath)
+		PanicOnError(err)
 		decoder := json.NewDecoder(file)
 		tempConfig := &tempConfigStruct{}
-		err := decoder.Decode(&tempConfig)
-		config = &configStruct{
+		err = decoder.Decode(&tempConfig)
+		config = &ConfigStruct{
 			tempConfig.InfoDir,
 			tempConfig.DataDir,
 			tempConfig.SliceSize,
@@ -98,8 +100,3 @@ func getConfig() *configStruct {
 
 	return config
 }
-
-/*
-Config
-*/
-var Config = getConfig()
