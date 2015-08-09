@@ -79,5 +79,5 @@ Save ...
 */
 func (d Domain) Save() {
 	serialized := d.impl.Marshal()
-	storage.Manager.Save(d.Info.ID, serialized)
+	storage.Manager.SaveData(d.Info.ID, serialized, 0)
 }

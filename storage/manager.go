@@ -1,19 +1,20 @@
 package storage
 
 import (
-	"bufio"
 	"counts/utils"
 	"os"
+	"os/user"
 	"path/filepath"
+
+	"github.com/hashicorp/golang-lru"
 )
 
-// FIXME: path currently hardcoded
+//FIXME: path currently hardcoded
 
 func getPath(path string) string {
-	var dataPath, err = filepath.Abs(path)
-	if err != nil {
-		panic(err)
-	}
+	const storeDir = ".counts/data"
+	usr, _ := user.Current()
+	dataPath := filepath.Join(usr.HomeDir, storeDir)
 	return dataPath
 }
 
@@ -24,13 +25,22 @@ var dataPath = getPath("~/.counts/storage")
 // of a counter to reinitialize it
 // the data is to refill the counters from disk
 type managerStruct struct {
+	cache *lru.Cache
 }
 
 var manager *managerStruct
 
+func onFileEvicted(k interface{}, v interface{}) {
+	f := v.(*os.File)
+	f.Close()
+}
+
 func getManager() *managerStruct {
 	if manager == nil {
-		manager = &managerStruct{}
+		//FIXME: size of cache should be read from config
+		cache, err := lru.NewWithEvict(250, onFileEvicted)
+		utils.PanicOnError(err)
+		manager = &managerStruct{cache}
 	}
 	return manager
 }
@@ -40,17 +50,35 @@ Create storage
 */
 func (m *managerStruct) Create(ID string) {
 	f, err := os.Create(filepath.Join(dataPath, ID))
-	defer f.Close()
+	utils.PanicOnError(err)
+	m.cache.Add(ID, f)
+}
+
+func (m *managerStruct) SaveData(ID string, data []byte, offset int64) {
+	f := m.getFileFromCache(ID)
+	_, err := f.WriteAt(data, offset)
 	utils.PanicOnError(err)
 }
 
-func (m *managerStruct) Save(ID string, data []byte) {
-	f, err := os.Create(ID)
-	defer f.Close()
+func (m *managerStruct) LoadData(ID string, offset int64) []byte {
+	f := m.getFileFromCache(ID)
+	data := []byte{}
+	_, err := f.ReadAt(data, offset)
 	utils.PanicOnError(err)
-	w := bufio.NewWriter(f)
-	w.Write(data)
-	w.Flush()
+	return data
+}
+
+func (m *managerStruct) getFileFromCache(ID string) *os.File {
+	v, ok := m.cache.Get(ID)
+	var f *os.File
+	var err error
+	if !ok {
+		f, err = os.Create(ID)
+		utils.PanicOnError(err)
+	} else {
+		f = v.(*os.File)
+	}
+	return f
 }
 
 /*
