@@ -3,6 +3,7 @@ package immutable
 import (
 	"counts/counters/abstract"
 	"counts/counters/immutable/hllpp"
+	"counts/storage"
 	"counts/utils"
 	"errors"
 )
@@ -21,6 +22,7 @@ type Domain struct {
 NewDomain ...
 */
 func NewDomain(info abstract.Info) Domain {
+	storage.Manager.Create(info.ID)
 	return Domain{info, hllpp.New()}
 }
 
@@ -70,4 +72,12 @@ Clear ...
 */
 func (d Domain) Clear() (bool, error) {
 	return true, nil
+}
+
+/*
+Save ...
+*/
+func (d Domain) Save() {
+	serialized := d.impl.Marshal()
+	storage.Manager.SaveData(d.Info.ID, serialized, 0)
 }
