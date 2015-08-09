@@ -12,10 +12,10 @@ import (
 )
 
 type requestData struct {
-	domain     string
-	domainType string
-	capacity   uint64
-	values     []string
+	Domain     string   `json:"domain"`
+	DomainType string   `json:"domainType"`
+	Capacity   uint64   `json:"capacity"`
+	Values     []string `json:"values"`
 }
 
 var logger = utils.GetLogger()
@@ -49,12 +49,12 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 		res = result{domains, err}
 	case method == "POST":
 		// Create new counter
-		err := counterManager.CreateDomain(data.domain, data.domainType, data.capacity)
-		res = result{data.domain, err}
+		err := counterManager.CreateDomain(data.Domain, data.DomainType, data.Capacity)
+		res = result{data.Domain, err}
 	case method == "DELETE":
 		// Remove values from domain
-		err := counterManager.DeleteDomain(data.domain)
-		res = result{data.domain, err}
+		err := counterManager.DeleteDomain(data.Domain)
+		res = result{data.Domain, err}
 	}
 
 	// Somebody tried a PUT request (ignore)
@@ -79,15 +79,15 @@ func (srv *Server) handleDomainRequest(w http.ResponseWriter, method string, dat
 	switch {
 	case method == "GET":
 		// Get a count for a specific domain
-		count, err := counterManager.GetCountForDomain(data.domain)
+		count, err := counterManager.GetCountForDomain(data.Domain)
 		res = result{count, err}
 	case method == "POST":
 		// Add values to domain
-		err := counterManager.AddToDomain(data.domain, data.values)
+		err := counterManager.AddToDomain(data.Domain, data.Values)
 		res = result{nil, err}
 	case method == "DELETE":
 		// Delete Counter
-		err := counterManager.DeleteFromDomain(data.domain, data.values)
+		err := counterManager.DeleteFromDomain(data.Domain, data.Values)
 		res = result{nil, err}
 	}
 	// Somebody tried a PUT request (ignore)
@@ -117,7 +117,7 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if len(domain) == 0 {
 		srv.handleTopRequest(w, method, data)
 	} else {
-		data.domain = domain
+		data.Domain = domain
 		srv.handleDomainRequest(w, method, data)
 	}
 }
