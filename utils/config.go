@@ -71,7 +71,7 @@ func getConfig() *configurationStruct {
 			if err != nil {
 				logg.Error.Println("error:", err)
 			}
-			configPath = dir + "/data/default_config.json"
+			configPath = filepath.Join(dir, "data/default_config.json")
 		}
 		file, _ := os.Open(configPath)
 		decoder := json.NewDecoder(file)
