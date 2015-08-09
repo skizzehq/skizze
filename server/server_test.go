@@ -79,6 +79,6 @@ func TestCreateDomain(t *testing.T) {
 
 	result := unmarschal(resp)
 	if len(result.Result) != 1 {
-		t.Fatalf("after add resultCount != 1. Got %s", result.Result)	
+		t.Fatalf("after add resultCount != 1. Got %s", len(result.Result))
 	}
 }
