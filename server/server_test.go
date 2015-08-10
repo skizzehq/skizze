@@ -28,7 +28,8 @@ func setupTests() {
 
 func request(s *Server, t *testing.T, method string, domain string, body string) *httptest.ResponseRecorder {
 	reqBody := strings.NewReader(body)
-	req, err := http.NewRequest(method, "http://counters.io/"+domain, reqBody)
+	fullDomain := "http://counters.io/" + domain
+	req, err := http.NewRequest(method, fullDomain, reqBody)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
@@ -47,7 +48,7 @@ func unmarschal(resp *httptest.ResponseRecorder) domainsResult {
 func TestDomainsInitiallyEmpty(t *testing.T) {
 	setupTests()
 	s := New()
-	resp := request(s, t, "GET", "", "{}")
+	resp := request(s, t, "GET", "", "")
 	if resp.Code != 200 {
 		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
 		return
@@ -61,11 +62,9 @@ func TestDomainsInitiallyEmpty(t *testing.T) {
 func TestCreateDomain(t *testing.T) {
 	setupTests()
 	s := New()
-	resp := request(s, t, "POST", "", `{
-		"domain": "marvel",
+	resp := request(s, t, "POST", "marvel", `{
 		"domainType": "immutable",
-		"capacity": 100000,
-		"values": []
+		"capacity": 100000
 	}`)
 
 	if resp.Code != 200 {

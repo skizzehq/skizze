@@ -8,6 +8,33 @@ A domain-counter data store
 * How many unique users visited my website in the last 3 hours? (sliding hyperloglog)
 
 
+### API-Documentation
+
+
+	GET 	/
+	Lists all available counters.
+
+	MERGE 	/
+	Merges multiple HyperLogLog counters.
+
+
+	POST 	/<key>
+	Creates a new Counter
+
+	GET		/<key>
+	Returns the count/cardinality of a counter
+
+	PUT 	/<key>
+	Updates a counter
+	Adds values to a cardinality/counter or incrments a counter.
+
+	PURGE 	/<key>
+	Purges values from a counter.
+
+	DELETE 	/<key>
+	Delets a counter
+
+
 ### TODO
 - [x] Design and implement REST API 
 - [x] Create counter manager
@@ -18,3 +45,5 @@ A domain-counter data store
 - [ ] Integrate Free (Just a plain +1 and -1 Counter)
 - [ ] Store to Disk
 - [ ] Replication on multiple servers
+- [ ] Expand `GET /` API so counters can be filtered using query params
+- [ ] Add pagination to `GET /` API
