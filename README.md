@@ -10,33 +10,31 @@ A domain-counter data store
 
 ### API-Documentation
 
-
-	GET 	/
+	GET	/
 	Lists all available counters.
 
-	MERGE 	/
+	MERGE	/
 	Merges multiple HyperLogLog counters.
 
+	POST	/<key>
+	Creates a new Counter.
 
-	POST 	/<key>
-	Creates a new Counter
+	GET	/<key>
+	Returns the count/cardinality of a counter.
 
-	GET		/<key>
-	Returns the count/cardinality of a counter
+	PUT	/<key>
+	Updates a counter.
+	Adds values to a cardinality/counter or increments a counter.
 
-	PUT 	/<key>
-	Updates a counter
-	Adds values to a cardinality/counter or incrments a counter.
-
-	PURGE 	/<key>
+	PURGE	/<key>
 	Purges values from a counter.
 
-	DELETE 	/<key>
-	Delets a counter
+	DELETE	/<key>
+	Deletes a counter.
 
 
 ### TODO
-- [x] Design and implement REST API 
+- [x] Design and implement REST API
 - [x] Create counter manager
 - [x] Integrate UniqueIncremental Counter (Hyperloglog++)
 - [x] Integrate Unique (CuckooFilter and possibly play with the idea of CuckooLogLog)
