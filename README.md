@@ -41,7 +41,7 @@ A domain-counter data store
 - [x] Integrate UniqueIncremental Counter (Hyperloglog++)
 - [x] Integrate Unique (CuckooFilter and possibly play with the idea of CuckooLogLog)
 - [ ] Integrate UniqueFrequency Counter (minCount)
-- [ ] Integrate UniqueExpiring (Sliding Hyperloglog)
+- [ ] Integrate UniqueIncrementalExpiring (Sliding Hyperloglog)
 - [ ] Integrate Free (Just a plain +1 and -1 Counter)
 - [ ] Store to Disk
 - [ ] Replication on multiple servers
