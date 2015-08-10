@@ -1,6 +1,7 @@
 package server
 
 import (
+	"counts/config"
 	"counts/counters"
 	"counts/utils"
 	"encoding/json"
@@ -142,8 +143,8 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 Run ...
 */
 func (srv *Server) Run() {
-	config := utils.GetConfig()
-	port := config.GetPort()
+	conf := config.GetConfig()
+	port := conf.GetPort()
 	logger.Info.Println("Server up and running on port: " + strconv.Itoa(port))
 	http.ListenAndServe(":"+strconv.Itoa(port), srv)
 }
