@@ -49,14 +49,13 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 		// Get all counters
 		domains, err := counterManager.GetDomains()
 		res = result{domains, err}
-	case method == "POST":
-		// Create new counter
-		err := counterManager.CreateDomain(data.Domain, data.DomainType, data.Capacity)
-		res = result{data.Domain, err}
-	case method == "DELETE":
-		// Remove values from domain
-		err := counterManager.DeleteDomain(data.Domain)
-		res = result{data.Domain, err}
+	case method == "MERGE":
+		// Reserved for merging hyper log log
+		http.Error(w, "Not Implemented", http.StatusNotImplemented)
+		return
+	default:
+		http.Error(w, "Invalid Method: "+method, http.StatusBadRequest)
+		return
 	}
 
 	// Somebody tried a PUT request (ignore)
@@ -84,9 +83,16 @@ func (srv *Server) handleDomainRequest(w http.ResponseWriter, method string, dat
 		count, err := counterManager.GetCountForDomain(data.Domain)
 		res = result{count, err}
 	case method == "POST":
-		// Add values to domain
+		// Create a new domain counter
+		err := counterManager.CreateDomain(data.Domain, data.DomainType, data.Capacity)
+		res = result{data.Domain, err}
+	case method == "PUT":
+		// Add values to counter
 		err := counterManager.AddToDomain(data.Domain, data.Values)
 		res = result{nil, err}
+	case method == "PURGE":
+		// Purges values from counter
+		http.Error(w, "Not Implemented", http.StatusNotImplemented)
 	case method == "DELETE":
 		// Delete Counter
 		err := counterManager.DeleteFromDomain(data.Domain, data.Values)
@@ -120,6 +126,8 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+	} else {
+		data = requestData{}
 	}
 
 	if len(domain) == 0 {
