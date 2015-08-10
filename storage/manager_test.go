@@ -13,7 +13,7 @@ func initTest() {
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)
-	configPath := filepath.Join(path, "data/default_config.json")
+	configPath := filepath.Join(path, "config/default.toml")
 	os.Setenv("COUNTS_CONFIG", configPath)
 }
 

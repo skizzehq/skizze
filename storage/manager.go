@@ -2,6 +2,7 @@ package storage
 
 import (
 	"bytes"
+	"counts/config"
 	"counts/utils"
 	"encoding/binary"
 	"os"
@@ -20,7 +21,7 @@ func getPath(path string) string {
 	return dataPath
 }
 
-var config *utils.ConfigStruct
+var conf *config.Config
 var dataPath string
 
 // ManagerStruct the storage should deal with 2 types of on disk files, info and data
@@ -39,8 +40,8 @@ func onFileEvicted(k interface{}, v interface{}) {
 }
 
 func newManager() *ManagerStruct {
-	config = utils.GetConfig()
-	dataPath = config.GetDataDir()
+	conf = config.GetConfig()
+	dataPath = conf.GetDataDir()
 	//FIXME: size of cache should be read from config
 	cache, err := lru.NewWithEvict(250, onFileEvicted)
 	utils.PanicOnError(err)

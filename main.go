@@ -1,6 +1,7 @@
 package main
 
 import (
+	"counts/config"
 	"counts/server"
 	"counts/utils"
 	"flag"
@@ -20,8 +21,8 @@ func main() {
 	os.Setenv("COUNTS_PORT", strconv.Itoa(int(port)))
 
 	logger.Info.Println("Starting counts...")
-	config := utils.GetConfig()
-	logger.Info.Println("Using data dir: ", config.GetDataDir())
+	conf := config.GetConfig()
+	logger.Info.Println("Using data dir: ", conf.GetDataDir())
 	server := server.New()
 	server.Run()
 }
