@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -92,7 +91,6 @@ func getConfig() *configStruct {
 			tempConfig.CacheSize,
 			tempConfig.SliceCacheSize,
 		}
-		fmt.Println(config)
 		if err != nil {
 			logger.Error.Println("error:", err)
 		}
