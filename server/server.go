@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -132,9 +133,11 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 /*
 Run ...
 */
-func (srv *Server) Run(port string) {
-	logger.Info.Println("Server up and running on port :" + port + " ...")
-	http.ListenAndServe(":"+port, srv)
+func (srv *Server) Run() {
+	config := utils.GetConfig()
+	port := config.GetPort()
+	logger.Info.Println("Server up and running on port: " + strconv.Itoa(port))
+	http.ListenAndServe(":"+strconv.Itoa(port), srv)
 }
 
 /*

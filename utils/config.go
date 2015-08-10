@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -12,16 +13,12 @@ import (
 Configuration stores all configuration parameters for Go
 */
 type tempConfigStruct struct {
-	// this is where top level info is stored for the counter manager we could also use a boltDB in the DataDir but this would make it harder to sync over replicas since not all replicas will hold the all the counters.
-	InfoDir string `json:"InfoDir"`
-	// this is where the data is stored either as json or .count (pure bytes)
-	DataDir string `json:"DataDir"`
-	// is needed for the raw bytes storage since we can split them up and not have it all in memory at once.
-	SliceSize uint `json:"SliceSize"`
-	// num of counters in cache
-	CacheSize uint `json:"CacheSize"`
-	// number slices in the slice cache
-	SliceCacheSize uint `json:"SliceCacheSize"`
+	InfoDir        string `json:"InfoDir"`
+	DataDir        string `json:"DataDir"`
+	SliceSize      uint   `json:"SliceSize"`
+	CacheSize      uint   `json:"CacheSize"`
+	SliceCacheSize uint   `json:"SliceCacheSize"`
+	Port           int    `json:"Port"`
 }
 
 /*
@@ -33,6 +30,7 @@ type ConfigStruct struct {
 	sliceSize      uint
 	cacheSize      uint
 	sliceCacheSize uint
+	port           int
 }
 
 var config *ConfigStruct
@@ -73,25 +71,36 @@ func (c *ConfigStruct) GetSliceCacheSize() uint {
 }
 
 /*
+GetPort returns the port the server runs on
+*/
+func (c *ConfigStruct) GetPort() int {
+	return c.port
+}
+
+func parseConfigJSON() *tempConfigStruct {
+	configPath := os.Getenv("COUNTS_CONFIG")
+	if configPath == "" {
+		path, err := os.Getwd()
+		PanicOnError(err)
+		path, err = filepath.Abs(path)
+		PanicOnError(err)
+		configPath = filepath.Join(path, "data/default_config.json")
+	}
+	file, err := os.Open(configPath)
+	PanicOnError(err)
+	decoder := json.NewDecoder(file)
+	tempConfig := &tempConfigStruct{}
+	err = decoder.Decode(&tempConfig)
+	PanicOnError(err)
+	return tempConfig
+}
+
+/*
 GetConfig returns a singleton Configuration
 */
 func GetConfig() *ConfigStruct {
 	if config == nil {
-		configPath := os.Getenv("COUNTS_CONFIG")
-		if configPath == "" {
-			path, err := os.Getwd()
-			PanicOnError(err)
-			path, err = filepath.Abs(path)
-			PanicOnError(err)
-			configPath = filepath.Join(path, "data/default_config.json")
-		}
-
-		file, err := os.Open(configPath)
-		PanicOnError(err)
-		decoder := json.NewDecoder(file)
-		tempConfig := &tempConfigStruct{}
-		err = decoder.Decode(&tempConfig)
-
+		tempConfig := parseConfigJSON()
 		usr, err := user.Current()
 		PanicOnError(err)
 		dir := usr.HomeDir
@@ -112,15 +121,18 @@ func GetConfig() *ConfigStruct {
 		}
 		os.Mkdir(dataDir, 0777)
 
+		port, err := strconv.Atoi(strings.TrimSpace(os.Getenv("COUNTS_PORT")))
+		if err != nil {
+			port = tempConfig.Port
+		}
+
 		config = &ConfigStruct{
 			infoDir,
 			dataDir,
 			tempConfig.SliceSize,
 			tempConfig.CacheSize,
 			tempConfig.SliceCacheSize,
-		}
-		if err != nil {
-			logger.Error.Println("error:", err)
+			port,
 		}
 	}
 	return config
