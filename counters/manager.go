@@ -21,13 +21,7 @@ type ManagerStruct struct {
 }
 
 var manager *ManagerStruct
-
-func dumpInfo(i *abstract.Info) {
-	manager := storage.GetManager()
-	infoData, err := json.Marshal(i)
-	utils.PanicOnError(err)
-	manager.PutInfo(i.ID, infoData)
-}
+var logger = utils.GetLogger()
 
 /*
 CreateDomain ...
@@ -122,13 +116,6 @@ func (m *ManagerStruct) GetCountForDomain(domainID string) (uint, error) {
 	return count, nil
 }
 
-func newManager() *ManagerStruct {
-	cache, _ := lru.New(100)
-	manager = &ManagerStruct{cache, make(map[string]abstract.Info)}
-	manager.loadInfo()
-	return manager
-}
-
 /*
 GetManager returns a singleton Manager
 */
@@ -139,11 +126,39 @@ func GetManager() *ManagerStruct {
 	return manager
 }
 
+func newManager() *ManagerStruct {
+	cache, _ := lru.New(100)
+	manager = &ManagerStruct{cache, make(map[string]abstract.Info)}
+	manager.loadInfo()
+	manager.loadData()
+	return manager
+}
+
+func dumpInfo(i *abstract.Info) {
+	manager := storage.GetManager()
+	infoData, err := json.Marshal(i)
+	utils.PanicOnError(err)
+	manager.PutInfo(i.ID, infoData)
+}
+
 func (m *ManagerStruct) loadInfo() {
 	manager := storage.GetManager()
 	var infoStruct abstract.Info
 	for _, infoData := range manager.GetAllInfo() {
 		json.Unmarshal(infoData, &infoStruct)
 		m.info[infoStruct.ID] = infoStruct
+	}
+}
+
+func (m *ManagerStruct) loadData() {
+	strg := storage.GetManager()
+	for key, info := range m.info {
+		switch info.Type {
+		case "immutable":
+			m.cache.Add(info.ID, immutable.NewDomainFromData(info))
+		default:
+			logger.Info.Println("Invalid counter type", info.Type)
+		}
+		strg.LoadData(key, 0, 0)
 	}
 }

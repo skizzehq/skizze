@@ -29,10 +29,22 @@ func NewDomain(info abstract.Info) Domain {
 }
 
 /*
+NewDomainFromData ...
+*/
+func NewDomainFromData(info abstract.Info) Domain {
+	manager = storage.GetManager()
+	data := manager.LoadData(info.ID, 0, 0)
+	counter, err := hllpp.Unmarshal(data)
+	utils.PanicOnError(err)
+	return Domain{info, counter}
+}
+
+/*
 Add ...
 */
 func (d Domain) Add(value []byte) (bool, error) {
 	d.impl.Add(value)
+	d.Save()
 	return true, nil
 }
 

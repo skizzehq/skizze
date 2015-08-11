@@ -18,8 +18,16 @@ func setupTests() {
 	os.Setenv("COUNTS_CONFIG", configPath)
 }
 
+func tearDownTests() {
+	os.RemoveAll(config.GetConfig().GetDataDir())
+	os.RemoveAll(config.GetConfig().GetInfoDir())
+	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
+	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
+}
+
 func TestNoCounters(t *testing.T) {
 	setupTests()
+	defer tearDownTests()
 	var manager = GetManager()
 	domains, err := manager.GetDomains()
 	if err != nil {
@@ -32,6 +40,8 @@ func TestNoCounters(t *testing.T) {
 
 func TestImmutableCounter(t *testing.T) {
 	setupTests()
+	defer tearDownTests()
+
 	var manager = GetManager()
 	err := manager.CreateDomain("marvel", "immutable", 10000000)
 	if err != nil {
@@ -77,6 +87,8 @@ func TestImmutableCounter(t *testing.T) {
 
 func TestMutableCounter(t *testing.T) {
 	setupTests()
+	defer tearDownTests()
+
 	manager := GetManager()
 	err := manager.CreateDomain("marvel", "mutable", 10000000)
 	if err != nil {
@@ -119,32 +131,50 @@ func TestMutableCounter(t *testing.T) {
 	}
 }
 
-func TestLoadInfo(t *testing.T) {
+func TestDumpLoadInfo(t *testing.T) {
 	setupTests()
-	conf := config.GetConfig()
-	testFilePath := filepath.Join(conf.GetInfoDir(), "test.json")
+	defer tearDownTests()
 
 	var exists bool
-	m := newManager()
-	if _, exists = m.info["test"]; exists {
-		t.Fatalf("expected test to not be initially loaded by manager")
+	m1 := newManager()
+	if _, exists = m1.info["avengers"]; exists {
+		t.Error("expected avengers to not be initially loaded by manager")
 	}
+	m1.CreateDomain("avengers", "immutable", 1000000)
 
-	f, err := os.Create(testFilePath)
-	defer os.Remove(testFilePath)
+	m2 := newManager()
+	if _, exists = m2.info["avengers"]; !exists {
+		t.Error("expected avengers to be in loaded by manager")
+	}
+}
+
+func TestDumpLoadImmutableData(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	var exists bool
+	m1 := newManager()
+	if _, exists = m1.info["avengers"]; exists {
+		t.Error("expected avengers to not be initially loaded by manager")
+	}
+	m1.CreateDomain("avengers", "immutable", 1000000)
+	m1.AddToDomain("avengers", []string{"sabertooth", "thunderbolt", "havoc", "cyclops"})
+
+	res, err := m1.GetCountForDomain("avengers")
 	if err != nil {
-		t.Fatal("Couldn't create test file")
+		t.Error("expected avengers to have no error, got", err)
 	}
-	f.WriteString(`{
-		"id": "test",
-		"type": "immutable",
-		"capacity": 12345
-	}`)
+	if res != 4 {
+		t.Error("expected avengers to have count 4, got", res)
+	}
 
-	m = newManager()
-	if _, exists = m.info["test"]; !exists {
-		t.Fatalf("expected test to be in loaded by manager")
+	m2 := newManager()
+	res, err = m2.GetCountForDomain("avengers")
+	if err != nil {
+		t.Error("expected avengers to have no error, got", err)
 	}
-	// info := m.info["test"]
+	if res != 4 {
+		t.Error("expected avengers to have count 4, got", res)
+	}
 
 }
