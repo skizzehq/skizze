@@ -3,7 +3,6 @@ package server
 import (
 	"counts/utils"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +15,11 @@ import (
 type domainsResult struct {
 	Result []string `json:"result"`
 	Error  error    `json:"error"`
+}
+
+type domainResult struct {
+	Result uint  `json:"result"`
+	Error  error `json:"error"`
 }
 
 func setupTests() {
@@ -40,9 +44,16 @@ func request(s *Server, t *testing.T, method string, domain string, body string)
 	return respw
 }
 
-func unmarshal(resp *httptest.ResponseRecorder) domainsResult {
+func unmarshalDomainsResult(resp *httptest.ResponseRecorder) domainsResult {
 	body, _ := ioutil.ReadAll(resp.Body)
 	var r domainsResult
+	json.Unmarshal(body, &r)
+	return r
+}
+
+func unmarshalDomainResult(resp *httptest.ResponseRecorder) domainResult {
+	body, _ := ioutil.ReadAll(resp.Body)
+	var r domainResult
 	json.Unmarshal(body, &r)
 	return r
 }
@@ -55,7 +66,7 @@ func TestDomainsInitiallyEmpty(t *testing.T) {
 		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
 		return
 	}
-	result := unmarshal(resp)
+	result := unmarshalDomainsResult(resp)
 	if len(result.Result) != 0 {
 		t.Fatalf("Initial resultCount != 0. Got %s", result)
 	}
@@ -75,7 +86,7 @@ func TestCreateDomain(t *testing.T) {
 	}
 
 	resp = request(s, t, "GET", "", `{}`)
-	result := unmarshal(resp)
+	result := unmarshalDomainsResult(resp)
 	if len(result.Result) != 1 {
 		t.Fatalf("after add resultCount != 1. Got %s", result)
 	}
@@ -95,7 +106,7 @@ func TestHLL(t *testing.T) {
 	}
 
 	resp = request(s, t, "GET", "", `{}`)
-	result := unmarshal(resp)
+	result := unmarshalDomainsResult(resp)
 	if len(result.Result) != 1 {
 		t.Fatalf("after add resultCount != 1. Got %s", result)
 	}
@@ -105,9 +116,8 @@ func TestHLL(t *testing.T) {
 	}`)
 
 	resp = request(s, t, "GET", "marvel", `{}`)
-	fmt.Println(resp)
-	result = unmarshal(resp)
-	if len(result.Result) != 1 {
-		t.Fatalf("after add resultCount != 1. Got %s", result)
+	result2 := unmarshalDomainResult(resp)
+	if result2.Result != 3 {
+		t.Fatalf("after add resultCount != 1. Got %d", result2.Result)
 	}
 }
