@@ -64,16 +64,16 @@ func (d Domain) AddMultiple(values [][]byte) (bool, error) {
 Remove ...
 */
 func (d Domain) Remove(value []byte) (bool, error) {
-	logger.Error.Println("This operation does not deletion of counters")
-	return false, errors.New("This operation does not deletion of counters")
+	logger.Error.Println("This domain type does not support deletion")
+	return false, errors.New("This domain type does not support deletion")
 }
 
 /*
 RemoveMultiple ...
 */
 func (d Domain) RemoveMultiple(values [][]byte) (bool, error) {
-	logger.Error.Println("This operation does not deletion of counters")
-	return false, errors.New("This operation does not deletion of counters")
+	logger.Error.Println("This domain type does not support deletion")
+	return false, errors.New("This domain type does not support deletion")
 }
 
 /*
