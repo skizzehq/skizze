@@ -114,3 +114,10 @@ func (m *ManagerStruct) forceFlush(ID string) {
 	m.cache.Remove(ID)
 	f.Close()
 }
+
+/*
+GetAllInfo ...
+*/
+func (m *ManagerStruct) GetAllInfo() {
+
+}
