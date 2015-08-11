@@ -118,11 +118,12 @@ GetManager returns a singleton Manager
 func GetManager() *ManagerStruct {
 	if manager == nil {
 		cache, _ := lru.New(100)
-		manager = &ManagerStruct{cache}
+		manager = &ManagerStruct{cache, make(map[string]abstract.Info)}
 	}
 	return manager
 }
 
 func populateInfo() map[string]abstract.Info {
-
+	// TODO: Implement..
+	return GetManager().info
 }
