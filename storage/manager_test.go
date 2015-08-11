@@ -2,6 +2,7 @@ package storage
 
 import (
 	"bytes"
+	"counts/config"
 	"counts/utils"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 
 func initTest() {
 	os.Setenv("COUNTS_DATA_DIR", "/tmp/count_data")
+	os.Setenv("COUNTS_INFO_DIR", "/tmp/count_info")
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)
@@ -29,4 +31,26 @@ func TestNoCounters(t *testing.T) {
 	if bytes.Compare(data1, data2) != 0 {
 		t.Error("Expected data2 == "+string(data1)+" got", data2)
 	}
+}
+
+func TestGetAllInfo(t *testing.T) {
+	conf := config.GetConfig()
+	testFilePath := filepath.Join(conf.GetInfoDir(), "test.json")
+
+	f, err := os.Create(testFilePath)
+	defer os.Remove(testFilePath)
+	if err != nil {
+		t.Fatal("Couldn't create test file")
+	}
+	f.WriteString(`{
+		"id": "test",
+		"type": "immutable",
+		"capacity": 12345
+	}`)
+	m := newManager()
+	infoDatas := m.GetAllInfo()
+	if len(infoDatas) != 1 {
+		t.Fatal("Expected exactly one infoData")
+	}
+
 }

@@ -5,6 +5,7 @@ import (
 	"counts/config"
 	"counts/utils"
 	"encoding/binary"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -118,6 +119,19 @@ func (m *ManagerStruct) forceFlush(ID string) {
 /*
 GetAllInfo ...
 */
-func (m *ManagerStruct) GetAllInfo() {
+func (m *ManagerStruct) GetAllInfo() [][]byte {
+	infoDir := conf.GetInfoDir()
+	os.Mkdir(infoDir, 0777)
+	fileInfos, err := ioutil.ReadDir(infoDir)
+	utils.PanicOnError(err)
+	infoDatas := make([][]byte, len(fileInfos))
+	for i, fileInfo := range fileInfos {
+		filePath := filepath.Join(infoDir, fileInfo.Name())
+		fileData, err := ioutil.ReadFile(filePath)
+		utils.PanicOnError(err)
 
+		infoDatas[i] = fileData
+	}
+
+	return infoDatas
 }

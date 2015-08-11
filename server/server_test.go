@@ -19,6 +19,7 @@ type domainsResult struct {
 
 func setupTests() {
 	os.Setenv("COUNTS_DATA_DIR", "/tmp/count_data")
+	os.Setenv("COUNTS_INFO_DIR", "/tmp/count_info")
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)

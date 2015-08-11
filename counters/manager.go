@@ -4,6 +4,8 @@ import (
 	"counts/counters/abstract"
 	"counts/counters/immutable"
 	"counts/counters/mutable"
+	"counts/storage"
+	"encoding/json"
 	"errors"
 
 	"github.com/hashicorp/golang-lru"
@@ -101,7 +103,6 @@ func (m *ManagerStruct) DeleteFromDomain(domainID string, values []string) error
 GetCountForDomain ...
 */
 func (m *ManagerStruct) GetCountForDomain(domainID string) (uint, error) {
-
 	var val, ok = m.cache.Get(domainID)
 	if ok == false {
 		return 0, errors.New("No such domain: " + domainID)
@@ -112,18 +113,31 @@ func (m *ManagerStruct) GetCountForDomain(domainID string) (uint, error) {
 	return count, nil
 }
 
+func newManager() *ManagerStruct {
+	cache, _ := lru.New(100)
+	manager = &ManagerStruct{cache, make(map[string]abstract.Info)}
+	manager.loadInfo()
+	return manager
+}
+
 /*
 GetManager returns a singleton Manager
 */
 func GetManager() *ManagerStruct {
 	if manager == nil {
-		cache, _ := lru.New(100)
-		manager = &ManagerStruct{cache, make(map[string]abstract.Info)}
+		manager = newManager()
 	}
 	return manager
 }
 
-func populateInfo() map[string]abstract.Info {
-	// TODO: Implement..
-	return GetManager().info
+func (m *ManagerStruct) loadInfo() {
+	manager := storage.GetManager()
+	var infoStruct abstract.Info
+	for _, infoData := range manager.GetAllInfo() {
+		json.Unmarshal(infoData, &infoStruct)
+		m.info[infoStruct.ID] = infoStruct
+	}
+}
+
+func (m *ManagerStruct) dumpInfo() {
 }
