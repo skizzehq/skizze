@@ -74,7 +74,7 @@ func parseConfigTOML() *Config {
 		utils.PanicOnError(err)
 		path, err = filepath.Abs(path)
 		utils.PanicOnError(err)
-		configPath = filepath.Join(path, "config/default_config.toml")
+		configPath = filepath.Join(path, "config/default.toml")
 	}
 	_, err := os.Open(configPath)
 	utils.PanicOnError(err)
