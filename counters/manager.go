@@ -14,6 +14,7 @@ ManagerStruct is responsible for manipulating the counters and syncing to disk
 */
 type ManagerStruct struct {
 	cache *lru.Cache
+	info  map[string]abstract.Info
 }
 
 var manager *ManagerStruct
@@ -120,4 +121,8 @@ func GetManager() *ManagerStruct {
 		manager = &ManagerStruct{cache}
 	}
 	return manager
+}
+
+func populateInfo() map[string]abstract.Info {
+
 }
