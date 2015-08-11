@@ -1,6 +1,7 @@
 package counters
 
 import (
+	"counts/config"
 	"counts/utils"
 	"os"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 
 func setupTests() {
 	os.Setenv("COUNTS_DATA_DIR", "/tmp/count_data")
+	os.Setenv("COUNTS_INFO_DIR", "/tmp/count_info")
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)
@@ -75,7 +77,7 @@ func TestImmutableCounter(t *testing.T) {
 
 func TestMutableCounter(t *testing.T) {
 	setupTests()
-	var manager = GetManager()
+	manager := GetManager()
 	err := manager.CreateDomain("marvel", "mutable", 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
@@ -115,4 +117,28 @@ func TestMutableCounter(t *testing.T) {
 	if len(domains) != 0 {
 		t.Error("Expected 0 counters, got", len(domains))
 	}
+}
+
+func TestLoadInfo(t *testing.T) {
+	setupTests()
+	conf := config.GetConfig()
+	testFilePath := filepath.Join(conf.GetInfoDir(), "test.json")
+
+	f, err := os.Create(testFilePath)
+	defer os.Remove(testFilePath)
+	if err != nil {
+		t.Fatal("Couldn't create test file")
+	}
+	f.WriteString(`{
+		"id": "test",
+		"type": "immutable",
+		"capacity": 12345
+	}`)
+
+	m := newManager()
+	if len(m.info) != 1 {
+		t.Fatalf("expected exactly one info to be loaded, got %d", len(m.info))
+	}
+	// info := m.info["test"]
+
 }
