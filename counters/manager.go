@@ -5,6 +5,7 @@ import (
 	"counts/counters/immutable"
 	"counts/counters/mutable"
 	"counts/storage"
+	"counts/utils"
 	"encoding/json"
 	"errors"
 
@@ -20,6 +21,13 @@ type ManagerStruct struct {
 }
 
 var manager *ManagerStruct
+
+func dumpInfo(i *abstract.Info) {
+	manager := storage.GetManager()
+	infoData, err := json.Marshal(i)
+	utils.PanicOnError(err)
+	manager.PutInfo(i.ID, infoData)
+}
 
 /*
 CreateDomain ...
@@ -37,6 +45,7 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 	default:
 		return errors.New("invalid domain type: " + domainType)
 	}
+	dumpInfo(&info)
 	return nil
 }
 
@@ -137,7 +146,4 @@ func (m *ManagerStruct) loadInfo() {
 		json.Unmarshal(infoData, &infoStruct)
 		m.info[infoStruct.ID] = infoStruct
 	}
-}
-
-func (m *ManagerStruct) dumpInfo() {
 }

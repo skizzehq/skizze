@@ -124,6 +124,12 @@ func TestLoadInfo(t *testing.T) {
 	conf := config.GetConfig()
 	testFilePath := filepath.Join(conf.GetInfoDir(), "test.json")
 
+	var exists bool
+	m := newManager()
+	if _, exists = m.info["test"]; exists {
+		t.Fatalf("expected test to not be initially loaded by manager")
+	}
+
 	f, err := os.Create(testFilePath)
 	defer os.Remove(testFilePath)
 	if err != nil {
@@ -135,9 +141,9 @@ func TestLoadInfo(t *testing.T) {
 		"capacity": 12345
 	}`)
 
-	m := newManager()
-	if len(m.info) != 1 {
-		t.Fatalf("expected exactly one info to be loaded, got %d", len(m.info))
+	m = newManager()
+	if _, exists = m.info["test"]; !exists {
+		t.Fatalf("expected test to be in loaded by manager")
 	}
 	// info := m.info["test"]
 
