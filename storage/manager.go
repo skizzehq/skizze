@@ -117,9 +117,9 @@ func (m *ManagerStruct) forceFlush(ID string) {
 }
 
 /*
-GetAllInfo ...
+LoadAllInfo ...
 */
-func (m *ManagerStruct) GetAllInfo() [][]byte {
+func (m *ManagerStruct) LoadAllInfo() [][]byte {
 	infoDir := conf.GetInfoDir()
 	os.Mkdir(infoDir, 0777)
 	fileInfos, err := ioutil.ReadDir(infoDir)
@@ -136,7 +136,10 @@ func (m *ManagerStruct) GetAllInfo() [][]byte {
 	return infoDatas
 }
 
-func (m *ManagerStruct) PutInfo(id string, infoData []byte) {
+/*
+SaveInfo ...
+*/
+func (m *ManagerStruct) SaveInfo(id string, infoData []byte) {
 	infoDir := conf.GetInfoDir()
 	infoPath := filepath.Join(infoDir, id+".json")
 	f, err := os.Create(infoPath)

@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func initTest() {
+func setupTests() {
 	os.Setenv("COUNTS_DATA_DIR", "/tmp/count_data")
 	os.Setenv("COUNTS_INFO_DIR", "/tmp/count_info")
 	path, err := os.Getwd()
@@ -17,10 +17,19 @@ func initTest() {
 	path = filepath.Dir(path)
 	configPath := filepath.Join(path, "config/default.toml")
 	os.Setenv("COUNTS_CONFIG", configPath)
+	tearDownTests()
+}
+
+func tearDownTests() {
+	os.RemoveAll(config.GetConfig().GetDataDir())
+	os.RemoveAll(config.GetConfig().GetInfoDir())
+	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
+	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
 }
 
 func TestNoCounters(t *testing.T) {
-	initTest()
+	setupTests()
+	defer tearDownTests()
 	//FIXME: size of cache should be read from config
 	m1 := newManager()
 	m2 := newManager()
@@ -34,6 +43,8 @@ func TestNoCounters(t *testing.T) {
 }
 
 func TestGetAllInfo(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
 	conf := config.GetConfig()
 	testFilePath := filepath.Join(conf.GetInfoDir(), "test.json")
 
@@ -48,7 +59,7 @@ func TestGetAllInfo(t *testing.T) {
 		"capacity": 12345
 	}`)
 	m := newManager()
-	infoDatas := m.GetAllInfo()
+	infoDatas := m.LoadAllInfo()
 	if len(infoDatas) != 1 {
 		t.Fatal("Expected exactly one infoData")
 	}

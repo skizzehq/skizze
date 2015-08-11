@@ -25,15 +25,16 @@ NewDomain ...
 func NewDomain(info abstract.Info) Domain {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
-	return Domain{info, hllpp.New()}
+	d := Domain{info, hllpp.New()}
+	d.Save()
+	return d
 }
 
 /*
 NewDomainFromData ...
 */
 func NewDomainFromData(info abstract.Info) Domain {
-	manager = storage.GetManager()
-	data := manager.LoadData(info.ID, 0, 0)
+	data := storage.GetManager().LoadData(info.ID, 0, 0)
 	counter, err := hllpp.Unmarshal(data)
 	utils.PanicOnError(err)
 	return Domain{info, counter}

@@ -29,7 +29,6 @@ CreateDomain ...
 func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacity uint64) error {
 	//TODO: spit errir uf domainType is invalid
 	//FIXME: no hardcoding of immutable here
-
 	info := abstract.Info{ID: domainID, Type: domainType, Capacity: capacity}
 	switch domainType {
 	case "immutable":
@@ -39,7 +38,9 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 	default:
 		return errors.New("invalid domain type: " + domainType)
 	}
-	dumpInfo(&info)
+	storage.GetManager().Create(domainID)
+
+	m.dumpInfo(&info)
 	return nil
 }
 
@@ -130,27 +131,27 @@ func newManager() *ManagerStruct {
 	cache, _ := lru.New(100)
 	manager = &ManagerStruct{cache, make(map[string]abstract.Info)}
 	manager.loadInfo()
-	manager.loadData()
+	manager.loadDomains()
 	return manager
 }
 
-func dumpInfo(i *abstract.Info) {
+func (m *ManagerStruct) dumpInfo(i *abstract.Info) {
 	manager := storage.GetManager()
 	infoData, err := json.Marshal(i)
 	utils.PanicOnError(err)
-	manager.PutInfo(i.ID, infoData)
+	manager.SaveInfo(i.ID, infoData)
 }
 
 func (m *ManagerStruct) loadInfo() {
 	manager := storage.GetManager()
 	var infoStruct abstract.Info
-	for _, infoData := range manager.GetAllInfo() {
+	for _, infoData := range manager.LoadAllInfo() {
 		json.Unmarshal(infoData, &infoStruct)
 		m.info[infoStruct.ID] = infoStruct
 	}
 }
 
-func (m *ManagerStruct) loadData() {
+func (m *ManagerStruct) loadDomains() {
 	strg := storage.GetManager()
 	for key, info := range m.info {
 		switch info.Type {
