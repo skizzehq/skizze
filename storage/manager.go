@@ -127,11 +127,20 @@ func (m *ManagerStruct) GetAllInfo() [][]byte {
 	infoDatas := make([][]byte, len(fileInfos))
 	for i, fileInfo := range fileInfos {
 		filePath := filepath.Join(infoDir, fileInfo.Name())
-		fileData, err := ioutil.ReadFile(filePath)
+		infoData, err := ioutil.ReadFile(filePath)
 		utils.PanicOnError(err)
 
-		infoDatas[i] = fileData
+		infoDatas[i] = infoData
 	}
 
 	return infoDatas
+}
+
+func (m *ManagerStruct) PutInfo(id string, infoData []byte) {
+	infoDir := conf.GetInfoDir()
+	infoPath := filepath.Join(infoDir, id+".json")
+	f, err := os.Create(infoPath)
+	defer f.Close()
+	utils.PanicOnError(err)
+	f.Write(infoData)
 }
