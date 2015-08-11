@@ -1,7 +1,10 @@
 # Counts
 
 [![Join the chat at https://gitter.im/seiflotfy/counts](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/seiflotfy/counts?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-A domain-counter data store
+
+A domain-counter data store to deal with all problems around counting using probabalistic data-structures.
+
+Unlike a Key-Value store, counts does not store values, but rather keeps track of keys added to a domain, allowing you to solve frequency and cardinality queries in near O(1) time, with minimal memory footprint.
 
 ## Motivation
 
