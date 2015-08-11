@@ -3,6 +3,7 @@ package server
 import (
 	"counts/utils"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -39,7 +40,7 @@ func request(s *Server, t *testing.T, method string, domain string, body string)
 	return respw
 }
 
-func unmarschal(resp *httptest.ResponseRecorder) domainsResult {
+func unmarshal(resp *httptest.ResponseRecorder) domainsResult {
 	body, _ := ioutil.ReadAll(resp.Body)
 	var r domainsResult
 	json.Unmarshal(body, &r)
@@ -54,7 +55,7 @@ func TestDomainsInitiallyEmpty(t *testing.T) {
 		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
 		return
 	}
-	result := unmarschal(resp)
+	result := unmarshal(resp)
 	if len(result.Result) != 0 {
 		t.Fatalf("Initial resultCount != 0. Got %s", result)
 	}
@@ -74,7 +75,38 @@ func TestCreateDomain(t *testing.T) {
 	}
 
 	resp = request(s, t, "GET", "", `{}`)
-	result := unmarschal(resp)
+	result := unmarshal(resp)
+	if len(result.Result) != 1 {
+		t.Fatalf("after add resultCount != 1. Got %s", result)
+	}
+}
+
+func TestHLL(t *testing.T) {
+	setupTests()
+	s := New()
+	resp := request(s, t, "POST", "marvel", `{
+		"domainType": "immutable",
+		"capacity": 100000
+	}`)
+
+	if resp.Code != 200 {
+		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
+		return
+	}
+
+	resp = request(s, t, "GET", "", `{}`)
+	result := unmarshal(resp)
+	if len(result.Result) != 1 {
+		t.Fatalf("after add resultCount != 1. Got %s", result)
+	}
+
+	resp = request(s, t, "PUT", "marvel", `{
+		"values": ["magneto", "wasp", "beast"]
+	}`)
+
+	resp = request(s, t, "GET", "marvel", `{}`)
+	fmt.Println(resp)
+	result = unmarshal(resp)
 	if len(result.Result) != 1 {
 		t.Fatalf("after add resultCount != 1. Got %s", result)
 	}

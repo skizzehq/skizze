@@ -43,6 +43,7 @@ func (d Domain) AddMultiple(values [][]byte) (bool, error) {
 	for _, value := range values {
 		d.impl.Add(value)
 	}
+	d.Save()
 	return true, nil
 }
 
