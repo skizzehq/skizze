@@ -13,7 +13,7 @@ var logger = utils.GetLogger()
 
 func main() {
 	var port uint
-	flag.UintVar(&port, "p", 7596, "specifies the port for Counts to run on")
+	flag.UintVar(&port, "p", 3596, "specifies the port for Counts to run on")
 	flag.Parse()
 
 	//TODO: Add arguments for dataDir and infoDir
