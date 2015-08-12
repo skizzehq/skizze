@@ -1,10 +1,10 @@
-package immutable
+package hllpp
 
 import (
 	"errors"
 
 	"github.com/seiflotfy/counts/counters/abstract"
-	"github.com/seiflotfy/counts/counters/immutable/hllpp"
+	"github.com/seiflotfy/counts/counters/wrappers/hllpp/hllpp"
 	"github.com/seiflotfy/counts/storage"
 	"github.com/seiflotfy/counts/utils"
 )

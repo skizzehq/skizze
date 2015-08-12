@@ -46,6 +46,7 @@ func newManager() *ManagerStruct {
 	dataPath = conf.GetDataDir()
 	//FIXME: size of cache should be read from config
 	cache, err := lru.NewWithEvict(250, onFileEvicted)
+	os.MkdirAll(dataPath, 0777)
 	utils.PanicOnError(err)
 	return &ManagerStruct{cache}
 }
@@ -122,7 +123,7 @@ LoadAllInfo ...
 */
 func (m *ManagerStruct) LoadAllInfo() [][]byte {
 	infoDir := conf.GetInfoDir()
-	os.Mkdir(infoDir, 0777)
+	err := os.MkdirAll(infoDir, 0777)
 	fileInfos, err := ioutil.ReadDir(infoDir)
 	utils.PanicOnError(err)
 	infoDatas := make([][]byte, len(fileInfos))

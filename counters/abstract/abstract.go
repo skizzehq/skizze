@@ -20,3 +20,16 @@ type Info struct {
 	Type     string `json:"type"`
 	Capacity uint64 `json:"capacity"`
 }
+
+/*
+Default		=> HLLPP
+Purgable	=> CuckooFilter
+Frequency	=> Count-min sketch
+Expirable	=> Sliding HLL
+*/
+const (
+	Default   = "default"
+	Purgable  = "purgable"
+	Frequency = "frequency"
+	Expirable = "expirable"
+)
