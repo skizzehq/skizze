@@ -1,9 +1,9 @@
 package mutable
 
 import (
-	"counts/counters/abstract"
-	"counts/counters/mutable/cuckoofilter"
-	"counts/utils"
+	"github.com/seiflotfy/counts/counters/abstract"
+	"github.com/seiflotfy/counts/counters/mutable/cuckoofilter"
+	"github.com/seiflotfy/counts/utils"
 )
 
 var logger = utils.GetLogger()

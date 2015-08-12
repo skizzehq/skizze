@@ -1,13 +1,14 @@
 package counters
 
 import (
-	"counts/counters/abstract"
-	"counts/counters/immutable"
-	"counts/counters/mutable"
-	"counts/storage"
-	"counts/utils"
 	"encoding/json"
 	"errors"
+
+	"github.com/seiflotfy/counts/counters/abstract"
+	"github.com/seiflotfy/counts/counters/immutable"
+	"github.com/seiflotfy/counts/counters/mutable"
+	"github.com/seiflotfy/counts/storage"
+	"github.com/seiflotfy/counts/utils"
 
 	"github.com/hashicorp/golang-lru"
 )

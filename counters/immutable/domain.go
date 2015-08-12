@@ -1,11 +1,12 @@
 package immutable
 
 import (
-	"counts/counters/abstract"
-	"counts/counters/immutable/hllpp"
-	"counts/storage"
-	"counts/utils"
 	"errors"
+
+	"github.com/seiflotfy/counts/counters/abstract"
+	"github.com/seiflotfy/counts/counters/immutable/hllpp"
+	"github.com/seiflotfy/counts/storage"
+	"github.com/seiflotfy/counts/utils"
 )
 
 var logger = utils.GetLogger()

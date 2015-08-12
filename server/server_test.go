@@ -1,7 +1,6 @@
 package server
 
 import (
-	"counts/utils"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/seiflotfy/counts/config"
+	"github.com/seiflotfy/counts/utils"
 )
 
 type domainsResult struct {
@@ -30,6 +32,14 @@ func setupTests() {
 	path = filepath.Dir(path)
 	configPath := filepath.Join(path, "config/default.toml")
 	os.Setenv("COUNTS_CONFIG", configPath)
+	tearDownTests()
+}
+
+func tearDownTests() {
+	os.RemoveAll(config.GetConfig().GetDataDir())
+	os.RemoveAll(config.GetConfig().GetInfoDir())
+	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
+	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
 }
 
 func request(s *Server, t *testing.T, method string, domain string, body string) *httptest.ResponseRecorder {
@@ -60,6 +70,7 @@ func unmarshalDomainResult(resp *httptest.ResponseRecorder) domainResult {
 
 func TestDomainsInitiallyEmpty(t *testing.T) {
 	setupTests()
+	defer tearDownTests()
 	s := New()
 	resp := request(s, t, "GET", "", "")
 	if resp.Code != 200 {
@@ -74,6 +85,7 @@ func TestDomainsInitiallyEmpty(t *testing.T) {
 
 func TestCreateDomain(t *testing.T) {
 	setupTests()
+	defer tearDownTests()
 	s := New()
 	resp := request(s, t, "POST", "marvel", `{
 		"domainType": "immutable",
@@ -94,6 +106,7 @@ func TestCreateDomain(t *testing.T) {
 
 func TestHLL(t *testing.T) {
 	setupTests()
+	defer tearDownTests()
 	s := New()
 	resp := request(s, t, "POST", "marvel", `{
 		"domainType": "immutable",

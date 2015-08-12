@@ -2,13 +2,14 @@ package storage
 
 import (
 	"bytes"
-	"counts/config"
-	"counts/utils"
 	"encoding/binary"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"github.com/seiflotfy/counts/config"
+	"github.com/seiflotfy/counts/utils"
 
 	"github.com/hashicorp/golang-lru"
 )

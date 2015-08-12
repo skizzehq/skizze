@@ -1,11 +1,12 @@
 package counters
 
 import (
-	"counts/config"
-	"counts/utils"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/seiflotfy/counts/config"
+	"github.com/seiflotfy/counts/utils"
 )
 
 func setupTests() {

@@ -1,9 +1,6 @@
 package server
 
 import (
-	"counts/config"
-	"counts/counters"
-	"counts/utils"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,6 +8,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/seiflotfy/counts/config"
+	"github.com/seiflotfy/counts/counters"
+	"github.com/seiflotfy/counts/utils"
 )
 
 type requestData struct {
