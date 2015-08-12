@@ -1,11 +1,12 @@
 package immutable
 
 import (
-	"counts/counters/abstract"
-	"counts/counters/immutable/hllpp"
-	"counts/storage"
-	"counts/utils"
 	"errors"
+
+	"github.com/seiflotfy/counts/counters/abstract"
+	"github.com/seiflotfy/counts/counters/immutable/hllpp"
+	"github.com/seiflotfy/counts/storage"
+	"github.com/seiflotfy/counts/utils"
 )
 
 var logger = utils.GetLogger()
@@ -25,7 +26,19 @@ NewDomain ...
 func NewDomain(info abstract.Info) Domain {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
-	return Domain{info, hllpp.New()}
+	d := Domain{info, hllpp.New()}
+	d.Save()
+	return d
+}
+
+/*
+NewDomainFromData ...
+*/
+func NewDomainFromData(info abstract.Info) Domain {
+	data := storage.GetManager().LoadData(info.ID, 0, 0)
+	counter, err := hllpp.Unmarshal(data)
+	utils.PanicOnError(err)
+	return Domain{info, counter}
 }
 
 /*
@@ -33,6 +46,7 @@ Add ...
 */
 func (d Domain) Add(value []byte) (bool, error) {
 	d.impl.Add(value)
+	d.Save()
 	return true, nil
 }
 
@@ -43,6 +57,7 @@ func (d Domain) AddMultiple(values [][]byte) (bool, error) {
 	for _, value := range values {
 		d.impl.Add(value)
 	}
+	d.Save()
 	return true, nil
 }
 
@@ -50,16 +65,16 @@ func (d Domain) AddMultiple(values [][]byte) (bool, error) {
 Remove ...
 */
 func (d Domain) Remove(value []byte) (bool, error) {
-	logger.Error.Println("This operation does not deletion of counters")
-	return false, errors.New("This operation does not deletion of counters")
+	logger.Error.Println("This domain type does not support deletion")
+	return false, errors.New("This domain type does not support deletion")
 }
 
 /*
 RemoveMultiple ...
 */
 func (d Domain) RemoveMultiple(values [][]byte) (bool, error) {
-	logger.Error.Println("This operation does not deletion of counters")
-	return false, errors.New("This operation does not deletion of counters")
+	logger.Error.Println("This domain type does not support deletion")
+	return false, errors.New("This domain type does not support deletion")
 }
 
 /*

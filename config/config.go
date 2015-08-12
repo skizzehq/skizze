@@ -1,12 +1,13 @@
 package config
 
 import (
-	"counts/utils"
 	"os"
 	"os/user"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/seiflotfy/counts/utils"
 
 	"github.com/BurntSushi/toml"
 )

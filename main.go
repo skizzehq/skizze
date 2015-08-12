@@ -1,12 +1,13 @@
 package main
 
 import (
-	"counts/config"
-	"counts/server"
-	"counts/utils"
 	"flag"
 	"os"
 	"strconv"
+
+	"github.com/seiflotfy/counts/config"
+	"github.com/seiflotfy/counts/server"
+	"github.com/seiflotfy/counts/utils"
 )
 
 var logger = utils.GetLogger()

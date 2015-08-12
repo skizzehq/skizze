@@ -2,12 +2,14 @@ package storage
 
 import (
 	"bytes"
-	"counts/config"
-	"counts/utils"
 	"encoding/binary"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"github.com/seiflotfy/counts/config"
+	"github.com/seiflotfy/counts/utils"
 
 	"github.com/hashicorp/golang-lru"
 )
@@ -113,4 +115,36 @@ func (m *ManagerStruct) forceFlush(ID string) {
 	f := m.getFileFromCache(ID)
 	m.cache.Remove(ID)
 	f.Close()
+}
+
+/*
+LoadAllInfo ...
+*/
+func (m *ManagerStruct) LoadAllInfo() [][]byte {
+	infoDir := conf.GetInfoDir()
+	os.Mkdir(infoDir, 0777)
+	fileInfos, err := ioutil.ReadDir(infoDir)
+	utils.PanicOnError(err)
+	infoDatas := make([][]byte, len(fileInfos))
+	for i, fileInfo := range fileInfos {
+		filePath := filepath.Join(infoDir, fileInfo.Name())
+		infoData, err := ioutil.ReadFile(filePath)
+		utils.PanicOnError(err)
+
+		infoDatas[i] = infoData
+	}
+
+	return infoDatas
+}
+
+/*
+SaveInfo ...
+*/
+func (m *ManagerStruct) SaveInfo(id string, infoData []byte) {
+	infoDir := conf.GetInfoDir()
+	infoPath := filepath.Join(infoDir, id+".json")
+	f, err := os.Create(infoPath)
+	defer f.Close()
+	utils.PanicOnError(err)
+	f.Write(infoData)
 }

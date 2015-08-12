@@ -16,7 +16,7 @@ type Counter interface {
 Info ...
 */
 type Info struct {
-	ID       string
-	Type     string
-	Capacity uint64
+	ID       string `json:"id"`
+	Type     string `json:"type"`
+	Capacity uint64 `json:"capacity"`
 }
