@@ -59,10 +59,10 @@ These examples expose a variety of settings. The full data may reside in a tradi
 ## TODO
 - [x] Design and implement REST API
 - [x] Create counter manager
-- [x] Integrate UniqueIncremental Counter (Hyperloglog++)
-- [x] Integrate Unique (CuckooFilter and possibly play with the idea of CuckooLogLog)
-- [ ] Integrate UniqueFrequency Counter (minCount)
-- [ ] Integrate UniqueIncrementalExpiring (Sliding Hyperloglog)
+- [x] Integrate Default Counter (Hyperloglog++)
+- [x] Integrate Purgable Counter (CuckooFilter and possibly play with the idea of CuckooLogLog)
+- [ ] Integrate Frequency Counter (Count-min sketch)
+- [ ] Integrate Expiring Counter (Sliding Hyperloglog)
 - [ ] Integrate Free (Just a plain +1 and -1 Counter)
 - [x] Store to Disk
 - [ ] Replication on multiple servers

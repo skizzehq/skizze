@@ -31,5 +31,5 @@ const (
 	Default   = "default"
 	Purgable  = "purgable"
 	Frequency = "frequency"
-	Expirable = "expirable"
+	Expiring  = "expiring"
 )
