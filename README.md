@@ -1,7 +1,9 @@
 # Counts
 
-[![Join the chat at https://gitter.im/seiflotfy/counts](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/seiflotfy/counts?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/seiflotfy/counts.svg?branch=master)](https://travis-ci.org/seiflotfy/counts)
+[![license](http://img.shields.io/badge/license-Apache-blue.svg)](https://raw.githubusercontent.com/seiflotfy/counts/master/LICENSE)
+[![Join the chat at https://gitter.im/seiflotfy/counts](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/seiflotfy/counts?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 
 A domain-counter data store to deal with all problems around counting using probabilistic data-structures.
 
