@@ -64,7 +64,7 @@ These examples expose a variety of settings. The full data may reside in a tradi
 - [ ] Integrate UniqueFrequency Counter (minCount)
 - [ ] Integrate UniqueIncrementalExpiring (Sliding Hyperloglog)
 - [ ] Integrate Free (Just a plain +1 and -1 Counter)
-- [ ] Store to Disk
+- [x] Store to Disk
 - [ ] Replication on multiple servers
 - [ ] Expand `GET /` API so counters can be filtered using query params
 - [ ] Add pagination to `GET /` API
