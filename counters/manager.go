@@ -38,7 +38,7 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 	default:
 		return errors.New("invalid domain type: " + domainType)
 	}
-	storage.GetManager().Create(domainID)
+	//storage.GetManager().Create(domainID)
 
 	m.dumpInfo(&info)
 	return nil

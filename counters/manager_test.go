@@ -26,7 +26,6 @@ func tearDownTests() {
 	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
 }
 
-/*
 func TestNoCounters(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
@@ -150,7 +149,6 @@ func TestDumpLoadInfo(t *testing.T) {
 	}
 }
 
-*/
 func TestDumpLoadImmutableData(t *testing.T) {
 	setupTests()
 	//defer tearDownTests()
@@ -181,5 +179,4 @@ func TestDumpLoadImmutableData(t *testing.T) {
 	if res != 4 {
 		t.Error("expected avengers to have count 4, got", res)
 	}
-
 }
