@@ -88,7 +88,7 @@ func TestCreateDomain(t *testing.T) {
 	defer tearDownTests()
 	s := New()
 	resp := request(s, t, "POST", "marvel", `{
-		"domainType": "immutable",
+		"domainType": "default",
 		"capacity": 100000
 	}`)
 
@@ -109,7 +109,7 @@ func TestHLL(t *testing.T) {
 	defer tearDownTests()
 	s := New()
 	resp := request(s, t, "POST", "marvel", `{
-		"domainType": "immutable",
+		"domainType": "default",
 		"capacity": 100000
 	}`)
 

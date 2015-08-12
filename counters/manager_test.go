@@ -40,12 +40,12 @@ func TestNoCounters(t *testing.T) {
 	}
 }
 
-func TestImmutableCounter(t *testing.T) {
+func TestDefaultCounter(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
 	var manager = GetManager()
-	err := manager.CreateDomain("marvel", "immutable", 10000000)
+	err := manager.CreateDomain("marvel", "default", 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
@@ -87,12 +87,12 @@ func TestImmutableCounter(t *testing.T) {
 
 }
 
-func TestMutableCounter(t *testing.T) {
+func TestPurgableCounter(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
 	manager := GetManager()
-	err := manager.CreateDomain("marvel", "mutable", 10000000)
+	err := manager.CreateDomain("marvel", "purgable", 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
@@ -142,7 +142,7 @@ func TestDumpLoadInfo(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateDomain("avengers", "immutable", 1000000)
+	m1.CreateDomain("avengers", "default", 1000000)
 
 	m2 := newManager()
 	if _, exists = m2.info["avengers"]; !exists {
@@ -150,7 +150,7 @@ func TestDumpLoadInfo(t *testing.T) {
 	}
 }
 
-func TestDumpLoadImmutableData(t *testing.T) {
+func TestDumpLoadDefaultData(t *testing.T) {
 	setupTests()
 	//defer tearDownTests()
 
@@ -159,7 +159,7 @@ func TestDumpLoadImmutableData(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateDomain("avengers", "immutable", 1000000)
+	m1.CreateDomain("avengers", "default", 1000000)
 
 	m1.AddToDomain("avengers", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops"})

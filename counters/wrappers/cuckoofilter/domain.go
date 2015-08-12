@@ -1,8 +1,8 @@
-package mutable
+package cuckoofilter
 
 import (
 	"github.com/seiflotfy/counts/counters/abstract"
-	"github.com/seiflotfy/counts/counters/mutable/cuckoofilter"
+	"github.com/seiflotfy/counts/counters/wrappers/cuckoofilter/cuckoofilter"
 	"github.com/seiflotfy/counts/utils"
 )
 

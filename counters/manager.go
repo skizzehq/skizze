@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/seiflotfy/counts/counters/abstract"
-	"github.com/seiflotfy/counts/counters/immutable"
-	"github.com/seiflotfy/counts/counters/mutable"
+	"github.com/seiflotfy/counts/counters/wrappers/cuckoofilter"
+	"github.com/seiflotfy/counts/counters/wrappers/hllpp"
 	"github.com/seiflotfy/counts/storage"
 	"github.com/seiflotfy/counts/utils"
 
@@ -32,15 +32,13 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 	//FIXME: no hardcoding of immutable here
 	info := abstract.Info{ID: domainID, Type: domainType, Capacity: capacity}
 	switch domainType {
-	case "immutable":
-		m.cache.Add(info.ID, immutable.NewDomain(info))
-	case "mutable":
-		m.cache.Add(info.ID, mutable.NewDomain(info))
+	case abstract.Default:
+		m.cache.Add(info.ID, hllpp.NewDomain(info))
+	case abstract.Purgable:
+		m.cache.Add(info.ID, cuckoofilter.NewDomain(info))
 	default:
 		return errors.New("invalid domain type: " + domainType)
 	}
-	//storage.GetManager().Create(domainID)
-
 	m.dumpInfo(&info)
 	return nil
 }
@@ -156,8 +154,8 @@ func (m *ManagerStruct) loadDomains() {
 	strg := storage.GetManager()
 	for key, info := range m.info {
 		switch info.Type {
-		case "immutable":
-			m.cache.Add(info.ID, immutable.NewDomainFromData(info))
+		case abstract.Default:
+			m.cache.Add(info.ID, hllpp.NewDomainFromData(info))
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
 		}
