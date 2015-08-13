@@ -3,6 +3,7 @@ package counters
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/seiflotfy/counts/counters/abstract"
 	"github.com/seiflotfy/counts/counters/wrappers/cuckoofilter"
@@ -171,8 +172,11 @@ func (m *ManagerStruct) loadDomains() error {
 	for key, info := range m.info {
 		switch info.Type {
 		case abstract.Default:
-			//FIXME: Do something with this error
-			domain, _ := hllpp.NewDomainFromData(info)
+			domain, err := hllpp.NewDomainFromData(info)
+			if err != nil {
+				errTxt := fmt.Sprint("Could not load domain ", info, ". Err:", err)
+				return errors.New(errTxt)
+			}
 			m.cache.Add(info.ID, domain)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
