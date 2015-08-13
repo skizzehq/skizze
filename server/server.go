@@ -102,7 +102,7 @@ func (srv *Server) handleDomainRequest(w http.ResponseWriter, method string, dat
 	}
 	// Somebody tried a PUT request (ignore)
 	if res.Result == nil && res.Error == nil {
-		fmt.Fprintf(w, "Huh?")
+		logger.Error.Println(w, "Huh?")
 		return
 	}
 

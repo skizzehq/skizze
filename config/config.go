@@ -102,7 +102,8 @@ func GetConfig() *Config {
 				infoDir = strings.Replace(config.InfoDir, "~", dir, 1)
 			}
 		}
-		os.Mkdir(infoDir, 0777)
+		err = os.Mkdir(infoDir, 0777)
+		utils.PanicOnError(err)
 
 		dataDir := strings.TrimSpace(os.Getenv("COUNTS_DATA_DIR"))
 		if len(dataDir) == 0 {
@@ -110,7 +111,8 @@ func GetConfig() *Config {
 				dataDir = strings.Replace(config.DataDir, "~", dir, 1)
 			}
 		}
-		os.Mkdir(dataDir, 0777)
+		err = os.Mkdir(dataDir, 0777)
+		utils.PanicOnError(err)
 
 		port, err := strconv.Atoi(strings.TrimSpace(os.Getenv("COUNTS_PORT")))
 		if err != nil {
