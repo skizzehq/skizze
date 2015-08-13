@@ -38,10 +38,14 @@ type result struct {
 /*
 New returns a new Server
 */
-func New() *Server {
-	counterManager = counters.GetManager()
+func New() (*Server, error) {
+	var err error
+	counterManager, err = counters.GetManager()
+	if err != nil {
+		return nil, err
+	}
 	server := Server{}
-	return &server
+	return &server, nil
 }
 
 func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data requestData) {

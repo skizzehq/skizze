@@ -71,7 +71,10 @@ func unmarshalDomainResult(resp *httptest.ResponseRecorder) domainResult {
 func TestDomainsInitiallyEmpty(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
-	s := New()
+	s, err := New()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
 	resp := request(s, t, "GET", "", "")
 	if resp.Code != 200 {
 		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
@@ -86,7 +89,10 @@ func TestDomainsInitiallyEmpty(t *testing.T) {
 func TestCreateDomain(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
-	s := New()
+	s, err := New()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
 	resp := request(s, t, "POST", "marvel", `{
 		"domainType": "default",
 		"capacity": 100000
@@ -107,7 +113,10 @@ func TestCreateDomain(t *testing.T) {
 func TestHLL(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
-	s := New()
+	s, err := New()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
 	resp := request(s, t, "POST", "marvel", `{
 		"domainType": "default",
 		"capacity": 100000
