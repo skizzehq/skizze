@@ -30,7 +30,10 @@ func tearDownTests() {
 func TestNoCounters(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
-	var manager = GetManager()
+	var manager, err = GetManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
 	domains, err := manager.GetDomains()
 	if err != nil {
 		t.Error("Expected no errors, got", err)
@@ -44,8 +47,11 @@ func TestDefaultCounter(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
-	var manager = GetManager()
-	err := manager.CreateDomain("marvel", "default", 10000000)
+	var manager, err = GetManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	err = manager.CreateDomain("marvel", "default", 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
@@ -91,8 +97,11 @@ func TestPurgableCounter(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
-	manager := GetManager()
-	err := manager.CreateDomain("marvel", "purgable", 10000000)
+	manager, err := GetManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	err = manager.CreateDomain("marvel", "purgable", 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
@@ -138,13 +147,19 @@ func TestDumpLoadInfo(t *testing.T) {
 	defer tearDownTests()
 
 	var exists bool
-	m1 := newManager()
+	m1, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
 	m1.CreateDomain("avengers", "default", 1000000)
 
-	m2 := newManager()
+	m2, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
 	if _, exists = m2.info["avengers"]; !exists {
 		t.Error("expected avengers to be in loaded by manager")
 	}
@@ -155,7 +170,10 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	//defer tearDownTests()
 
 	var exists bool
-	m1 := newManager()
+	m1, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
@@ -172,7 +190,10 @@ func TestDumpLoadDefaultData(t *testing.T) {
 		t.Error("expected avengers to have count 4, got", res)
 	}
 
-	m2 := newManager()
+	m2, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
 	res, err = m2.GetCountForDomain("avengers")
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)

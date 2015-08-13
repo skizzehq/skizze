@@ -37,7 +37,10 @@ func TestNoCounters(t *testing.T) {
 	m1.Create("marvel")
 	data1 := []byte("wolverine")
 	m1.SaveData("marvel", data1, 0)
-	data2 := m2.LoadData("marvel", 0, 0)
+	data2, err := m2.LoadData("marvel", 0, 0)
+	if err != nil {
+		t.Error("Expected no error loading data, got", err)
+	}
 	if bytes.Compare(data1, data2) != 0 {
 		t.Error("Expected data2 == "+string(data1)+" got", data2)
 	}
@@ -60,7 +63,10 @@ func TestGetAllInfo(t *testing.T) {
 		"capacity": 12345
 	}`)
 	m := newManager()
-	infoDatas := m.LoadAllInfo()
+	infoDatas, err := m.LoadAllInfo()
+	if err != nil {
+		t.Error("Expected no error loading data, got", err)
+	}
 	if len(infoDatas) != 1 {
 		t.Fatal("Expected exactly one infoData")
 	}

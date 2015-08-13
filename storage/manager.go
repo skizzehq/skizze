@@ -36,6 +36,7 @@ func newManager() *ManagerStruct {
 	dataPath = conf.GetDataDir()
 	//FIXME: size of cache should be read from config
 	cache, err := lru.NewWithEvict(250, onFileEvicted)
+	utils.PanicOnError(err)
 	if _, err := os.Stat(dataPath); os.IsNotExist(err) {
 		os.MkdirAll(dataPath, 0777)
 	}
@@ -56,80 +57,93 @@ func GetManager() *ManagerStruct {
 /*
 Create storage
 */
-func (m *ManagerStruct) Create(ID string) {
+func (m *ManagerStruct) Create(ID string) error {
 	f, err := os.Create(filepath.Join(dataPath, ID))
-	utils.PanicOnError(err)
+	if err != nil {
+		return err
+	}
 	m.cache.Add(ID, f)
+	return nil
 }
 
 /*
 SaveData ...
 */
-func (m *ManagerStruct) SaveData(ID string, data []byte, offset int64) {
-	f := m.getFileFromCache(ID)
+func (m *ManagerStruct) SaveData(ID string, data []byte, offset int64) error {
+	f, err := m.getFileFromCache(ID)
+	if err != nil {
+		return err
+	}
 	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.BigEndian, data)
-	utils.PanicOnError(err)
+	err = binary.Write(buf, binary.BigEndian, data)
+	if err != nil {
+		return err
+	}
 	_, err = f.WriteAt(buf.Bytes(), offset)
-	utils.PanicOnError(err)
+	return err
 }
 
 /*
 LoadData ...
 */
-func (m *ManagerStruct) LoadData(ID string, offset int64, length int64) []byte {
-	f := m.getFileFromCache(ID)
+func (m *ManagerStruct) LoadData(ID string, offset int64, length int64) ([]byte, error) {
+	f, err := m.getFileFromCache(ID)
+	if err != nil {
+		return nil, err
+	}
 	if length == 0 {
 		info, err := f.Stat()
-		utils.PanicOnError(err)
+		if err != nil {
+			return nil, err
+		}
 		length = info.Size()
 		length -= offset
 	}
 	data := make([]byte, length)
-	_, err := f.ReadAt(data, offset)
-	utils.PanicOnError(err)
-	return data
+	_, err = f.ReadAt(data, offset)
+	return data, err
 }
 
-func (m *ManagerStruct) getFileFromCache(ID string) *os.File {
+func (m *ManagerStruct) getFileFromCache(ID string) (*os.File, error) {
 	v, ok := m.cache.Get(ID)
 	var f *os.File
 	var err error
 	if !ok {
 		f, err = os.Open(filepath.Join(dataPath, ID))
-		utils.PanicOnError(err)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		f = v.(*os.File)
 	}
-	return f
-}
-
-func (m *ManagerStruct) forceFlush(ID string) {
-	f := m.getFileFromCache(ID)
-	m.cache.Remove(ID)
-	f.Close()
+	return f, nil
 }
 
 /*
 LoadAllInfo ...
 */
-func (m *ManagerStruct) LoadAllInfo() [][]byte {
+func (m *ManagerStruct) LoadAllInfo() ([][]byte, error) {
 	infoDir := conf.GetInfoDir()
 	if _, err := os.Stat(infoDir); os.IsNotExist(err) {
 		err = os.MkdirAll(infoDir, 0777)
+		if err != nil {
+			return nil, err
+		}
 	}
 	fileInfos, err := ioutil.ReadDir(infoDir)
-	utils.PanicOnError(err)
+	if err != nil {
+		return nil, err
+	}
 	infoDatas := make([][]byte, len(fileInfos))
 	for i, fileInfo := range fileInfos {
 		filePath := filepath.Join(infoDir, fileInfo.Name())
 		infoData, err := ioutil.ReadFile(filePath)
-		utils.PanicOnError(err)
-
+		if err != nil {
+			return nil, err
+		}
 		infoDatas[i] = infoData
 	}
-
-	return infoDatas
+	return infoDatas, nil
 }
 
 /*
