@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"io/ioutil"
 	"os"
-	"os/user"
 	"path/filepath"
 
 	"github.com/seiflotfy/counts/config"
@@ -13,15 +12,6 @@ import (
 
 	"github.com/hashicorp/golang-lru"
 )
-
-//FIXME: path currently hardcoded
-
-func getPath(path string) string {
-	const storeDir = ".counts/data"
-	usr, _ := user.Current()
-	dataPath := filepath.Join(usr.HomeDir, storeDir)
-	return dataPath
-}
 
 var conf *config.Config
 var dataPath string
@@ -46,7 +36,9 @@ func newManager() *ManagerStruct {
 	dataPath = conf.GetDataDir()
 	//FIXME: size of cache should be read from config
 	cache, err := lru.NewWithEvict(250, onFileEvicted)
-	os.MkdirAll(dataPath, 0777)
+	if _, err := os.Stat(dataPath); os.IsNotExist(err) {
+		os.MkdirAll(dataPath, 0777)
+	}
 	utils.PanicOnError(err)
 	return &ManagerStruct{cache}
 }
@@ -123,7 +115,9 @@ LoadAllInfo ...
 */
 func (m *ManagerStruct) LoadAllInfo() [][]byte {
 	infoDir := conf.GetInfoDir()
-	err := os.MkdirAll(infoDir, 0777)
+	if _, err := os.Stat(infoDir); os.IsNotExist(err) {
+		err = os.MkdirAll(infoDir, 0777)
+	}
 	fileInfos, err := ioutil.ReadDir(infoDir)
 	utils.PanicOnError(err)
 	infoDatas := make([][]byte, len(fileInfos))
