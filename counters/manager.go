@@ -3,6 +3,7 @@ package counters
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/seiflotfy/counts/counters/abstract"
 	"github.com/seiflotfy/counts/counters/wrappers/cuckoofilter"
@@ -119,19 +120,29 @@ func (m *ManagerStruct) GetCountForDomain(domainID string) (uint, error) {
 /*
 GetManager returns a singleton Manager
 */
-func GetManager() *ManagerStruct {
+func GetManager() (*ManagerStruct, error) {
+	var err error
 	if manager == nil {
-		manager = newManager()
+		manager, err = newManager()
 	}
-	return manager
+	if err != nil {
+		return nil, err
+	}
+	return manager, nil
 }
 
-func newManager() *ManagerStruct {
+func newManager() (*ManagerStruct, error) {
 	cache, _ := lru.New(100)
 	manager = &ManagerStruct{cache, make(map[string]abstract.Info)}
-	manager.loadInfo()
-	manager.loadDomains()
-	return manager
+	err := manager.loadInfo()
+	if err != nil {
+		return nil, err
+	}
+	err = manager.loadDomains()
+	if err != nil {
+		return nil, err
+	}
+	return manager, nil
 }
 
 func (m *ManagerStruct) dumpInfo(i *abstract.Info) {
@@ -141,24 +152,36 @@ func (m *ManagerStruct) dumpInfo(i *abstract.Info) {
 	manager.SaveInfo(i.ID, infoData)
 }
 
-func (m *ManagerStruct) loadInfo() {
+func (m *ManagerStruct) loadInfo() error {
 	manager := storage.GetManager()
 	var infoStruct abstract.Info
-	for _, infoData := range manager.LoadAllInfo() {
+	infos, err := manager.LoadAllInfo()
+	//FIXME: Should we panic?
+	if err != nil {
+		return err
+	}
+	for _, infoData := range infos {
 		json.Unmarshal(infoData, &infoStruct)
 		m.info[infoStruct.ID] = infoStruct
 	}
+	return nil
 }
 
-func (m *ManagerStruct) loadDomains() {
+func (m *ManagerStruct) loadDomains() error {
 	strg := storage.GetManager()
 	for key, info := range m.info {
 		switch info.Type {
 		case abstract.Default:
-			m.cache.Add(info.ID, hllpp.NewDomainFromData(info))
+			domain, err := hllpp.NewDomainFromData(info)
+			if err != nil {
+				errTxt := fmt.Sprint("Could not load domain ", info, ". Err:", err)
+				return errors.New(errTxt)
+			}
+			m.cache.Add(info.ID, domain)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
 		}
 		strg.LoadData(key, 0, 0)
 	}
+	return nil
 }

@@ -34,11 +34,13 @@ func NewDomain(info abstract.Info) Domain {
 /*
 NewDomainFromData ...
 */
-func NewDomainFromData(info abstract.Info) Domain {
-	data := storage.GetManager().LoadData(info.ID, 0, 0)
+func NewDomainFromData(info abstract.Info) (*Domain, error) {
+	data, err := storage.GetManager().LoadData(info.ID, 0, 0)
 	counter, err := hllpp.Unmarshal(data)
-	utils.PanicOnError(err)
-	return Domain{info, counter}
+	if err != nil {
+		return nil, err
+	}
+	return &Domain{info, counter}, nil
 }
 
 /*
@@ -94,7 +96,8 @@ func (d Domain) Clear() (bool, error) {
 /*
 Save ...
 */
-func (d Domain) Save() {
+func (d Domain) Save() error {
 	serialized := d.impl.Marshal()
-	manager.SaveData(d.Info.ID, serialized, 0)
+	err := manager.SaveData(d.Info.ID, serialized, 0)
+	return err
 }
