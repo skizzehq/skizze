@@ -37,9 +37,7 @@ func newManager() *ManagerStruct {
 	//FIXME: size of cache should be read from config
 	cache, err := lru.NewWithEvict(250, onFileEvicted)
 	utils.PanicOnError(err)
-	if _, err := os.Stat(dataPath); os.IsNotExist(err) {
-		os.MkdirAll(dataPath, 0777)
-	}
+	err = os.MkdirAll(dataPath, 0777)
 	utils.PanicOnError(err)
 	return &ManagerStruct{cache}
 }
@@ -75,8 +73,7 @@ func (m *ManagerStruct) SaveData(ID string, data []byte, offset int64) error {
 		return err
 	}
 	buf := new(bytes.Buffer)
-	err = binary.Write(buf, binary.BigEndian, data)
-	if err != nil {
+	if err = binary.Write(buf, binary.BigEndian, data); err != nil {
 		return err
 	}
 	_, err = f.WriteAt(buf.Bytes(), offset)
@@ -92,12 +89,12 @@ func (m *ManagerStruct) LoadData(ID string, offset int64, length int64) ([]byte,
 		return nil, err
 	}
 	if length == 0 {
-		info, err := f.Stat()
-		if err != nil {
+		if info, err := f.Stat(); err == nil {
+			length = info.Size()
+			length -= offset
+		} else {
 			return nil, err
 		}
-		length = info.Size()
-		length -= offset
 	}
 	data := make([]byte, length)
 	_, err = f.ReadAt(data, offset)
@@ -109,8 +106,7 @@ func (m *ManagerStruct) getFileFromCache(ID string) (*os.File, error) {
 	var f *os.File
 	var err error
 	if !ok {
-		f, err = os.Open(filepath.Join(dataPath, ID))
-		if err != nil {
+		if f, err = os.Open(filepath.Join(dataPath, ID)); err != nil {
 			return nil, err
 		}
 	} else {
@@ -124,24 +120,24 @@ LoadAllInfo ...
 */
 func (m *ManagerStruct) LoadAllInfo() ([][]byte, error) {
 	infoDir := conf.GetInfoDir()
-	if _, err := os.Stat(infoDir); os.IsNotExist(err) {
-		err = os.MkdirAll(infoDir, 0777)
-		if err != nil {
-			return nil, err
-		}
+	// If path is already a directory, MkdirAll does nothing and returns nil.
+	var err error
+	if err = os.MkdirAll(infoDir, 0777); err != nil {
+		return nil, err
 	}
-	fileInfos, err := ioutil.ReadDir(infoDir)
-	if err != nil {
+
+	var fileInfos []os.FileInfo
+	if fileInfos, err = ioutil.ReadDir(infoDir); err != nil {
 		return nil, err
 	}
 	infoDatas := make([][]byte, len(fileInfos))
 	for i, fileInfo := range fileInfos {
 		filePath := filepath.Join(infoDir, fileInfo.Name())
-		infoData, err := ioutil.ReadFile(filePath)
-		if err != nil {
+		if infoData, err := ioutil.ReadFile(filePath); err == nil {
+			infoDatas[i] = infoData
+		} else {
 			return nil, err
 		}
-		infoDatas[i] = infoData
 	}
 	return infoDatas, nil
 }
