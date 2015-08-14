@@ -2,6 +2,7 @@ package hllpp
 
 import (
 	"errors"
+	"sync"
 
 	"github.com/seiflotfy/counts/counters/abstract"
 	"github.com/seiflotfy/counts/counters/wrappers/hllpp/hllpp"
@@ -18,17 +19,18 @@ Domain is the toplevel domain to control the HLL implementation
 type Domain struct {
 	abstract.Info
 	impl *hllpp.HLLPP
+	lock sync.RWMutex
 }
 
 /*
 NewDomain ...
 */
-func NewDomain(info abstract.Info) Domain {
+func NewDomain(info abstract.Info) *Domain {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
-	d := Domain{info, hllpp.New()}
+	d := Domain{info, hllpp.New(), sync.RWMutex{}}
 	d.Save()
-	return d
+	return &d
 }
 
 /*
@@ -40,13 +42,15 @@ func NewDomainFromData(info abstract.Info) (*Domain, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Domain{info, counter}, nil
+	return &Domain{info, counter, sync.RWMutex{}}, nil
 }
 
 /*
 Add ...
 */
-func (d Domain) Add(value []byte) (bool, error) {
+func (d *Domain) Add(value []byte) (bool, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
 	d.impl.Add(value)
 	d.Save()
 	return true, nil
@@ -55,7 +59,9 @@ func (d Domain) Add(value []byte) (bool, error) {
 /*
 AddMultiple ...
 */
-func (d Domain) AddMultiple(values [][]byte) (bool, error) {
+func (d *Domain) AddMultiple(values [][]byte) (bool, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
 	for _, value := range values {
 		d.impl.Add(value)
 	}
@@ -66,7 +72,7 @@ func (d Domain) AddMultiple(values [][]byte) (bool, error) {
 /*
 Remove ...
 */
-func (d Domain) Remove(value []byte) (bool, error) {
+func (d *Domain) Remove(value []byte) (bool, error) {
 	logger.Error.Println("This domain type does not support deletion")
 	return false, errors.New("This domain type does not support deletion")
 }
@@ -74,7 +80,7 @@ func (d Domain) Remove(value []byte) (bool, error) {
 /*
 RemoveMultiple ...
 */
-func (d Domain) RemoveMultiple(values [][]byte) (bool, error) {
+func (d *Domain) RemoveMultiple(values [][]byte) (bool, error) {
 	logger.Error.Println("This domain type does not support deletion")
 	return false, errors.New("This domain type does not support deletion")
 }
@@ -82,21 +88,23 @@ func (d Domain) RemoveMultiple(values [][]byte) (bool, error) {
 /*
 GetCount ...
 */
-func (d Domain) GetCount() uint {
+func (d *Domain) GetCount() uint {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
 	return uint(d.impl.Count())
 }
 
 /*
 Clear ...
 */
-func (d Domain) Clear() (bool, error) {
+func (d *Domain) Clear() (bool, error) {
 	return true, nil
 }
 
 /*
 Save ...
 */
-func (d Domain) Save() error {
+func (d *Domain) Save() error {
 	serialized := d.impl.Marshal()
 	err := manager.SaveData(d.Info.ID, serialized, 0)
 	return err

@@ -1,8 +1,11 @@
 package counters
 
 import (
+	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/seiflotfy/counts/config"
@@ -167,7 +170,7 @@ func TestDumpLoadInfo(t *testing.T) {
 
 func TestDumpLoadDefaultData(t *testing.T) {
 	setupTests()
-	//defer tearDownTests()
+	defer tearDownTests()
 
 	var exists bool
 	m1, err := newManager()
@@ -200,5 +203,61 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	}
 	if res != 4 {
 		t.Error("expected avengers to have count 4, got", res)
+	}
+}
+
+func TestExtremeParallelDefaultCounter(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	m1, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if _, exists := m1.info["avengers"]; exists {
+		t.Error("expected avengers to not be initially loaded by manager")
+	}
+	m1.CreateDomain("avengers", "default", 1000000)
+	m1.CreateDomain("x-men", "default", 1000000)
+
+	fd, err := os.Open("/usr/share/dict/web2")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	scanner := bufio.NewScanner(fd)
+
+	i := 0
+	values := []string{} //{"a", "aam"} //"doorknob", "doorless"
+	for scanner.Scan() {
+		s := []byte(scanner.Text())
+		values = append(values, string(s))
+		i++
+	}
+
+	// Add all values in a go routine per value
+	var wg sync.WaitGroup
+	defer wg.Wait()
+	resChan := make(chan interface{})
+
+	var pFunc = func(value string) {
+		defer wg.Done()
+		m1.AddToDomain("avengers", []string{value})
+		resChan <- nil
+	}
+	for _, value := range values {
+		wg.Add(1)
+		go pFunc(value)
+	}
+	for j := 0; j < len(values); j++ {
+		<-resChan
+	}
+
+	// add all values in one bulk
+	m1.AddToDomain("x-men", values)
+	count1, err := m1.GetCountForDomain("avengers")
+	count2, err := m1.GetCountForDomain("x-men")
+	if count1 != count2 {
+		t.Error("expected avengers count == x-men count, got", count1, "!=", count2)
 	}
 }
