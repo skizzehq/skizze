@@ -102,22 +102,12 @@ func GetConfig() *Config {
 				infoDir = strings.Replace(config.InfoDir, "~", dir, 1)
 			}
 		}
-		if _, err := os.Stat(infoDir); os.IsNotExist(err) {
-			os.Mkdir(infoDir, 0777)
-		} else {
-			utils.PanicOnError(err)
-		}
 
 		dataDir := strings.TrimSpace(os.Getenv("COUNTS_DATA_DIR"))
 		if len(dataDir) == 0 {
 			if config.DataDir[:2] == "~/" {
 				dataDir = strings.Replace(config.DataDir, "~", dir, 1)
 			}
-		}
-		if _, err := os.Stat(dataDir); os.IsNotExist(err) {
-			os.Mkdir(dataDir, 0777)
-		} else {
-			utils.PanicOnError(err)
 		}
 
 		port, err := strconv.Atoi(strings.TrimSpace(os.Getenv("COUNTS_PORT")))
