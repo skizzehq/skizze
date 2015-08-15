@@ -23,8 +23,8 @@ type Domain struct {
 /*
 NewDomain ...
 */
-func NewDomain(info abstract.Info) (Domain, error) {
-	return Domain{info, cuckoofilter.NewCuckooFilter(uint(info.Capacity))}, nil
+func NewDomain(info abstract.Info) Domain {
+	return Domain{info, cuckoofilter.NewCuckooFilter(info.ID, uint(info.Capacity))}
 }
 
 /*
