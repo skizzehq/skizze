@@ -10,6 +10,7 @@ import (
 
 	"github.com/seiflotfy/counts/config"
 	"github.com/seiflotfy/counts/counters"
+	"github.com/seiflotfy/counts/storage"
 	"github.com/seiflotfy/counts/utils"
 )
 
@@ -158,5 +159,6 @@ func (srv *Server) Run() {
 Stop ...
 */
 func (srv *Server) Stop() {
+	storage.CloseInfoDB()
 	os.Exit(0)
 }

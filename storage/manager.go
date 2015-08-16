@@ -120,7 +120,7 @@ func (m *ManagerStruct) getFileFromCache(ID string) (*os.File, error) {
 LoadAllInfo ...
 */
 func (m *ManagerStruct) LoadAllInfo() ([][]byte, error) {
-	db, err := getInfoDb()
+	db, err := GetInfoDB()
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ var db *bolt.DB = nil
 SaveInfo ...
 */
 func (m *ManagerStruct) SaveInfo(id string, infoData []byte) error {
-	db, err := getInfoDb()
+	db, err := GetInfoDB()
 	err = db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("info"))
 		if err != nil {
@@ -171,7 +171,14 @@ func (m *ManagerStruct) SaveInfo(id string, infoData []byte) error {
 	return err
 }
 
-func getInfoDb() (*bolt.DB, error) {
+func CloseInfoDB() error {
+	if db != nil {
+		return db.Close()
+	}
+	return nil
+}
+
+func GetInfoDB() (*bolt.DB, error) {
 	if db != nil {
 		return db, nil
 	}

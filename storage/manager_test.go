@@ -52,7 +52,7 @@ func TestGetAllInfo(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 	func() {
-		db, err := getInfoDb()
+		db, err := GetInfoDB()
 		if err != nil {
 			t.Fatal(err)
 		}
