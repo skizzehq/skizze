@@ -120,11 +120,10 @@ func (m *ManagerStruct) getFileFromCache(ID string) (*os.File, error) {
 LoadAllInfo ...
 */
 func (m *ManagerStruct) LoadAllInfo() ([][]byte, error) {
-	db, err := openInfoDb()
+	db, err := getInfoDb()
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
 	var infoDatas [][]byte
 	err = db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("info"))
@@ -150,12 +149,13 @@ func (m *ManagerStruct) LoadAllInfo() ([][]byte, error) {
 	return infoDatas, nil
 }
 
+var db *bolt.DB = nil
+
 /*
 SaveInfo ...
 */
 func (m *ManagerStruct) SaveInfo(id string, infoData []byte) error {
-	db, err := openInfoDb()
-	defer db.Close()
+	db, err := getInfoDb()
 	err = db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("info"))
 		if err != nil {
@@ -171,15 +171,19 @@ func (m *ManagerStruct) SaveInfo(id string, infoData []byte) error {
 	return err
 }
 
-func openInfoDb() (*bolt.DB, error) {
+func getInfoDb() (*bolt.DB, error) {
+	if db != nil {
+		return db, nil
+	}
+	var err error
 	infoDir := conf.GetInfoDir()
-	err := os.MkdirAll(infoDir, 0777)
+	err = os.MkdirAll(infoDir, 0777)
 	if err != nil {
 		return nil, err
 	}
 	infoDBPath := filepath.Join(infoDir, "info.db")
 	dbOptions := &bolt.Options{Timeout: 1 * time.Second}
-	db, err := bolt.Open(infoDBPath, 0600, dbOptions)
+	db, err = bolt.Open(infoDBPath, 0600, dbOptions)
 	if err != nil {
 		return nil, err
 	}
