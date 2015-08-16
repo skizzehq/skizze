@@ -52,11 +52,10 @@ func TestGetAllInfo(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 	func() {
-		db, err := openInfoDb()
+		db, err := GetInfoDB()
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer db.Close()
 
 		err = db.Update(func(tx *bolt.Tx) error {
 			bucket := tx.Bucket([]byte("info"))
