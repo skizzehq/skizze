@@ -149,8 +149,6 @@ func (m *ManagerStruct) LoadAllInfo() ([][]byte, error) {
 	return infoDatas, nil
 }
 
-var db *bolt.DB = nil
-
 /*
 SaveInfo ...
 */
@@ -170,6 +168,8 @@ func (m *ManagerStruct) SaveInfo(id string, infoData []byte) error {
 	})
 	return err
 }
+
+var db *bolt.DB = nil
 
 func CloseInfoDB() error {
 	if db != nil {
