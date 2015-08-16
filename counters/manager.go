@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 
+	"github.com/seiflotfy/counts/config"
 	"github.com/seiflotfy/counts/counters/abstract"
 	"github.com/seiflotfy/counts/counters/wrappers/cuckoofilter"
 	"github.com/seiflotfy/counts/counters/wrappers/hllpp"
@@ -40,6 +42,11 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 	default:
 		return errors.New("invalid domain type: " + domainType)
 	}
+	// TODO: check if domainID is already contained
+
+	if len([]byte(domainID)) > config.MaxKeySize {
+		return errors.New("invalid length of domain ID: " + strconv.Itoa(len(domainID)) + ". Max length allowed: " + strconv.Itoa(config.MaxKeySize))
+	}
 	m.dumpInfo(&info)
 	return nil
 }
@@ -48,6 +55,9 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 DeleteDomain ...
 */
 func (m *ManagerStruct) DeleteDomain(domainID string) error {
+	if !m.cache.Contains(domainID) {
+		return errors.New("No such domain " + domainID)
+	}
 	m.cache.Remove(domainID)
 	return nil
 }
