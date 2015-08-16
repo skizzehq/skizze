@@ -33,20 +33,29 @@ CreateDomain ...
 func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacity uint64) error {
 	//TODO: spit errir uf domainType is invalid
 	//FIXME: no hardcoding of immutable here
-	info := abstract.Info{ID: domainID, Type: domainType, Capacity: capacity}
-	switch domainType {
-	case abstract.Default:
-		m.cache.Add(info.ID, hllpp.NewDomain(info))
-	case abstract.Purgable:
-		m.cache.Add(info.ID, cuckoofilter.NewDomain(info))
-	default:
-		return errors.New("invalid domain type: " + domainType)
-	}
-	// TODO: check if domainID is already contained
-
 	if len([]byte(domainID)) > config.MaxKeySize {
 		return errors.New("invalid length of domain ID: " + strconv.Itoa(len(domainID)) + ". Max length allowed: " + strconv.Itoa(config.MaxKeySize))
 	}
+	info := abstract.Info{ID: domainID,
+		Type:     domainType,
+		Capacity: capacity,
+		State:    make(map[string]uint64)}
+	var domain abstract.Counter
+	var err error
+	switch domainType {
+	case abstract.Default:
+		domain, err = hllpp.NewDomain(info)
+	case abstract.Purgable:
+		domain, err = cuckoofilter.NewDomain(info)
+	default:
+		return errors.New("invalid domain type: " + domainType)
+	}
+
+	if err != nil {
+		errTxt := fmt.Sprint("Could not load domain ", info, ". Err:", err)
+		return errors.New(errTxt)
+	}
+	m.cache.Add(info.ID, domain)
 	m.dumpInfo(&info)
 	return nil
 }
@@ -179,17 +188,22 @@ func (m *ManagerStruct) loadInfo() error {
 func (m *ManagerStruct) loadDomains() error {
 	strg := storage.GetManager()
 	for key, info := range m.info {
+		var domain abstract.Counter
+		var err error
 		switch info.Type {
 		case abstract.Default:
-			domain, err := hllpp.NewDomainFromData(info)
-			if err != nil {
-				errTxt := fmt.Sprint("Could not load domain ", info, ". Err:", err)
-				return errors.New(errTxt)
-			}
+			domain, err = hllpp.NewDomainFromData(info)
+		case abstract.Purgable:
+			domain, err = cuckoofilter.NewDomain(info)
 			m.cache.Add(info.ID, domain)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
 		}
+		if err != nil {
+			errTxt := fmt.Sprint("Could not load domain ", info, ". Err:", err)
+			return errors.New(errTxt)
+		}
+		m.cache.Add(info.ID, domain)
 		strg.LoadData(key, 0, 0)
 	}
 	return nil

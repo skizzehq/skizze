@@ -25,12 +25,13 @@ type Domain struct {
 /*
 NewDomain ...
 */
-func NewDomain(info abstract.Info) *Domain {
+func NewDomain(info abstract.Info) (*Domain, error) {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
 	d := Domain{info, hllpp.New(), sync.RWMutex{}}
 	d.Save()
-	return &d
+	//FIXME: check for error
+	return &d, nil
 }
 
 /*

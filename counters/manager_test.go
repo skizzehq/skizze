@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/seiflotfy/counts/config"
+	"github.com/seiflotfy/counts/counters/abstract"
 	"github.com/seiflotfy/counts/storage"
 	"github.com/seiflotfy/counts/utils"
 )
@@ -147,7 +148,7 @@ func TestPurgableCounter(t *testing.T) {
 	}
 }
 
-func TestDumpLoadInfo(t *testing.T) {
+func TestDumpLoadDefaultInfo(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
@@ -209,6 +210,40 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if res != 4 {
 		t.Error("expected avengers to have count 4, got", res)
 	}
+}
+
+func TestDumpLoadPurgableInfo(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	var exists bool
+	m1, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if _, exists = m1.info["avengers"]; exists {
+		t.Error("expected avengers to not be initially loaded by manager")
+	}
+	err = m1.CreateDomain("avengers", abstract.Purgable, 1000000)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = m1.AddToDomain("avengers", []string{"hulk", "storm"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m2, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if _, exists = m2.info["avengers"]; !exists {
+		t.Error("expected avengers to be in loaded by manager")
+	}
+
+	count, err := m2.GetCountForDomain("averngers")
+	fmt.Println(count)
 }
 
 func TestExtremeParallelDefaultCounter(t *testing.T) {

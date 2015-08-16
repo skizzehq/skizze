@@ -1,8 +1,12 @@
 package cuckoofilter
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/seiflotfy/counts/counters/abstract"
 	"github.com/seiflotfy/counts/counters/wrappers/cuckoofilter/cuckoofilter"
+	"github.com/seiflotfy/counts/storage"
 	"github.com/seiflotfy/counts/utils"
 )
 
@@ -19,8 +23,8 @@ type Domain struct {
 /*
 NewDomain ...
 */
-func NewDomain(info abstract.Info) Domain {
-	return Domain{info, cuckoofilter.NewCuckooFilter(uint(info.Capacity))}
+func NewDomain(info abstract.Info) (Domain, error) {
+	return Domain{info, cuckoofilter.NewCuckooFilter(uint(info.Capacity))}, nil
 }
 
 /*
@@ -28,7 +32,8 @@ Add ...
 */
 func (d Domain) Add(value []byte) (bool, error) {
 	ok := d.impl.InsertUnique(value)
-	return ok, nil
+	err := d.Save()
+	return ok, err
 }
 
 /*
@@ -42,7 +47,8 @@ func (d Domain) AddMultiple(values [][]byte) (bool, error) {
 			ok = okk
 		}
 	}
-	return ok, nil
+	err := d.Save()
+	return ok, err
 }
 
 /*
@@ -50,7 +56,8 @@ Remove ...
 */
 func (d Domain) Remove(value []byte) (bool, error) {
 	ok := d.impl.Delete(value)
-	return ok, nil
+	err := d.Save()
+	return ok, err
 }
 
 /*
@@ -64,7 +71,8 @@ func (d Domain) RemoveMultiple(values [][]byte) (bool, error) {
 			ok = okk
 		}
 	}
-	return ok, nil
+	err := d.Save()
+	return ok, err
 }
 
 /*
@@ -79,4 +87,19 @@ Clear ...
 */
 func (d Domain) Clear() (bool, error) {
 	return true, nil
+}
+
+/*
+Save ...
+*/
+func (d Domain) Save() error {
+	count := d.impl.GetCount()
+	fmt.Println(d.Info.State["count"])
+	d.Info.State["count"] = uint64(count)
+	infoData, err := json.Marshal(d.Info)
+	if err != nil {
+		return err
+	}
+	err = storage.GetManager().SaveInfo(d.Info.ID, infoData)
+	return err
 }
