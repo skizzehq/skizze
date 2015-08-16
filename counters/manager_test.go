@@ -96,7 +96,6 @@ func TestDefaultCounter(t *testing.T) {
 	if len(domains) != 0 {
 		t.Error("Expected 0 counters, got", len(domains))
 	}
-
 }
 
 func TestPurgableCounter(t *testing.T) {
@@ -242,8 +241,15 @@ func TestDumpLoadPurgableInfo(t *testing.T) {
 		t.Error("expected avengers to be in loaded by manager")
 	}
 
-	count, err := m2.GetCountForDomain("averngers")
-	fmt.Println(count)
+	count, err := m2.GetCountForDomain("avengers")
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if count != 2 {
+		t.Error("Expected count == 2, got", count)
+	}
+
 }
 
 func TestExtremeParallelDefaultCounter(t *testing.T) {

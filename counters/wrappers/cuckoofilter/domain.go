@@ -2,7 +2,6 @@ package cuckoofilter
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/seiflotfy/counts/counters/abstract"
 	"github.com/seiflotfy/counts/counters/wrappers/cuckoofilter/cuckoofilter"
@@ -23,8 +22,8 @@ type Domain struct {
 /*
 NewDomain ...
 */
-func NewDomain(info abstract.Info) Domain {
-	return Domain{info, cuckoofilter.NewCuckooFilter(info.ID, uint(info.Capacity))}
+func NewDomain(info abstract.Info) (Domain, error) {
+	return Domain{info, cuckoofilter.NewCuckooFilter(info)}, nil
 }
 
 /*
@@ -94,7 +93,6 @@ Save ...
 */
 func (d Domain) Save() error {
 	count := d.impl.GetCount()
-	fmt.Println(d.Info.State["count"])
 	d.Info.State["count"] = uint64(count)
 	infoData, err := json.Marshal(d.Info)
 	if err != nil {

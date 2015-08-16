@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/seiflotfy/counts/config"
+	"github.com/seiflotfy/counts/counters/abstract"
 	"github.com/seiflotfy/counts/utils"
 )
 
@@ -31,9 +32,11 @@ func tearDownTests() {
 
 func TestInsertion(t *testing.T) {
 	setupTests()
-	//defer tearDownTests()
+	defer tearDownTests()
 
-	cf := NewCuckooFilter("ultimates", 1000000)
+	cf := NewCuckooFilter(abstract.Info{ID: "ultimates",
+		Type:     abstract.Purgable,
+		Capacity: 1000000, State: make(map[string]uint64)})
 
 	fd, err := os.Open("/usr/share/dict/web2")
 	if err != nil {

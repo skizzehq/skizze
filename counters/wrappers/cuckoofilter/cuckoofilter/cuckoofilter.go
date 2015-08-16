@@ -1,6 +1,10 @@
 package cuckoofilter
 
-import "math/rand"
+import (
+	"math/rand"
+
+	"github.com/seiflotfy/counts/counters/abstract"
+)
 
 const maxCuckooCount = 500
 
@@ -16,21 +20,22 @@ type CuckooFilter struct {
 /*
 NewCuckooFilter returns a new cuckoofilter with a given capacity
 */
-func NewCuckooFilter(ID string, capacity uint) *CuckooFilter {
-	capacity = getNextPow2(uint64(capacity)) / bucketSize
+func NewCuckooFilter(info abstract.Info) *CuckooFilter {
+	capacity := getNextPow2(uint64(info.Capacity)) / bucketSize
 	if capacity == 0 {
 		capacity = 1
 	}
 	//FIXME: return error
-	bs, _ := newBuckets(ID, capacity)
-	return &CuckooFilter{ID, bs, 0}
+	bs, _ := newBuckets(info.ID, capacity)
+	return &CuckooFilter{info.ID, bs, uint(info.State["count"])}
 }
 
 /*
 NewDefaultCuckooFilter returns a new cuckoofilter with the default capacity of 1000000
 */
-func NewDefaultCuckooFilter(ID string) *CuckooFilter {
-	return NewCuckooFilter(ID, 1000000)
+func NewDefaultCuckooFilter(info abstract.Info) *CuckooFilter {
+	info.Capacity = 1000000
+	return NewCuckooFilter(info)
 }
 
 /*
