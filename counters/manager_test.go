@@ -157,7 +157,10 @@ func TestDumpLoadInfo(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateDomain("avengers", "default", 1000000)
+	err = m1.CreateDomain("avengers", "default", 1000000)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	m2, err := newManager()
 	if err != nil {

@@ -3,13 +3,14 @@ package storage
 import (
 	"bytes"
 	"encoding/binary"
-	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/seiflotfy/counts/config"
 	"github.com/seiflotfy/counts/utils"
 
+	"github.com/boltdb/bolt"
 	"github.com/hashicorp/golang-lru"
 )
 
@@ -119,37 +120,78 @@ func (m *ManagerStruct) getFileFromCache(ID string) (*os.File, error) {
 LoadAllInfo ...
 */
 func (m *ManagerStruct) LoadAllInfo() ([][]byte, error) {
-	infoDir := conf.GetInfoDir()
-	// If path is already a directory, MkdirAll does nothing and returns nil.
-	var err error
-	if err = os.MkdirAll(infoDir, 0777); err != nil {
+	db, err := openInfoDb()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+	var infoDatas [][]byte
+	err = db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("info"))
+
+		infoDatas = make([][]byte, bucket.Stats().KeyN)
+		c := bucket.Cursor()
+		i := 0
+		for k, infoData := c.First(); k != nil; k, infoData = c.Next() {
+			// We need to copy as the infoData is freed once
+			// we are done with this transaction
+			infoDataResult := make([]byte, len(infoData))
+			copy(infoDataResult, infoData)
+			infoDatas[i] = infoDataResult
+			i++
+		}
+		return nil
+
+	})
+	if err != nil {
 		return nil, err
 	}
 
-	var fileInfos []os.FileInfo
-	if fileInfos, err = ioutil.ReadDir(infoDir); err != nil {
-		return nil, err
-	}
-	infoDatas := make([][]byte, len(fileInfos))
-	for i, fileInfo := range fileInfos {
-		filePath := filepath.Join(infoDir, fileInfo.Name())
-		if infoData, err := ioutil.ReadFile(filePath); err == nil {
-			infoDatas[i] = infoData
-		} else {
-			return nil, err
-		}
-	}
 	return infoDatas, nil
 }
 
 /*
 SaveInfo ...
 */
-func (m *ManagerStruct) SaveInfo(id string, infoData []byte) {
+func (m *ManagerStruct) SaveInfo(id string, infoData []byte) error {
+	db, err := openInfoDb()
+	defer db.Close()
+	err = db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("info"))
+		if err != nil {
+			return err
+		}
+		key := []byte(id)
+		err = bucket.Put(key, infoData)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+func openInfoDb() (*bolt.DB, error) {
 	infoDir := conf.GetInfoDir()
-	infoPath := filepath.Join(infoDir, id+".json")
-	f, err := os.Create(infoPath)
-	defer f.Close()
-	utils.PanicOnError(err)
-	f.Write(infoData)
+	err := os.MkdirAll(infoDir, 0777)
+	if err != nil {
+		return nil, err
+	}
+	infoDBPath := filepath.Join(infoDir, "info.db")
+	dbOptions := &bolt.Options{Timeout: 1 * time.Second}
+	db, err := bolt.Open(infoDBPath, 0600, dbOptions)
+	if err != nil {
+		return nil, err
+	}
+	err = db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte("info"))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
 }
