@@ -15,14 +15,14 @@ var logger = utils.GetLogger()
 Domain is the toplevel domain to control the HLL implementation
 */
 type Domain struct {
-	abstract.Info
+	*abstract.Info
 	impl *cuckoofilter.CuckooFilter
 }
 
 /*
 NewDomain ...
 */
-func NewDomain(info abstract.Info) (Domain, error) {
+func NewDomain(info *abstract.Info) (Domain, error) {
 	return Domain{info, cuckoofilter.NewCuckooFilter(info)}, nil
 }
 

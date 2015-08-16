@@ -34,7 +34,7 @@ func TestInsertion(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
-	cf := NewCuckooFilter(abstract.Info{ID: "ultimates",
+	cf := NewCuckooFilter(&abstract.Info{ID: "ultimates",
 		Type:     abstract.Purgable,
 		Capacity: 1000000, State: make(map[string]uint64)})
 

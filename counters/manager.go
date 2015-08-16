@@ -36,7 +36,7 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 	if len([]byte(domainID)) > config.MaxKeySize {
 		return errors.New("invalid length of domain ID: " + strconv.Itoa(len(domainID)) + ". Max length allowed: " + strconv.Itoa(config.MaxKeySize))
 	}
-	info := abstract.Info{ID: domainID,
+	info := &abstract.Info{ID: domainID,
 		Type:     domainType,
 		Capacity: capacity,
 		State:    make(map[string]uint64)}
@@ -56,7 +56,7 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 		return errors.New(errTxt)
 	}
 	m.cache.Add(info.ID, domain)
-	m.dumpInfo(&info)
+	m.dumpInfo(info)
 	return nil
 }
 
@@ -192,9 +192,9 @@ func (m *ManagerStruct) loadDomains() error {
 		var err error
 		switch info.Type {
 		case abstract.Default:
-			domain, err = hllpp.NewDomainFromData(info)
+			domain, err = hllpp.NewDomainFromData(&info)
 		case abstract.Purgable:
-			domain, err = cuckoofilter.NewDomain(info)
+			domain, err = cuckoofilter.NewDomain(&info)
 			m.cache.Add(info.ID, domain)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)

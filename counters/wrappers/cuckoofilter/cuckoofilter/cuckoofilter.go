@@ -20,7 +20,7 @@ type CuckooFilter struct {
 /*
 NewCuckooFilter returns a new cuckoofilter with a given capacity
 */
-func NewCuckooFilter(info abstract.Info) *CuckooFilter {
+func NewCuckooFilter(info *abstract.Info) *CuckooFilter {
 	capacity := getNextPow2(uint64(info.Capacity)) / bucketSize
 	if capacity == 0 {
 		capacity = 1
@@ -33,7 +33,7 @@ func NewCuckooFilter(info abstract.Info) *CuckooFilter {
 /*
 NewDefaultCuckooFilter returns a new cuckoofilter with the default capacity of 1000000
 */
-func NewDefaultCuckooFilter(info abstract.Info) *CuckooFilter {
+func NewDefaultCuckooFilter(info *abstract.Info) *CuckooFilter {
 	info.Capacity = 1000000
 	return NewCuckooFilter(info)
 }

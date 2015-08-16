@@ -17,7 +17,7 @@ var manager *storage.ManagerStruct
 Domain is the toplevel domain to control the HLL implementation
 */
 type Domain struct {
-	abstract.Info
+	*abstract.Info
 	impl *hllpp.HLLPP
 	lock sync.RWMutex
 }
@@ -25,7 +25,7 @@ type Domain struct {
 /*
 NewDomain ...
 */
-func NewDomain(info abstract.Info) (*Domain, error) {
+func NewDomain(info *abstract.Info) (*Domain, error) {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
 	d := Domain{info, hllpp.New(), sync.RWMutex{}}
@@ -37,7 +37,7 @@ func NewDomain(info abstract.Info) (*Domain, error) {
 /*
 NewDomainFromData ...
 */
-func NewDomainFromData(info abstract.Info) (*Domain, error) {
+func NewDomainFromData(info *abstract.Info) (*Domain, error) {
 	data, err := storage.GetManager().LoadData(info.ID, 0, 0)
 	counter, err := hllpp.Unmarshal(data)
 	if err != nil {
