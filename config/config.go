@@ -27,6 +27,11 @@ type Config struct {
 var config *Config
 
 /*
+MaxKeySize
+*/
+const MaxKeySize int = 32768 // max key size BoltDB in bytes
+
+/*
 GetInfoDir returns the top level info
 */
 func (c *Config) GetInfoDir() string {

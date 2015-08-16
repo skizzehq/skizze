@@ -266,3 +266,72 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 		t.Error("expected avengers count == x-men count, got", count1, "!=", count2)
 	}
 }
+
+func TestFailCreateDomain(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	m1, err := newManager()
+	if err != nil {
+		t.Log("Expected no errors, got", err)
+	}
+
+	// test for unknown domainType
+	err = m1.CreateDomain("marvel", "wrong", 10000000)
+	if err == nil {
+		t.Error("Expected errors while creating domain, got", err)
+	}
+
+	buffer := make([]byte, config.MaxKeySize+1)
+	for i := 0; i < config.MaxKeySize+1; i++ {
+		buffer[i] = byte(49) // ascii 1
+	}
+	domainID := string(buffer)
+	// test for too long domainID
+	err = m1.CreateDomain(domainID, "default", 10000000)
+	if err == nil {
+		t.Error("Expected errors while creating domain, got", err)
+	}
+}
+
+func TestFailDeleteDomain(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	m1, err := newManager()
+	if err != nil {
+		t.Log("Expected no errors, got", err)
+	}
+	err = m1.DeleteDomain("-1")
+	if err == nil {
+		t.Error("Expected error, got", err)
+	}
+}
+
+func TestFailDeleteFromDomain(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	m1, err := newManager()
+	if err != nil {
+		t.Log("Expected no errors, got", err)
+	}
+	err = m1.DeleteFromDomain("-1", []string{})
+	if err == nil {
+		t.Error("Expected error, got", err)
+	}
+}
+
+func TestFailGetCountForDomain(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	m1, err := newManager()
+	if err != nil {
+		t.Log("Expected no errors, got", err)
+	}
+	_, err = m1.GetCountForDomain("-1")
+	if err == nil {
+		t.Error("Expected error, got", err)
+	}
+}
