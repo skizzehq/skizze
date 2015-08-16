@@ -57,9 +57,9 @@ GetDomains ...
 */
 func (m *ManagerStruct) GetDomains() ([]string, error) {
 	// TODO: Remove dummy data and implement proper result
-	values := manager.cache.Keys()
-	domains := make([]string, len(values), len(values))
-	for i, v := range values {
+	cacheKeys := manager.cache.Keys()
+	domains := make([]string, len(cacheKeys), len(cacheKeys))
+	for i, v := range cacheKeys {
 		domains[i] = v.(string)
 	}
 	return domains, nil
@@ -156,7 +156,6 @@ func (m *ManagerStruct) loadInfo() error {
 	manager := storage.GetManager()
 	var infoStruct abstract.Info
 	infos, err := manager.LoadAllInfo()
-	//FIXME: Should we panic?
 	if err != nil {
 		return err
 	}

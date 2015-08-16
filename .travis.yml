@@ -9,6 +9,7 @@ install:
  - go get github.com/hashicorp/golang-lru
  - go get github.com/BurntSushi/toml
  - go get code.google.com/p/gofarmhash
+ - go get github.com/boltdb/bolt
 
 script:
  - go test -v ./...

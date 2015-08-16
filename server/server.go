@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -27,10 +26,14 @@ var counterManager *counters.ManagerStruct
 /*
 Server manages the http connections and communciates with the counters manager
 */
-type Server struct {
+type Server struct{}
+
+type domainsResult struct {
+	Result []string `json:"result"`
+	Error  error    `json:"error"`
 }
 
-type result struct {
+type domainResult struct {
 	Result interface{} `json:"result"`
 	Error  error       `json:"error"`
 }
@@ -49,12 +52,15 @@ func New() (*Server, error) {
 }
 
 func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data requestData) {
-	var res result
+	var err error
+	var domains []string
+	var js []byte
+
 	switch {
 	case method == "GET":
 		// Get all counters
-		domains, err := counterManager.GetDomains()
-		res = result{domains, err}
+		domains, err = counterManager.GetDomains()
+		js, err = json.Marshal(domainsResult{domains, err})
 	case method == "MERGE":
 		// Reserved for merging hyper log log
 		http.Error(w, "Not Implemented", http.StatusNotImplemented)
@@ -63,14 +69,6 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 		http.Error(w, "Invalid Method: "+method, http.StatusBadRequest)
 		return
 	}
-
-	// Somebody tried a PUT request (ignore)
-	if res.Result == nil && res.Error == nil {
-		fmt.Fprintf(w, "Huh?")
-		return
-	}
-
-	js, err := json.Marshal(res)
 
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json")
@@ -82,31 +80,33 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 }
 
 func (srv *Server) handleDomainRequest(w http.ResponseWriter, method string, data requestData) {
-	var res result
+	var res domainResult
+	var err error
+
+	// TODO (mb): handle errors from counterManager.*
 	switch {
 	case method == "GET":
 		// Get a count for a specific domain
 		count, err := counterManager.GetCountForDomain(data.Domain)
-		res = result{count, err}
+		res = domainResult{count, err}
 	case method == "POST":
 		// Create a new domain counter
-		err := counterManager.CreateDomain(data.Domain, data.DomainType, data.Capacity)
-		res = result{data.Domain, err}
+		err = counterManager.CreateDomain(data.Domain, data.DomainType, data.Capacity)
+		res = domainResult{0, err}
 	case method == "PUT":
 		// Add values to counter
-		err := counterManager.AddToDomain(data.Domain, data.Values)
-		res = result{nil, err}
+		err = counterManager.AddToDomain(data.Domain, data.Values)
+		res = domainResult{nil, err}
 	case method == "PURGE":
 		// Purges values from counter
-		http.Error(w, "Not Implemented", http.StatusNotImplemented)
+		err = counterManager.DeleteFromDomain(data.Domain, data.Values)
+		res = domainResult{nil, err}
 	case method == "DELETE":
 		// Delete Counter
 		err := counterManager.DeleteFromDomain(data.Domain, data.Values)
-		res = result{nil, err}
-	}
-	// Somebody tried a PUT request (ignore)
-	if res.Result == nil && res.Error == nil {
-		logger.Error.Println(w, "Huh?")
+		res = domainResult{nil, err}
+	default:
+		http.Error(w, "Invalid Method: "+method, http.StatusBadRequest)
 		return
 	}
 

@@ -8,6 +8,8 @@ import (
 
 	"github.com/seiflotfy/counts/config"
 	"github.com/seiflotfy/counts/utils"
+
+	"github.com/boltdb/bolt"
 )
 
 func setupTests() {
@@ -49,26 +51,38 @@ func TestNoCounters(t *testing.T) {
 func TestGetAllInfo(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
-	conf := config.GetConfig()
-	testFilePath := filepath.Join(conf.GetInfoDir(), "test.json")
+	func() {
+		db, err := openInfoDb()
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer db.Close()
 
-	f, err := os.Create(testFilePath)
-	defer os.Remove(testFilePath)
-	if err != nil {
-		t.Fatal("Couldn't create test file")
-	}
-	f.WriteString(`{
-		"id": "test",
-		"type": "immutable",
-		"capacity": 12345
-	}`)
+		err = db.Update(func(tx *bolt.Tx) error {
+			bucket := tx.Bucket([]byte("info"))
+			err := bucket.Put([]byte("thing"), []byte(`{
+				"id": "thing",
+				"type": "default",
+				"capacity": 12345
+			}`))
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 	m := newManager()
 	infoDatas, err := m.LoadAllInfo()
 	if err != nil {
-		t.Error("Expected no error loading data, got", err)
+		t.Fatal(err)
 	}
+
 	if len(infoDatas) != 1 {
-		t.Fatal("Expected exactly one infoData")
+		t.Error("Expected exactly one infoData, got", len(infoDatas))
 	}
 
 }
