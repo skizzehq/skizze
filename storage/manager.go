@@ -173,7 +173,9 @@ func (m *ManagerStruct) SaveInfo(id string, infoData []byte) error {
 
 func CloseInfoDB() error {
 	if db != nil {
-		return db.Close()
+		err := db.Close()
+		db = nil
+		return err
 	}
 	return nil
 }
