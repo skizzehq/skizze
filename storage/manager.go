@@ -169,8 +169,11 @@ func (m *ManagerStruct) SaveInfo(id string, infoData []byte) error {
 	return err
 }
 
-var db *bolt.DB = nil
+var db *bolt.DB
 
+/*
+CloseInfoDB ...
+*/
 func CloseInfoDB() error {
 	if db != nil {
 		err := db.Close()
@@ -180,6 +183,10 @@ func CloseInfoDB() error {
 	return nil
 }
 
+/*
+GetInfoDB ...
+Creates a new DB if it doesn't exist
+*/
 func GetInfoDB() (*bolt.DB, error) {
 	if db != nil {
 		return db, nil
