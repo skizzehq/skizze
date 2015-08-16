@@ -2,6 +2,7 @@ package cuckoofilter
 
 import (
 	"encoding/json"
+	"sync"
 
 	"github.com/seiflotfy/counts/counters/abstract"
 	"github.com/seiflotfy/counts/counters/wrappers/cuckoofilter/cuckoofilter"
@@ -17,19 +18,22 @@ Domain is the toplevel domain to control the HLL implementation
 type Domain struct {
 	*abstract.Info
 	impl *cuckoofilter.CuckooFilter
+	lock sync.RWMutex
 }
 
 /*
 NewDomain ...
 */
-func NewDomain(info *abstract.Info) (Domain, error) {
-	return Domain{info, cuckoofilter.NewCuckooFilter(info)}, nil
+func NewDomain(info *abstract.Info) (*Domain, error) {
+	return &Domain{info, cuckoofilter.NewCuckooFilter(info), sync.RWMutex{}}, nil
 }
 
 /*
 Add ...
 */
-func (d Domain) Add(value []byte) (bool, error) {
+func (d *Domain) Add(value []byte) (bool, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
 	ok := d.impl.InsertUnique(value)
 	err := d.Save()
 	return ok, err
@@ -38,7 +42,9 @@ func (d Domain) Add(value []byte) (bool, error) {
 /*
 AddMultiple ...
 */
-func (d Domain) AddMultiple(values [][]byte) (bool, error) {
+func (d *Domain) AddMultiple(values [][]byte) (bool, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
 	ok := true
 	for _, value := range values {
 		okk := d.impl.InsertUnique(value)
@@ -53,7 +59,9 @@ func (d Domain) AddMultiple(values [][]byte) (bool, error) {
 /*
 Remove ...
 */
-func (d Domain) Remove(value []byte) (bool, error) {
+func (d *Domain) Remove(value []byte) (bool, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
 	ok := d.impl.Delete(value)
 	err := d.Save()
 	return ok, err
@@ -62,7 +70,9 @@ func (d Domain) Remove(value []byte) (bool, error) {
 /*
 RemoveMultiple ...
 */
-func (d Domain) RemoveMultiple(values [][]byte) (bool, error) {
+func (d *Domain) RemoveMultiple(values [][]byte) (bool, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
 	ok := true
 	for _, value := range values {
 		okk := d.impl.Delete(value)
@@ -77,21 +87,21 @@ func (d Domain) RemoveMultiple(values [][]byte) (bool, error) {
 /*
 GetCount ...
 */
-func (d Domain) GetCount() uint {
+func (d *Domain) GetCount() uint {
 	return uint(d.impl.GetCount())
 }
 
 /*
 Clear ...
 */
-func (d Domain) Clear() (bool, error) {
+func (d *Domain) Clear() (bool, error) {
 	return true, nil
 }
 
 /*
 Save ...
 */
-func (d Domain) Save() error {
+func (d *Domain) Save() error {
 	count := d.impl.GetCount()
 	d.Info.State["count"] = uint64(count)
 	infoData, err := json.Marshal(d.Info)
