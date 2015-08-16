@@ -12,16 +12,14 @@ import (
 	"github.com/seiflotfy/counts/counters/wrappers/hllpp"
 	"github.com/seiflotfy/counts/storage"
 	"github.com/seiflotfy/counts/utils"
-
-	"github.com/hashicorp/golang-lru"
 )
 
 /*
 ManagerStruct is responsible for manipulating the counters and syncing to disk
 */
 type ManagerStruct struct {
-	cache *lru.Cache
-	info  map[string]abstract.Info
+	domains map[string]abstract.Counter
+	info    map[string]abstract.Info
 }
 
 var manager *ManagerStruct
@@ -55,7 +53,7 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 		errTxt := fmt.Sprint("Could not load domain ", info, ". Err:", err)
 		return errors.New(errTxt)
 	}
-	m.cache.Add(info.ID, domain)
+	m.domains[info.ID] = domain
 	m.dumpInfo(info)
 	return nil
 }
@@ -64,10 +62,11 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 DeleteDomain ...
 */
 func (m *ManagerStruct) DeleteDomain(domainID string) error {
-	if !m.cache.Contains(domainID) {
+	if _, ok := m.domains[domainID]; !ok {
 		return errors.New("No such domain " + domainID)
 	}
-	m.cache.Remove(domainID)
+	delete(m.domains, domainID)
+	//FIXME: delete from storage
 	return nil
 }
 
@@ -76,10 +75,11 @@ GetDomains ...
 */
 func (m *ManagerStruct) GetDomains() ([]string, error) {
 	// TODO: Remove dummy data and implement proper result
-	cacheKeys := manager.cache.Keys()
-	domains := make([]string, len(cacheKeys), len(cacheKeys))
-	for i, v := range cacheKeys {
-		domains[i] = v.(string)
+	domains := make([]string, len(m.domains), len(m.domains))
+	i := 0
+	for k := range m.domains {
+		domains[i] = k
+		i++
 	}
 	return domains, nil
 }
@@ -88,7 +88,7 @@ func (m *ManagerStruct) GetDomains() ([]string, error) {
 AddToDomain ...
 */
 func (m *ManagerStruct) AddToDomain(domainID string, values []string) error {
-	var val, ok = m.cache.Get(domainID)
+	var val, ok = m.domains[domainID]
 	if ok == false {
 		return errors.New("No such domain: " + domainID)
 	}
@@ -107,7 +107,7 @@ func (m *ManagerStruct) AddToDomain(domainID string, values []string) error {
 DeleteFromDomain ...
 */
 func (m *ManagerStruct) DeleteFromDomain(domainID string, values []string) error {
-	var val, ok = m.cache.Get(domainID)
+	var val, ok = m.domains[domainID]
 	if ok == false {
 		return errors.New("No such domain: " + domainID)
 	}
@@ -126,7 +126,7 @@ func (m *ManagerStruct) DeleteFromDomain(domainID string, values []string) error
 GetCountForDomain ...
 */
 func (m *ManagerStruct) GetCountForDomain(domainID string) (uint, error) {
-	var val, ok = m.cache.Get(domainID)
+	var val, ok = m.domains[domainID]
 	if ok == false {
 		return 0, errors.New("No such domain: " + domainID)
 	}
@@ -151,8 +151,8 @@ func GetManager() (*ManagerStruct, error) {
 }
 
 func newManager() (*ManagerStruct, error) {
-	cache, _ := lru.New(100)
-	manager = &ManagerStruct{cache, make(map[string]abstract.Info)}
+	domains := make(map[string]abstract.Counter)
+	manager = &ManagerStruct{domains, make(map[string]abstract.Info)}
 	err := manager.loadInfo()
 	if err != nil {
 		return nil, err
@@ -195,7 +195,6 @@ func (m *ManagerStruct) loadDomains() error {
 			domain, err = hllpp.NewDomainFromData(&info)
 		case abstract.Purgable:
 			domain, err = cuckoofilter.NewDomain(&info)
-			m.cache.Add(info.ID, domain)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
 		}
@@ -203,7 +202,7 @@ func (m *ManagerStruct) loadDomains() error {
 			errTxt := fmt.Sprint("Could not load domain ", info, ". Err:", err)
 			return errors.New(errTxt)
 		}
-		m.cache.Add(info.ID, domain)
+		m.domains[info.ID] = domain
 		strg.LoadData(key, 0, 0)
 	}
 	return nil
