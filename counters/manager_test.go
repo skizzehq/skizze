@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/seiflotfy/counts/config"
+	"github.com/seiflotfy/counts/storage"
 	"github.com/seiflotfy/counts/utils"
 )
 
@@ -28,6 +29,7 @@ func tearDownTests() {
 	os.RemoveAll(config.GetConfig().GetInfoDir())
 	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
 	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
+	storage.CloseInfoDB()
 }
 
 func TestNoCounters(t *testing.T) {
