@@ -4,12 +4,39 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/seiflotfy/counts/config"
+	"github.com/seiflotfy/counts/counters/abstract"
+	"github.com/seiflotfy/counts/utils"
 )
 
-func TestInsertion(t *testing.T) {
+func setupTests() {
+	os.Setenv("COUNTS_DATA_DIR", "/tmp/count_data")
+	os.Setenv("COUNTS_INFO_DIR", "/tmp/count_info")
+	path, err := os.Getwd()
+	utils.PanicOnError(err)
+	path = filepath.Dir(path)
+	configPath := filepath.Join(path, "../../../config/default.toml")
+	os.Setenv("COUNTS_CONFIG", configPath)
+	tearDownTests()
+}
 
-	cf := NewCuckooFilter(1000000)
+func tearDownTests() {
+	os.RemoveAll(config.GetConfig().GetDataDir())
+	os.RemoveAll(config.GetConfig().GetInfoDir())
+	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
+	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
+}
+
+func TestInsertion(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	cf := NewCuckooFilter(&abstract.Info{ID: "ultimates",
+		Type:     abstract.Purgable,
+		Capacity: 1000000, State: make(map[string]uint64)})
 
 	fd, err := os.Open("/usr/share/dict/web2")
 	if err != nil {

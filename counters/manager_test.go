@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/seiflotfy/counts/config"
+	"github.com/seiflotfy/counts/counters/abstract"
 	"github.com/seiflotfy/counts/storage"
 	"github.com/seiflotfy/counts/utils"
 )
@@ -95,7 +96,6 @@ func TestDefaultCounter(t *testing.T) {
 	if len(domains) != 0 {
 		t.Error("Expected 0 counters, got", len(domains))
 	}
-
 }
 
 func TestPurgableCounter(t *testing.T) {
@@ -147,7 +147,7 @@ func TestPurgableCounter(t *testing.T) {
 	}
 }
 
-func TestDumpLoadInfo(t *testing.T) {
+func TestDumpLoadDefaultInfo(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
@@ -211,6 +211,47 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	}
 }
 
+func TestDumpLoadPurgableInfo(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	var exists bool
+	m1, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if _, exists = m1.info["avengers"]; exists {
+		t.Error("expected avengers to not be initially loaded by manager")
+	}
+	err = m1.CreateDomain("avengers", abstract.Purgable, 1000000)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = m1.AddToDomain("avengers", []string{"hulk", "storm"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m2, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if _, exists = m2.info["avengers"]; !exists {
+		t.Error("expected avengers to be in loaded by manager")
+	}
+
+	count, err := m2.GetCountForDomain("avengers")
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if count != 2 {
+		t.Error("Expected count == 2, got", count)
+	}
+
+}
+
 func TestExtremeParallelDefaultCounter(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
@@ -238,6 +279,68 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 		s := []byte(scanner.Text())
 		values = append(values, string(s))
 		i++
+		if i == 10000 {
+			break
+		}
+	}
+
+	// Add all values in a go routine per value
+	var wg sync.WaitGroup
+	defer wg.Wait()
+	resChan := make(chan interface{})
+
+	var pFunc = func(value string) {
+		defer wg.Done()
+		m1.AddToDomain("avengers", []string{value})
+		resChan <- nil
+	}
+	for _, value := range values {
+		wg.Add(1)
+		go pFunc(value)
+	}
+	for j := 0; j < len(values); j++ {
+		<-resChan
+	}
+
+	// add all values in one bulk
+	m1.AddToDomain("x-men", values)
+	count1, err := m1.GetCountForDomain("avengers")
+	count2, err := m1.GetCountForDomain("x-men")
+	if count1 != count2 {
+		t.Error("expected avengers count == x-men count, got", count1, "!=", count2)
+	}
+}
+
+func TestExtremeParallelPurgableCounter(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	m1, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if _, exists := m1.info["avengers"]; exists {
+		t.Error("expected avengers to not be initially loaded by manager")
+	}
+	m1.CreateDomain("avengers", abstract.Purgable, 1000000)
+	m1.CreateDomain("x-men", abstract.Purgable, 1000000)
+
+	fd, err := os.Open("/usr/share/dict/web2")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	scanner := bufio.NewScanner(fd)
+
+	i := 0
+	values := []string{} //{"a", "aam"} //"doorknob", "doorless"
+	for scanner.Scan() {
+		s := []byte(scanner.Text())
+		values = append(values, string(s))
+		i++
+		if i == 10000 {
+			break
+		}
 	}
 
 	// Add all values in a go routine per value

@@ -44,7 +44,7 @@ func tearDownTests() {
 	storage.CloseInfoDB()
 }
 
-func http_request(s *Server, t *testing.T, method string, domain string, body string) *httptest.ResponseRecorder {
+func httpRequest(s *Server, t *testing.T, method string, domain string, body string) *httptest.ResponseRecorder {
 	reqBody := strings.NewReader(body)
 	fullDomain := "http://counters.io/" + domain
 	req, err := http.NewRequest(method, fullDomain, reqBody)
@@ -77,7 +77,7 @@ func TestDomainsInitiallyEmpty(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	resp := http_request(s, t, "GET", "", "")
+	resp := httpRequest(s, t, "GET", "", "")
 	if resp.Code != 200 {
 		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
 		return
@@ -95,7 +95,7 @@ func TestPost(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	resp := http_request(s, t, "POST", "marvel", `{
+	resp := httpRequest(s, t, "POST", "marvel", `{
 		"domainType": "default",
 		"capacity": 100000
 	}`)
@@ -105,7 +105,7 @@ func TestPost(t *testing.T) {
 		return
 	}
 
-	resp = http_request(s, t, "GET", "", `{}`)
+	resp = httpRequest(s, t, "GET", "", `{}`)
 	result := unmarshalDomainsResult(resp)
 	if len(result.Result) != 1 {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
@@ -119,7 +119,7 @@ func TestHLL(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	resp := http_request(s, t, "POST", "marvel", `{
+	resp := httpRequest(s, t, "POST", "marvel", `{
 		"domainType": "default",
 		"capacity": 100000
 	}`)
@@ -129,17 +129,17 @@ func TestHLL(t *testing.T) {
 		return
 	}
 
-	resp = http_request(s, t, "GET", "", `{}`)
+	resp = httpRequest(s, t, "GET", "", `{}`)
 	result := unmarshalDomainsResult(resp)
 	if len(result.Result) != 1 {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
 	}
 
-	resp = http_request(s, t, "PUT", "marvel", `{
+	resp = httpRequest(s, t, "PUT", "marvel", `{
 		"values": ["magneto", "wasp", "beast"]
 	}`)
 
-	resp = http_request(s, t, "GET", "marvel", `{}`)
+	resp = httpRequest(s, t, "GET", "marvel", `{}`)
 	result2 := unmarshalDomainResult(resp)
 	if result2.Result != 3 {
 		t.Fatalf("after add resultCount != 1. Got %d", result2.Result)

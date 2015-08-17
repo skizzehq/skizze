@@ -1,6 +1,10 @@
 package cuckoofilter
 
-import "math/rand"
+import (
+	"math/rand"
+
+	"github.com/seiflotfy/counts/counters/abstract"
+)
 
 const maxCuckooCount = 500
 
@@ -8,38 +12,40 @@ const maxCuckooCount = 500
 CuckooFilter represents a probabalistic counter
 */
 type CuckooFilter struct {
-	buckets []bucket
-	count   uint
+	ID    string
+	bs    *buckets
+	count uint
 }
 
 /*
 NewCuckooFilter returns a new cuckoofilter with a given capacity
 */
-func NewCuckooFilter(capacity uint) *CuckooFilter {
-	capacity = getNextPow2(uint64(capacity)) / bucketSize
+func NewCuckooFilter(info *abstract.Info) *CuckooFilter {
+	capacity := getNextPow2(uint64(info.Capacity)) / bucketSize
 	if capacity == 0 {
 		capacity = 1
 	}
-	buckets := make([]bucket, capacity, capacity)
-	for i := range buckets {
-		buckets[i] = [bucketSize]fingerprint{}
-	}
-	return &CuckooFilter{buckets, 0}
+	//FIXME: return error
+	bs, _ := newBuckets(info.ID, capacity)
+	return &CuckooFilter{info.ID, bs, uint(info.State["count"])}
 }
 
 /*
 NewDefaultCuckooFilter returns a new cuckoofilter with the default capacity of 1000000
 */
-func NewDefaultCuckooFilter() *CuckooFilter {
-	return NewCuckooFilter(1000000)
+func NewDefaultCuckooFilter(info *abstract.Info) *CuckooFilter {
+	info.Capacity = 1000000
+	return NewCuckooFilter(info)
 }
 
 /*
 Lookup returns true if data is in the counter
 */
 func (cf *CuckooFilter) Lookup(data []byte) bool {
-	i1, i2, fp := getIndicesAndFingerprint(data, uint(len(cf.buckets)))
-	b1, b2 := cf.buckets[i1], cf.buckets[i2]
+	i1, i2, fp := getIndicesAndFingerprint(data, cf.bs.numBuckets)
+	// FIXME: deal with errors
+	b1, _ := cf.bs.getBucket(i1)
+	b2, _ := cf.bs.getBucket(i2)
 	return b1.getFingerprintIndex(fp) > -1 || b2.getFingerprintIndex(fp) > -1
 }
 
@@ -47,7 +53,7 @@ func (cf *CuckooFilter) Lookup(data []byte) bool {
 Insert inserts data into the counter and returns true upon success
 */
 func (cf *CuckooFilter) Insert(data []byte) bool {
-	i1, i2, fp := getIndicesAndFingerprint(data, uint(len(cf.buckets)))
+	i1, i2, fp := getIndicesAndFingerprint(data, cf.bs.numBuckets)
 	if cf.insert(fp, i1) || cf.insert(fp, i2) {
 		return true
 	}
@@ -65,7 +71,10 @@ func (cf *CuckooFilter) InsertUnique(data []byte) bool {
 }
 
 func (cf *CuckooFilter) insert(fp fingerprint, i uint) bool {
-	if cf.buckets[i].insert(fp) {
+	// FIXME: return error
+	b, _ := cf.bs.getBucket(i)
+	if b.insert(fp) {
+		cf.bs.setBucket(i, b)
 		cf.count++
 		return true
 	}
@@ -76,11 +85,16 @@ func (cf *CuckooFilter) reinsert(fp fingerprint, i uint) bool {
 	for k := 0; k < maxCuckooCount; k++ {
 		j := rand.Intn(bucketSize)
 		oldfp := fp
-		fp = cf.buckets[i][j]
-		cf.buckets[i][j] = oldfp
+
+		// FIXME: return error
+		b, _ := cf.bs.getBucket(i)
+
+		fp = b[j]
+		b[j] = oldfp
+		cf.bs.setBucket(i, b)
 
 		// look in the alternate location for that random element
-		i = getAltIndex(fp, i, uint(len(cf.buckets)))
+		i = getAltIndex(fp, i, cf.bs.numBuckets)
 		if cf.insert(fp, i) {
 			return true
 		}
@@ -92,12 +106,14 @@ func (cf *CuckooFilter) reinsert(fp fingerprint, i uint) bool {
 Delete data from counter if exists and return if deleted or not
 */
 func (cf *CuckooFilter) Delete(data []byte) bool {
-	i1, i2, fp := getIndicesAndFingerprint(data, uint(len(cf.buckets)))
+	i1, i2, fp := getIndicesAndFingerprint(data, cf.bs.numBuckets)
 	return cf.delete(fp, i1) || cf.delete(fp, i2)
 }
 
 func (cf *CuckooFilter) delete(fp fingerprint, i uint) bool {
-	if cf.buckets[i].delete(fp) {
+	b, _ := cf.bs.getBucket(i)
+	if b.delete(fp) {
+		cf.bs.setBucket(i, b)
 		cf.count--
 		return true
 	}

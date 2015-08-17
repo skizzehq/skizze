@@ -184,8 +184,7 @@ func CloseInfoDB() error {
 }
 
 /*
-GetInfoDB ...
-Creates a new DB if it doesn't exist
+GetInfoDB returns a singleton of the infoDB
 */
 func GetInfoDB() (*bolt.DB, error) {
 	if db != nil {
