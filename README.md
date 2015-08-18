@@ -61,7 +61,7 @@ These examples expose a variety of settings. The full data may reside in a tradi
 - [x] Create counter manager
 - [x] Integrate Default Counter (Hyperloglog++)
 - [x] Integrate Purgable Counter (CuckooFilter and possibly play with the idea of CuckooLogLog)
-- [ ] Integrate Frequency Counter (Count-min sketch)
+- [ ] Integrate Frequency Counter (Count-Min-Log sketch)
 - [ ] Integrate Expiring Counter (Sliding Hyperloglog)
 - [x] Store to Disk
 - [ ] Replication on multiple servers
