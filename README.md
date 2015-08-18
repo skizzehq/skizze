@@ -61,9 +61,11 @@ These examples expose a variety of settings. The full data may reside in a tradi
 ## Milestones
 - [x] Design and implement REST API
 - [x] Create counter manager
-- [x] Integrate Default Counter (Hyperloglog++)
-- [x] Integrate Purgable Counter (CuckooFilter and possibly play with the idea of CuckooLogLog)
+- [x] Integrate Cardinality Counter (Hyperloglog++)
+- [x] Integrate CardinalityPurgable Counter (CuckooFilter and possibly play with the idea of CuckooLogLog)
 - [ ] Integrate Frequency Counter (Count-Min-Log sketch)
+- [ ] Integrate FrequencyPurgable Counter (Count-Min sketch)
 - [ ] Integrate Expiring Counter (Sliding Hyperloglog)
+- [ ] Integrate Top (TopK)
 - [x] Store to Disk
 - [ ] Replication on multiple servers
