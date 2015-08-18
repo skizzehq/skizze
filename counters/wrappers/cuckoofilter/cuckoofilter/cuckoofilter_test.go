@@ -35,7 +35,7 @@ func TestInsertion(t *testing.T) {
 	defer tearDownTests()
 
 	cf := NewCuckooFilter(&abstract.Info{ID: "ultimates",
-		Type:     abstract.Purgable,
+		Type:     abstract.PurgableCardinality,
 		Capacity: 1000000, State: make(map[string]uint64)})
 
 	fd, err := os.Open("/usr/share/dict/web2")
