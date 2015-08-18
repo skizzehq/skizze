@@ -41,9 +41,9 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 	var domain abstract.Counter
 	var err error
 	switch domainType {
-	case abstract.Default:
+	case abstract.Cardinality:
 		domain, err = hllpp.NewDomain(info)
-	case abstract.Purgable:
+	case abstract.PurgableCardinality:
 		domain, err = cuckoofilter.NewDomain(info)
 	default:
 		return errors.New("invalid domain type: " + domainType)
@@ -191,9 +191,9 @@ func (m *ManagerStruct) loadDomains() error {
 		var domain abstract.Counter
 		var err error
 		switch info.Type {
-		case abstract.Default:
+		case abstract.Cardinality:
 			domain, err = hllpp.NewDomainFromData(&info)
-		case abstract.Purgable:
+		case abstract.PurgableCardinality:
 			domain, err = cuckoofilter.NewDomain(&info)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)

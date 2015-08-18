@@ -57,7 +57,7 @@ func TestDefaultCounter(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	err = manager.CreateDomain("marvel", "default", 10000000)
+	err = manager.CreateDomain("marvel", "cardinality", 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
@@ -106,7 +106,7 @@ func TestPurgableCounter(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	err = manager.CreateDomain("marvel", "purgable", 10000000)
+	err = manager.CreateDomain("marvel", abstract.PurgableCardinality, 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
@@ -159,7 +159,7 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	err = m1.CreateDomain("avengers", "default", 1000000)
+	err = m1.CreateDomain("avengers", "cardinality", 1000000)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,7 +185,7 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateDomain("avengers", "default", 1000000)
+	m1.CreateDomain("avengers", "cardinality", 1000000)
 
 	m1.AddToDomain("avengers", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops"})
@@ -223,7 +223,7 @@ func TestDumpLoadPurgableInfo(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	err = m1.CreateDomain("avengers", abstract.Purgable, 1000000)
+	err = m1.CreateDomain("avengers", abstract.PurgableCardinality, 1000000)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -263,8 +263,8 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 	if _, exists := m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateDomain("avengers", "default", 1000000)
-	m1.CreateDomain("x-men", "default", 1000000)
+	m1.CreateDomain("avengers", "cardinality", 1000000)
+	m1.CreateDomain("x-men", "cardinality", 1000000)
 
 	fd, err := os.Open("/usr/share/dict/web2")
 	if err != nil {
@@ -322,8 +322,8 @@ func TestExtremeParallelPurgableCounter(t *testing.T) {
 	if _, exists := m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateDomain("avengers", abstract.Purgable, 1000000)
-	m1.CreateDomain("x-men", abstract.Purgable, 1000000)
+	m1.CreateDomain("avengers", abstract.PurgableCardinality, 1000000)
+	m1.CreateDomain("x-men", abstract.PurgableCardinality, 1000000)
 
 	fd, err := os.Open("/usr/share/dict/web2")
 	if err != nil {
@@ -391,7 +391,7 @@ func TestFailCreateDomain(t *testing.T) {
 	}
 	domainID := string(buffer)
 	// test for too long domainID
-	err = m1.CreateDomain(domainID, "default", 10000000)
+	err = m1.CreateDomain(domainID, "cardinality", 10000000)
 	if err == nil {
 		t.Error("Expected errors while creating domain, got", err)
 	}

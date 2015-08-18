@@ -96,7 +96,7 @@ func TestPost(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "marvel", `{
-		"domainType": "default",
+		"domainType": "cardinality",
 		"capacity": 100000
 	}`)
 
@@ -120,7 +120,7 @@ func TestHLL(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "marvel", `{
-		"domainType": "default",
+		"domainType": "cardinality",
 		"capacity": 100000
 	}`)
 
