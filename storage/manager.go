@@ -35,8 +35,11 @@ func onFileEvicted(k interface{}, v interface{}) {
 func newManager() *ManagerStruct {
 	conf = config.GetConfig()
 	dataPath = conf.GetDataDir()
-	//FIXME: size of cache should be read from config
-	cache, err := lru.NewWithEvict(250, onFileEvicted)
+	var cacheSize int = int(conf.GetCacheSize())
+	if cacheSize == 0 {
+		cacheSize = 250 // default cache size
+	}
+	cache, err := lru.NewWithEvict(cacheSize, onFileEvicted)
 	utils.PanicOnError(err)
 	err = os.MkdirAll(dataPath, 0777)
 	utils.PanicOnError(err)

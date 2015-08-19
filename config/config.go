@@ -21,7 +21,7 @@ type Config struct {
 	SliceSize      uint   `toml:"slice_size"`
 	CacheSize      uint   `toml:"cache_size"`
 	SliceCacheSize uint   `toml:"slice_cache_size"`
-	Port           int    `toml:"port"`
+	Port           uint    `toml:"port"`
 }
 
 var config *Config
@@ -69,7 +69,7 @@ func (c *Config) GetSliceCacheSize() uint {
 /*
 GetPort returns the port the server runs on
 */
-func (c *Config) GetPort() int {
+func (c *Config) GetPort() uint {
 	return c.Port
 }
 
@@ -115,7 +115,8 @@ func GetConfig() *Config {
 			}
 		}
 
-		port, err := strconv.Atoi(strings.TrimSpace(os.Getenv("COUNTS_PORT")))
+		portInt, err := strconv.Atoi(strings.TrimSpace(os.Getenv("COUNTS_PORT")))
+		port := uint(portInt)
 		if err != nil {
 			port = config.Port
 		}
