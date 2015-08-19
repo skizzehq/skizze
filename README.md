@@ -7,7 +7,7 @@
 
 A domain-counter data store to deal with all problems around counting using probabilistic data-structures.
 
-Unlike a Key-Value store, counts does not store values, but rather keeps track of keys added to a domain, allowing you to solve frequency and cardinality queries in near O(1) time, with minimal memory footprint.
+Unlike a Key-Value store, Skizze does not store values, but rather keeps track of keys added to a domain, allowing you to solve frequency and cardinality queries in near O(1) time, with minimal memory footprint.
 
 <b>Note:</b> Data structures that can grow too big to reside in memory are read and written from/to disk directly via open stream to make sure we can maintain a high number of counters.
 
