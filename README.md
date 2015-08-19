@@ -1,4 +1,4 @@
-# Counts
+# Skizze
 
 [![Build Status](https://travis-ci.org/seiflotfy/counts.svg?branch=master)](https://travis-ci.org/seiflotfy/counts)
 [![license](http://img.shields.io/badge/license-Apache-blue.svg)](https://raw.githubusercontent.com/seiflotfy/counts/master/LICENSE)
