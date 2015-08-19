@@ -67,8 +67,11 @@ func (m *ManagerStruct) DeleteDomain(domainID string) error {
 	}
 	delete(m.domains, domainID)
 	manager := storage.GetManager()
-	manager.DeleteInfo(domainID)
-	return nil
+	err := manager.DeleteInfo(domainID)
+	if err != nil {
+		return err
+	}
+	return manager.DeleteData(domainID)
 }
 
 /*

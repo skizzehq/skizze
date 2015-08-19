@@ -15,8 +15,8 @@ import (
 )
 
 func setupTests() {
-	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_data")
-	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_info")
+	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_manager_data")
+	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_manager_info")
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)
@@ -51,7 +51,7 @@ func TestNoCounters(t *testing.T) {
 
 func TestDefaultCounter(t *testing.T) {
 	setupTests()
-	defer tearDownTests()
+	tearDownTests()
 
 	var manager, err = GetManager()
 	if err != nil {
@@ -249,7 +249,6 @@ func TestDumpLoadPurgableInfo(t *testing.T) {
 	if count != 2 {
 		t.Error("Expected count == 2, got", count)
 	}
-
 }
 
 func TestExtremeParallelDefaultCounter(t *testing.T) {

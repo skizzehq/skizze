@@ -86,6 +86,23 @@ func (m *ManagerStruct) SaveData(ID string, data []byte, offset int64) error {
 }
 
 /*
+DeleteData ...
+*/
+func (m *ManagerStruct) DeleteData(ID string) error {
+	v, ok := m.cache.Peek(ID)
+	if ok {
+		v.(*os.File).Close()
+	}
+	path := filepath.Join(dataPath, ID)
+	/*
+		if _, err := os.Stat(path); err != nil {
+			return nil
+		}
+	*/
+	return os.Remove(path)
+}
+
+/*
 LoadData ...
 */
 func (m *ManagerStruct) LoadData(ID string, offset int64, length int64) ([]byte, error) {

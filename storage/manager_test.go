@@ -13,8 +13,8 @@ import (
 )
 
 func setupTests() {
-	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_data")
-	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_info")
+	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_storage_data")
+	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_storage_info")
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)
@@ -130,5 +130,24 @@ func TestDeleteInfo(t *testing.T) {
 	if len(infoData) != 1 {
 		t.Error("Expected exactly one infoData, got", len(infoData))
 	}
+}
 
+func TestSaveAndDeleteData(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+	m := newManager()
+	m.Create("phoenix")
+	m.SaveData("phoenix", []byte("phoenix"), 0)
+	path := filepath.Join(config.GetConfig().GetDataDir(), "phoenix")
+	if _, err := os.Stat(path); err != nil {
+		t.Error("Expected data in,", path, "got", err)
+	}
+
+	err := m.DeleteData("phoenix")
+	if err != nil {
+		t.Error("Expected no error deleting data, got", err)
+	}
+	if _, err := os.Stat(path); err == nil {
+		t.Error("Expected no data in,", path, "got", err)
+	}
 }
