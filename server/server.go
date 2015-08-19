@@ -150,7 +150,7 @@ Run ...
 */
 func (srv *Server) Run() {
 	conf := config.GetConfig()
-	port := conf.GetPort()
+	port := int(conf.GetPort())
 	logger.Info.Println("Server up and running on port: " + strconv.Itoa(port))
 	http.ListenAndServe(":"+strconv.Itoa(port), srv)
 }
