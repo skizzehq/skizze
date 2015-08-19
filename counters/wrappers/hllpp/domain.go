@@ -29,8 +29,10 @@ func NewDomain(info *abstract.Info) (*Domain, error) {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
 	d := Domain{info, hllpp.New(), sync.RWMutex{}}
-	d.Save()
-	//FIXME: check for error
+	err := d.Save()
+	if err != nil {
+		logger.Error.Println("an error has occurred while saving domain: "+err.Error())	
+	}
 	return &d, nil
 }
 
