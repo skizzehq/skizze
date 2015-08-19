@@ -66,7 +66,8 @@ func (m *ManagerStruct) DeleteDomain(domainID string) error {
 		return errors.New("No such domain " + domainID)
 	}
 	delete(m.domains, domainID)
-	//FIXME: delete from storage
+	manager := storage.GetManager()
+	manager.DeleteInfo(domainID)
 	return nil
 }
 

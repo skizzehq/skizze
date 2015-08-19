@@ -52,7 +52,7 @@ func TestGetAllInfo(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 	func() {
-		db, err := GetInfoDB()
+		db, err := getInfoDB()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -75,13 +75,60 @@ func TestGetAllInfo(t *testing.T) {
 		}
 	}()
 	m := newManager()
-	infoDatas, err := m.LoadAllInfo()
+	infoData, err := m.LoadAllInfo()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(infoDatas) != 1 {
-		t.Error("Expected exactly one infoData, got", len(infoDatas))
+	if len(infoData) != 1 {
+		t.Error("Expected exactly one infoData, got", len(infoData))
+	}
+}
+
+func TestDeleteInfo(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+	func() {
+		db, err := getInfoDB()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = db.Update(func(tx *bolt.Tx) error {
+			bucket := tx.Bucket([]byte("info"))
+			err := bucket.Put([]byte("thing"), []byte(`{
+				"id": "thing",
+				"type": "default",
+				"capacity": 12345
+			}`))
+			if err != nil {
+				return err
+			}
+			err = bucket.Put([]byte("venom"), []byte(`{
+				"id": "venom",
+				"type": "default",
+				"capacity": 67890
+			}`))
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+	m := newManager()
+
+	m.DeleteInfo("venom")
+	infoData, err := m.LoadAllInfo()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(infoData) != 1 {
+		t.Error("Expected exactly one infoData, got", len(infoData))
 	}
 
 }
