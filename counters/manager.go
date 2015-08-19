@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/seiflotfy/counts/config"
-	"github.com/seiflotfy/counts/counters/abstract"
-	"github.com/seiflotfy/counts/counters/wrappers/cuckoofilter"
-	"github.com/seiflotfy/counts/counters/wrappers/hllpp"
-	"github.com/seiflotfy/counts/storage"
-	"github.com/seiflotfy/counts/utils"
+	"github.com/seiflotfy/skizze/config"
+	"github.com/seiflotfy/skizze/counters/abstract"
+	"github.com/seiflotfy/skizze/counters/wrappers/cuckoofilter"
+	"github.com/seiflotfy/skizze/counters/wrappers/hllpp"
+	"github.com/seiflotfy/skizze/storage"
+	"github.com/seiflotfy/skizze/utils"
 )
 
 /*

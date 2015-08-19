@@ -4,10 +4,10 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/seiflotfy/counts/counters/abstract"
-	"github.com/seiflotfy/counts/counters/wrappers/hllpp/hllpp"
-	"github.com/seiflotfy/counts/storage"
-	"github.com/seiflotfy/counts/utils"
+	"github.com/seiflotfy/skizze/counters/abstract"
+	"github.com/seiflotfy/skizze/counters/wrappers/hllpp/hllpp"
+	"github.com/seiflotfy/skizze/storage"
+	"github.com/seiflotfy/skizze/utils"
 )
 
 var logger = utils.GetLogger()
@@ -31,7 +31,7 @@ func NewDomain(info *abstract.Info) (*Domain, error) {
 	d := Domain{info, hllpp.New(), sync.RWMutex{}}
 	err := d.Save()
 	if err != nil {
-		logger.Error.Println("an error has occurred while saving domain: "+err.Error())	
+		logger.Error.Println("an error has occurred while saving domain: " + err.Error())
 	}
 	return &d, nil
 }

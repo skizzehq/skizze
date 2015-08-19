@@ -1,6 +1,6 @@
 package cuckoofilter
 
-import "github.com/seiflotfy/counts/storage"
+import "github.com/seiflotfy/skizze/storage"
 
 const fingerprintSize = 1
 const bucketSize = 4

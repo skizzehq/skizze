@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/seiflotfy/counts/counters/abstract"
-	"github.com/seiflotfy/counts/counters/wrappers/cuckoofilter/cuckoofilter"
-	"github.com/seiflotfy/counts/storage"
-	"github.com/seiflotfy/counts/utils"
+	"github.com/seiflotfy/skizze/counters/abstract"
+	"github.com/seiflotfy/skizze/counters/wrappers/cuckoofilter/cuckoofilter"
+	"github.com/seiflotfy/skizze/storage"
+	"github.com/seiflotfy/skizze/utils"
 )
 
 var logger = utils.GetLogger()

@@ -1,8 +1,8 @@
 # this is where top level info is stored for the counter manager we could also use a boltDB in the DataDir but this would make it harder to sync over replicas since not all replicas will hold the all the counters.
-info_dir = "~/.counts/info"
+info_dir = "~/.skizze/info"
 
 # this is where the data is stored either as json or .count (pure bytes)
-data_dir = "~/.counts/data"
+data_dir = "~/.skizze/data"
 
 # is needed for the raw bytes storage since we can split them up and not have it all in memory at once.
 slice_size = 5

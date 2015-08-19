@@ -5,9 +5,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/seiflotfy/counts/config"
-	"github.com/seiflotfy/counts/server"
-	"github.com/seiflotfy/counts/utils"
+	"github.com/seiflotfy/skizze/config"
+	"github.com/seiflotfy/skizze/server"
+	"github.com/seiflotfy/skizze/utils"
 )
 
 var logger = utils.GetLogger()

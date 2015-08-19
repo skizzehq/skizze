@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/seiflotfy/counts/config"
-	"github.com/seiflotfy/counts/utils"
+	"github.com/seiflotfy/skizze/config"
+	"github.com/seiflotfy/skizze/utils"
 
 	"github.com/boltdb/bolt"
 	"github.com/hashicorp/golang-lru"
@@ -16,6 +16,7 @@ import (
 
 var conf *config.Config
 var dataPath string
+var db *bolt.DB
 
 // ManagerStruct the storage should deal with 2 types of on disk files, info and data
 // info describes a domain and can be used to load back from disk the settings
@@ -35,7 +36,7 @@ func onFileEvicted(k interface{}, v interface{}) {
 func newManager() *ManagerStruct {
 	conf = config.GetConfig()
 	dataPath = conf.GetDataDir()
-	var cacheSize int = int(conf.GetCacheSize())
+	cacheSize := int(conf.GetCacheSize())
 	if cacheSize == 0 {
 		cacheSize = 250 // default cache size
 	}
@@ -171,8 +172,6 @@ func (m *ManagerStruct) SaveInfo(id string, infoData []byte) error {
 	})
 	return err
 }
-
-var db *bolt.DB
 
 /*
 CloseInfoDB ...

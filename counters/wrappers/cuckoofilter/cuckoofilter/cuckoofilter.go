@@ -3,7 +3,7 @@ package cuckoofilter
 import (
 	"math/rand"
 
-	"github.com/seiflotfy/counts/counters/abstract"
+	"github.com/seiflotfy/skizze/counters/abstract"
 )
 
 const maxCuckooCount = 500

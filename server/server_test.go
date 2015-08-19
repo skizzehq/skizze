@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/seiflotfy/counts/config"
-	"github.com/seiflotfy/counts/storage"
-	"github.com/seiflotfy/counts/utils"
+	"github.com/seiflotfy/skizze/config"
+	"github.com/seiflotfy/skizze/storage"
+	"github.com/seiflotfy/skizze/utils"
 )
 
 type testDomainsResult struct {
@@ -26,13 +26,13 @@ type testDomainResult struct {
 }
 
 func setupTests() {
-	os.Setenv("COUNTS_DATA_DIR", "/tmp/count_data")
-	os.Setenv("COUNTS_INFO_DIR", "/tmp/count_info")
+	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_data")
+	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_info")
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)
 	configPath := filepath.Join(path, "config/default.toml")
-	os.Setenv("COUNTS_CONFIG", configPath)
+	os.Setenv("SKZ_CONFIG", configPath)
 	tearDownTests()
 }
 
