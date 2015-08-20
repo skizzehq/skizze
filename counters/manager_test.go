@@ -132,7 +132,12 @@ func TestPurgableCounter(t *testing.T) {
 	if count != 2 {
 		t.Error("Expected count == 2, got", count)
 	}
-
+	
+	err = manager.DeleteFromDomain("marvel", []string{"hulk", "thor"})
+	if err != nil {
+		t.Error("Expected no errors while getting domains, got", err)
+	}
+	
 	err = manager.DeleteDomain("marvel")
 	if err != nil {
 		t.Error("Expected no errors while deleting domain, got", err)
