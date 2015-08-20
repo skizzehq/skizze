@@ -13,8 +13,8 @@ import (
 )
 
 func setupTests() {
-	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_data")
-	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_info")
+	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_storage_data")
+	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_storage_info")
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)
@@ -52,7 +52,7 @@ func TestGetAllInfo(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 	func() {
-		db, err := GetInfoDB()
+		db, err := getInfoDB()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -75,13 +75,79 @@ func TestGetAllInfo(t *testing.T) {
 		}
 	}()
 	m := newManager()
-	infoDatas, err := m.LoadAllInfo()
+	infoData, err := m.LoadAllInfo()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(infoDatas) != 1 {
-		t.Error("Expected exactly one infoData, got", len(infoDatas))
+	if len(infoData) != 1 {
+		t.Error("Expected exactly one infoData, got", len(infoData))
+	}
+}
+
+func TestDeleteInfo(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+	func() {
+		db, err := getInfoDB()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = db.Update(func(tx *bolt.Tx) error {
+			bucket := tx.Bucket([]byte("info"))
+			err := bucket.Put([]byte("thing"), []byte(`{
+				"id": "thing",
+				"type": "default",
+				"capacity": 12345
+			}`))
+			if err != nil {
+				return err
+			}
+			err = bucket.Put([]byte("venom"), []byte(`{
+				"id": "venom",
+				"type": "default",
+				"capacity": 67890
+			}`))
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+	m := newManager()
+
+	m.DeleteInfo("venom")
+	infoData, err := m.LoadAllInfo()
+	if err != nil {
+		t.Fatal(err)
 	}
 
+	if len(infoData) != 1 {
+		t.Error("Expected exactly one infoData, got", len(infoData))
+	}
+}
+
+func TestSaveAndDeleteData(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+	m := newManager()
+	m.Create("phoenix")
+	m.SaveData("phoenix", []byte("phoenix"), 0)
+	path := filepath.Join(config.GetConfig().GetDataDir(), "phoenix")
+	if _, err := os.Stat(path); err != nil {
+		t.Error("Expected data in,", path, "got", err)
+	}
+
+	err := m.DeleteData("phoenix")
+	if err != nil {
+		t.Error("Expected no error deleting data, got", err)
+	}
+	if _, err := os.Stat(path); err == nil {
+		t.Error("Expected no data in,", path, "got", err)
+	}
 }

@@ -86,6 +86,23 @@ func (m *ManagerStruct) SaveData(ID string, data []byte, offset int64) error {
 }
 
 /*
+DeleteData ...
+*/
+func (m *ManagerStruct) DeleteData(ID string) error {
+	v, ok := m.cache.Peek(ID)
+	if ok {
+		v.(*os.File).Close()
+	}
+	path := filepath.Join(dataPath, ID)
+	/*
+		if _, err := os.Stat(path); err != nil {
+			return nil
+		}
+	*/
+	return os.Remove(path)
+}
+
+/*
 LoadData ...
 */
 func (m *ManagerStruct) LoadData(ID string, offset int64, length int64) ([]byte, error) {
@@ -124,7 +141,7 @@ func (m *ManagerStruct) getFileFromCache(ID string) (*os.File, error) {
 LoadAllInfo ...
 */
 func (m *ManagerStruct) LoadAllInfo() ([][]byte, error) {
-	db, err := GetInfoDB()
+	db, err := getInfoDB()
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +174,7 @@ func (m *ManagerStruct) LoadAllInfo() ([][]byte, error) {
 SaveInfo ...
 */
 func (m *ManagerStruct) SaveInfo(id string, infoData []byte) error {
-	db, err := GetInfoDB()
+	db, err := getInfoDB()
 	err = db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("info"))
 		if err != nil {
@@ -165,6 +182,26 @@ func (m *ManagerStruct) SaveInfo(id string, infoData []byte) error {
 		}
 		key := []byte(id)
 		err = bucket.Put(key, infoData)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+/*
+DeleteInfo ...
+*/
+func (m *ManagerStruct) DeleteInfo(id string) error {
+	db, err := getInfoDB()
+	err = db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("info"))
+		if err != nil {
+			return err
+		}
+		key := []byte(id)
+		err = bucket.Delete(key)
 		if err != nil {
 			return err
 		}
@@ -186,9 +223,9 @@ func CloseInfoDB() error {
 }
 
 /*
-GetInfoDB returns a singleton of the infoDB
+getInfoDB returns a singleton of the infoDB
 */
-func GetInfoDB() (*bolt.DB, error) {
+func getInfoDB() (*bolt.DB, error) {
 	if db != nil {
 		return db, nil
 	}
