@@ -25,7 +25,9 @@ type Domain struct {
 NewDomain ...
 */
 func NewDomain(info *abstract.Info) (*Domain, error) {
-	return &Domain{info, cuckoofilter.NewCuckooFilter(info), sync.RWMutex{}}, nil
+	d := &Domain{info, cuckoofilter.NewCuckooFilter(info), sync.RWMutex{}}
+	d.Save()
+	return d, nil
 }
 
 /*
