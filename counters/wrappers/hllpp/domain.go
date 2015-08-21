@@ -1,6 +1,7 @@
 package hllpp
 
 import (
+	"encoding/json"
 	"errors"
 	"sync"
 
@@ -110,5 +111,9 @@ Save ...
 func (d *Domain) Save() error {
 	serialized := d.impl.Marshal()
 	err := manager.SaveData(d.Info.ID, serialized, 0)
-	return err
+	if err != nil {
+		return err
+	}
+	info, _ := json.Marshal(d.Info)
+	return manager.SaveInfo(d.Info.ID, info)
 }
