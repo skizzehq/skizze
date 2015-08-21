@@ -110,6 +110,5 @@ func (d *Domain) Save() error {
 	if err != nil {
 		return err
 	}
-	err = storage.GetManager().SaveInfo(d.Info.ID, infoData)
-	return err
+	return storage.GetManager().SaveInfo(d.Info.ID, infoData)
 }
