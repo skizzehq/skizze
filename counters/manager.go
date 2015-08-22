@@ -32,7 +32,11 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 	//TODO: spit errir uf domainType is invalid
 	//FIXME: no hardcoding of immutable here
 	if len([]byte(domainID)) > config.MaxKeySize {
-		return errors.New("invalid length of domain ID: " + strconv.Itoa(len(domainID)) + ". Max length allowed: " + strconv.Itoa(config.MaxKeySize))
+		return errors.New("Invalid length of domain ID: " + strconv.Itoa(len(domainID)) + ". Max length allowed: " + strconv.Itoa(config.MaxKeySize))
+	}
+	if domainType == "" {
+		logger.Error.Println("DomainType is mandatory and must be set!")
+		return errors.New("No domain type was given!")
 	}
 	info := &abstract.Info{ID: domainID,
 		Type:     domainType,
@@ -46,7 +50,7 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 	case abstract.PurgableCardinality:
 		domain, err = cuckoofilter.NewDomain(info)
 	default:
-		return errors.New("invalid domain type: " + domainType)
+		return errors.New("Invalid domain type: " + domainType)
 	}
 
 	if err != nil {
