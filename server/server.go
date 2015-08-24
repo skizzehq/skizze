@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -109,12 +110,12 @@ func (srv *Server) handleDomainRequest(w http.ResponseWriter, method string, dat
 		res = domainResult{nil, err}
 	case method == "DELETE":
 		// Delete Counter
-		err := counterManager.DeleteFromDomain(data.Domain, data.Values)
+		err := counterManager.DeleteDomain(data.Domain)
 		logger.Info.Printf("[%v]: Deleting domain: %v", method, data.Domain)
 		res = domainResult{nil, err}
 	default:
-		logger.Error.Printf("Invalid Method: %v", method, http.StatusBadRequest)
-		http.Error(w, "Invalid Method: "+method, http.StatusBadRequest)
+		logger.Error.Printf("[%v]: Invalid Method: %v", method, http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Invalid Method: %s", method), http.StatusBadRequest)
 		return
 	}
 
