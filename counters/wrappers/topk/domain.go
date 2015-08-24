@@ -1,12 +1,14 @@
-package hllpp
+package topk
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"sync"
 
 	"github.com/seiflotfy/skizze/counters/abstract"
-	"github.com/seiflotfy/skizze/counters/wrappers/hllpp/hllpp"
+	"github.com/seiflotfy/skizze/counters/wrappers/topk/go-topk"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
@@ -19,9 +21,14 @@ Domain is the toplevel domain to control the HLL implementation
 */
 type Domain struct {
 	*abstract.Info
-	impl *hllpp.HLLPP
+	impl *topk.Stream
 	lock sync.RWMutex
 }
+
+/*
+ResultElement ...
+*/
+type ResultElement topk.Element
 
 /*
 NewDomain ...
@@ -29,7 +36,7 @@ NewDomain ...
 func NewDomain(info *abstract.Info) (*Domain, error) {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
-	d := Domain{info, hllpp.New(), sync.RWMutex{}}
+	d := Domain{info, topk.New(int(info.Capacity)), sync.RWMutex{}}
 	err := d.Save()
 	if err != nil {
 		logger.Error.Println("an error has occurred while saving domain: " + err.Error())
@@ -43,11 +50,20 @@ NewDomainFromData ...
 func NewDomainFromData(info *abstract.Info) (*Domain, error) {
 	manager = storage.GetManager()
 	data, err := manager.LoadData(info.ID, 0, 0)
-	counter, err := hllpp.Unmarshal(data)
 	if err != nil {
 		return nil, err
 	}
-	return &Domain{info, counter, sync.RWMutex{}}, nil
+
+	var network bytes.Buffer // Stand-in for a network connection
+	network.Write(data)
+	dec := gob.NewDecoder(&network) // Will read from network.
+
+	var counter topk.Stream
+	err = dec.Decode(&counter)
+	if err != nil {
+		return nil, err
+	}
+	return &Domain{info, &counter, sync.RWMutex{}}, nil
 }
 
 /*
@@ -56,7 +72,8 @@ Add ...
 func (d *Domain) Add(value []byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
-	d.impl.Add(value)
+	str := string(value)
+	d.impl.Insert(str, 1)
 	d.Save()
 	return true, nil
 }
@@ -68,7 +85,8 @@ func (d *Domain) AddMultiple(values [][]byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for _, value := range values {
-		d.impl.Add(value)
+		str := string(value)
+		d.impl.Insert(str, 1)
 	}
 	d.Save()
 	return true, nil
@@ -96,7 +114,12 @@ GetCount ...
 func (d *Domain) GetCount() interface{} {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
-	return uint(d.impl.Count())
+	keys := d.impl.Keys()
+	result := make([]ResultElement, len(keys), len(keys))
+	for i, k := range keys {
+		result[i] = ResultElement(k)
+	}
+	return result
 }
 
 /*
@@ -110,8 +133,11 @@ func (d *Domain) Clear() (bool, error) {
 Save ...
 */
 func (d *Domain) Save() error {
-	serialized := d.impl.Marshal()
-	err := manager.SaveData(d.Info.ID, serialized, 0)
+	var network bytes.Buffer        // Stand-in for a network connection
+	enc := gob.NewEncoder(&network) // Will write to network.
+	// Encode (send) the value.
+	err := enc.Encode(d.impl)
+	err = manager.SaveData(d.Info.ID, network.Bytes(), 0)
 	if err != nil {
 		return err
 	}

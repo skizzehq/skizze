@@ -8,7 +8,7 @@ type Counter interface {
 	AddMultiple([][]byte) (bool, error)
 	Remove([]byte) (bool, error)
 	RemoveMultiple([][]byte) (bool, error)
-	GetCount() uint
+	GetCount() interface{}
 	Clear() (bool, error)
 }
 
