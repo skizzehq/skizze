@@ -41,7 +41,8 @@ func NewDomain(info *abstract.Info) (*Domain, error) {
 NewDomainFromData ...
 */
 func NewDomainFromData(info *abstract.Info) (*Domain, error) {
-	data, err := storage.GetManager().LoadData(info.ID, 0, 0)
+	manager = storage.GetManager()
+	data, err := manager.LoadData(info.ID, 0, 0)
 	counter, err := hllpp.Unmarshal(data)
 	if err != nil {
 		return nil, err

@@ -11,7 +11,7 @@ import (
 Create storage
 */
 func (m *ManagerStruct) Create(ID string) error {
-	f, err := os.Create(filepath.Join(dataPath, ID))
+	f, err := os.OpenFile(filepath.Join(dataPath, ID), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,8 @@ func (m *ManagerStruct) getFileFromCache(ID string) (*os.File, error) {
 	var f *os.File
 	var err error
 	if !ok {
-		if f, err = os.Open(filepath.Join(dataPath, ID)); err != nil {
+		f, err = os.OpenFile(filepath.Join(dataPath, ID), os.O_CREATE|os.O_RDWR, 0644)
+		if err != nil {
 			return nil, err
 		}
 	} else {
