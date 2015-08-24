@@ -27,13 +27,14 @@ These examples expose a variety of settings. The full data may reside in a tradi
 
 
 ## Other example problems?
-* Is this URI in my spam list? (spam list over a million entries)
-* How many users like my post? (a like being subject to change)
-* How may times did oliver watch this video? (counting frequencies)
-* How many unique users visited my website in the last 3 hours? (sliding hyperloglog)
+* I want to know if a uri is in my spam list (spam list over a million entries)
+* I want to know the number of users like my post (a like being subject to change)
+* I want to know how may times oliver watched a video (counting frequencies)
+* I want to know how many unique users visited my website in the last 3 hours? (sliding hyperloglog)
+* I want to know the top 10 countries of users experiencing a crash (sliding hyperloglog)
 
-
-## API-Documentation
+## API
+### RESTful API
 
 	GET	/
 	Lists all available domains (sketches).
@@ -41,21 +42,29 @@ These examples expose a variety of settings. The full data may reside in a tradi
 	MERGE	/
 	Merges multiple HyperLogLog counters.
 
-	POST	/<key>
+	POST	/<key> {domainName: string, domainType: string, capacity: uint64}
 	Creates a new Counter.
 
 	GET	/<key>
 	Returns the count/cardinality/sketch of a domain.
 
-	PUT	/<key>
+	PUT	/<key>	{values: [<string>, <string>]}
 	Updates a domain.
 	Adds values to a cardinality/counter to a domain.
 
-	PURGE	/<key>
+	PURGE	/<key>	{values: [<string>, <string>]}
 	Purges values from a domain.
 
 	DELETE	/<key>
 	Deletes a domain.
+
+### DomainType
+ - [x] <b>"cardinality"</b>: <i>query unique items of all added values (HyperLogLog: does not support remove, merge available soon, capacity up to billions)</i>
+ - [x] <b>"pcardinality"</b>: <i>query unique items of all added values (CuckooFilter:like HyperLogLog but allows removing, requires way more space, recommended capacity < 10.000.000)</i>
+ - [ ] <b>"frequency"</b>: <i>query occurance frequenct of values (Count-Min-Log Sketch: integration under development, recommended capacity < 1.000.000)</i>
+ - [ ] <b>"pfrequency"</b>: <i>Count-Mean-Min Sketch (like Count-Min-Log but allows removing, requires more space, recommended capacity < 10.000.000)</i>
+ - [ ] <b>"expiring"</b>: <i>Sliding Hyper-Log-Log (like HyperLogLog but with expiring entries)</i>
+ - [x] <b>"topk"</b>: <i>Top-K Sketch (keeps track of the top k most added values to the sketch)</i>
 
 
 ## Milestones
