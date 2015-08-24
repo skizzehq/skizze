@@ -5,11 +5,11 @@
 [![Join the chat at https://gitter.im/seiflotfy/counts](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/seiflotfy/counts?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
-A domain-counter data store to deal with all problems around counting using probabilistic data-structures.
+A domain-sketch data store to deal with all problems around counting and sketching using probabilistic data-structures.
 
 Unlike a Key-Value store, Skizze does not store values, but rather keeps track of keys added to a domain, allowing you to solve frequency and cardinality queries in near O(1) time, with minimal memory footprint.
 
-<b>Note:</b> Data structures that can grow too big to reside in memory are read and written from/to disk directly via open stream to make sure we can maintain a high number of counters.
+<b>Note:</b> Data structures that can grow too big to reside in memory are read and written from/to disk directly via open stream to make sure we can maintain a high number of sketches.
 
 ## Motivation
 
@@ -36,7 +36,7 @@ These examples expose a variety of settings. The full data may reside in a tradi
 ## API-Documentation
 
 	GET	/
-	Lists all available counters.
+	Lists all available domains (sketches).
 
 	MERGE	/
 	Merges multiple HyperLogLog counters.
@@ -45,27 +45,27 @@ These examples expose a variety of settings. The full data may reside in a tradi
 	Creates a new Counter.
 
 	GET	/<key>
-	Returns the count/cardinality of a counter.
+	Returns the count/cardinality/sketch of a domain.
 
 	PUT	/<key>
-	Updates a counter.
-	Adds values to a cardinality/counter or increments a counter.
+	Updates a domain.
+	Adds values to a cardinality/counter to a domain.
 
 	PURGE	/<key>
-	Purges values from a counter.
+	Purges values from a domain.
 
 	DELETE	/<key>
-	Deletes a counter.
+	Deletes a domain.
 
 
 ## Milestones
 - [x] Design and implement REST API
-- [x] Create counter manager
-- [x] Integrate Cardinality Counter (Hyperloglog++)
-- [x] Integrate CardinalityPurgable Counter (CuckooFilter and possibly play with the idea of CuckooLogLog)
-- [ ] Integrate Frequency Counter (Count-Min-Log sketch)
-- [ ] Integrate FrequencyPurgable Counter (Count-Min sketch)
-- [ ] Integrate Expiring Counter (Sliding Hyperloglog)
+- [x] Create domain manager
+- [x] Integrate Cardinality Sketch (Hyperloglog++)
+- [x] Integrate CardinalityPurgable Sketch (CuckooFilte)
+- [ ] Integrate Frequency Sketch (Count-Min-Log sketch)
+- [ ] Integrate FrequencyPurgable Sketch (Count-Min sketch)
+- [ ] Integrate Expiring Sketch (Sliding Hyperloglog)
 - [x] Integrate Top (TopK)
 - [x] Store to Disk
 - [ ] Replication on multiple servers
