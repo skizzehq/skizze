@@ -11,6 +11,8 @@ Unlike a Key-Value store, Skizze does not store values, but rather appends value
 
 <b>Note:</b> Data structures that can grow too big to reside in memory are read and written from/to disk directly via open stream to make sure we can maintain a high number of sketches.
 
+#### Current status ==> pre-Alpha
+
 ## Motivation
 
 From [Synopses for Massive Data: Samples, Histograms, Wavelets, Sketches](http://db.cs.berkeley.edu/cs286/papers/synopses-fntdb2012.pdf)
