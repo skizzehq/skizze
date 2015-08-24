@@ -112,3 +112,10 @@ func (d *Domain) Save() error {
 	}
 	return storage.GetManager().SaveInfo(d.Info.ID, infoData)
 }
+
+/*
+GetType ...
+*/
+func (d *Domain) GetType() string {
+	return d.Type
+}

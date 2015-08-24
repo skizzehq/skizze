@@ -10,6 +10,7 @@ type Counter interface {
 	RemoveMultiple([][]byte) (bool, error)
 	GetCount() interface{}
 	Clear() (bool, error)
+	GetType() string
 }
 
 /*

@@ -20,7 +20,7 @@ ManagerStruct is responsible for manipulating the counters and syncing to disk
 */
 type ManagerStruct struct {
 	domains map[string]abstract.Counter
-	info    map[string]abstract.Info
+	info    map[string]*abstract.Info
 }
 
 var manager *ManagerStruct
@@ -31,7 +31,11 @@ CreateDomain ...
 */
 func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacity uint64) error {
 
-	//FIXME: if domainID already exists throw error
+	// Check if domain with ID already exists
+	if info, ok := m.info[domainID]; ok {
+		errStr := fmt.Sprintf("Domain %s of type %s already exists", domainID, info.Type)
+		return errors.New(errStr)
+	}
 
 	if len([]byte(domainID)) > config.MaxKeySize {
 		return errors.New("Invalid length of domain ID: " + strconv.Itoa(len(domainID)) + ". Max length allowed: " + strconv.Itoa(config.MaxKeySize))
@@ -74,6 +78,7 @@ func (m *ManagerStruct) DeleteDomain(domainID string) error {
 		return errors.New("No such domain " + domainID)
 	}
 	delete(m.domains, domainID)
+	delete(m.info, domainID)
 	manager := storage.GetManager()
 	err := manager.DeleteInfo(domainID)
 	if err != nil {
@@ -164,19 +169,20 @@ func GetManager() (*ManagerStruct, error) {
 
 func newManager() (*ManagerStruct, error) {
 	domains := make(map[string]abstract.Counter)
-	manager = &ManagerStruct{domains, make(map[string]abstract.Info)}
-	err := manager.loadInfo()
+	m := &ManagerStruct{domains, make(map[string]*abstract.Info)}
+	err := m.loadInfo()
 	if err != nil {
 		return nil, err
 	}
-	err = manager.loadDomains()
+	err = m.loadDomains()
 	if err != nil {
 		return nil, err
 	}
-	return manager, nil
+	return m, nil
 }
 
 func (m *ManagerStruct) dumpInfo(i *abstract.Info) {
+	m.info[i.ID] = i
 	manager := storage.GetManager()
 	infoData, err := json.Marshal(i)
 	utils.PanicOnError(err)
@@ -192,7 +198,7 @@ func (m *ManagerStruct) loadInfo() error {
 	}
 	for _, infoData := range infos {
 		json.Unmarshal(infoData, &infoStruct)
-		m.info[infoStruct.ID] = infoStruct
+		m.info[infoStruct.ID] = &infoStruct
 	}
 	return nil
 }
@@ -204,11 +210,11 @@ func (m *ManagerStruct) loadDomains() error {
 		var err error
 		switch info.Type {
 		case abstract.Cardinality:
-			domain, err = hllpp.NewDomainFromData(&info)
+			domain, err = hllpp.NewDomainFromData(info)
 		case abstract.PurgableCardinality:
-			domain, err = cuckoofilter.NewDomain(&info)
+			domain, err = cuckoofilter.NewDomain(info)
 		case abstract.TopK:
-			domain, err = topk.NewDomainFromData(&info)
+			domain, err = topk.NewDomainFromData(info)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
 		}

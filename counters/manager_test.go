@@ -1,15 +1,30 @@
 package counters
 
 import (
+	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/seiflotfy/skizze/config"
+	"github.com/seiflotfy/skizze/counters/abstract"
 	"github.com/seiflotfy/skizze/counters/wrappers/topk"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
+
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
+}
 
 func setupTests() {
 	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_manager_data")
@@ -23,18 +38,17 @@ func setupTests() {
 }
 
 func tearDownTests() {
+	storage.CloseInfoDB()
 	os.RemoveAll(config.GetConfig().GetDataDir())
 	os.RemoveAll(config.GetConfig().GetInfoDir())
 	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
 	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
-	storage.CloseInfoDB()
 }
 
-/*
 func TestNoCounters(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
-	var manager, err = GetManager()
+	var manager, err = newManager()
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -47,11 +61,10 @@ func TestNoCounters(t *testing.T) {
 	}
 }
 
-func TestDefaultCounter(t *testing.T) {
+func TestDuplicateCounters(t *testing.T) {
 	setupTests()
-	tearDownTests()
-
-	var manager, err = GetManager()
+	defer tearDownTests()
+	var manager, err = newManager()
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -59,8 +72,35 @@ func TestDefaultCounter(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
+	err = manager.CreateDomain("marvel", "topk", 10000000)
+	if err == nil {
+		t.Error("Expected errors while creating domain duplicate domain, got", err)
+	}
+}
+
+func TestDefaultCounter(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	var manager, err = newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
 
 	domains, err := manager.GetDomains()
+	if err != nil {
+		t.Error("Expected no errors while getting domains, got", err)
+	}
+	if len(domains) != 0 {
+		t.Error("Expected 0 counters, got", len(domains))
+	}
+
+	err = manager.CreateDomain("marvel", "cardinality", 10000000)
+	if err != nil {
+		t.Error("Expected no errors while creating domain, got", err)
+	}
+
+	domains, err = manager.GetDomains()
 	if err != nil {
 		t.Error("Expected no errors while getting domains, got", err)
 	}
@@ -100,7 +140,7 @@ func TestPurgableCounter(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
-	manager, err := GetManager()
+	manager, err := newManager()
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -160,10 +200,10 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	if _, exists = m1.info["avengers"]; exists {
+	if _, exists = m1.info["x-force"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	err = m1.CreateDomain("avengers", "cardinality", 1000000)
+	err = m1.CreateDomain("x-force", "cardinality", 1000000)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -172,8 +212,8 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	if _, exists = m2.info["avengers"]; !exists {
-		t.Error("expected avengers to be in loaded by manager")
+	if _, exists = m2.info["x-force"]; !exists {
+		t.Error("expected x-force to be in loaded by manager")
 	}
 }
 
@@ -441,9 +481,8 @@ func TestFailGetCountForDomain(t *testing.T) {
 		t.Error("Expected error, got", err)
 	}
 }
-*/
 
-func TestExtremeTopKCounter(t *testing.T) {
+func TestTopKCounter(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 

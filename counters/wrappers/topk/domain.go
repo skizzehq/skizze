@@ -144,3 +144,10 @@ func (d *Domain) Save() error {
 	info, _ := json.Marshal(d.Info)
 	return manager.SaveInfo(d.Info.ID, info)
 }
+
+/*
+GetType ...
+*/
+func (d *Domain) GetType() string {
+	return d.Type
+}
