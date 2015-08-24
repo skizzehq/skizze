@@ -38,6 +38,12 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 		logger.Error.Println("DomainType is mandatory and must be set!")
 		return errors.New("No domain type was given!")
 	}
+
+	if _, ok := m.domains[domainID]; ok {
+		logger.Info.Printf("Domain was already found: %v", domainID)
+		return errors.New("Domain was already found: " + domainID)
+	}
+
 	info := &abstract.Info{ID: domainID,
 		Type:     domainType,
 		Capacity: capacity,
