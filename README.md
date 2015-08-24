@@ -66,6 +66,6 @@ These examples expose a variety of settings. The full data may reside in a tradi
 - [ ] Integrate Frequency Counter (Count-Min-Log sketch)
 - [ ] Integrate FrequencyPurgable Counter (Count-Min sketch)
 - [ ] Integrate Expiring Counter (Sliding Hyperloglog)
-- [ ] Integrate Top (TopK)
+- [x] Integrate Top (TopK)
 - [x] Store to Disk
 - [ ] Replication on multiple servers
