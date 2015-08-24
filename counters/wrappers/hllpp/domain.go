@@ -93,7 +93,7 @@ func (d *Domain) RemoveMultiple(values [][]byte) (bool, error) {
 /*
 GetCount ...
 */
-func (d *Domain) GetCount() uint {
+func (d *Domain) GetCount() interface{} {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	return uint(d.impl.Count())

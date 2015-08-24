@@ -1,15 +1,12 @@
 package counters
 
 import (
-	"bufio"
-	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
 	"testing"
 
 	"github.com/seiflotfy/skizze/config"
-	"github.com/seiflotfy/skizze/counters/abstract"
+	"github.com/seiflotfy/skizze/counters/wrappers/topk"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
@@ -33,6 +30,7 @@ func tearDownTests() {
 	storage.CloseInfoDB()
 }
 
+/*
 func TestNoCounters(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
@@ -80,8 +78,8 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected 1 counters, got", len(domains))
 	}
 
-	if count != 2 {
-		t.Error("Expected count == 2, got", count)
+	if count.(uint) != 2 {
+		t.Error("Expected count == 2, got", count.(uint))
 	}
 
 	err = manager.DeleteDomain("marvel")
@@ -125,8 +123,8 @@ func TestPurgableCounter(t *testing.T) {
 	}
 
 	count, err := manager.GetCountForDomain("marvel")
-	if count != 2 {
-		t.Error("Expected count == 2, got", count)
+	if count.(uint) != 2 {
+		t.Error("Expected count == 2, got", count.(uint))
 	}
 
 	err = manager.DeleteFromDomain("marvel", []string{"hulk"})
@@ -135,8 +133,8 @@ func TestPurgableCounter(t *testing.T) {
 	}
 
 	count, err = manager.GetCountForDomain("marvel")
-	if count != 1 {
-		t.Error("Expected count == 1, got", count)
+	if count.(uint) != 1 {
+		t.Error("Expected count == 1, got", count.(uint))
 	}
 
 	err = manager.DeleteDomain("marvel")
@@ -200,8 +198,8 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
-	if res != 4 {
-		t.Error("expected avengers to have count 4, got", res)
+	if res.(uint) != 4 {
+		t.Error("expected avengers to have count 4, got", res.(uint))
 	}
 
 	m2, err := newManager()
@@ -212,8 +210,8 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
-	if res != 4 {
-		t.Error("expected avengers to have count 4, got", res)
+	if res.(uint) != 4 {
+		t.Error("expected avengers to have count 4, got", res.(uint))
 	}
 }
 
@@ -252,8 +250,8 @@ func TestDumpLoadPurgableInfo(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if count != 2 {
-		t.Error("Expected count == 2, got", count)
+	if count.(uint) != 2 {
+		t.Error("Expected count == 2, got", count.(uint))
 	}
 }
 
@@ -441,5 +439,59 @@ func TestFailGetCountForDomain(t *testing.T) {
 	_, err = m1.GetCountForDomain("-1")
 	if err == nil {
 		t.Error("Expected error, got", err)
+	}
+}
+*/
+
+func TestExtremeTopKCounter(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	var exists bool
+	m1, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if _, exists = m1.info["avengers"]; exists {
+		t.Error("expected avengers to not be initially loaded by manager")
+	}
+	m1.CreateDomain("avengers", "topk", 3)
+
+	m1.AddToDomain("avengers", []string{"sabertooth",
+		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
+
+	res, err := m1.GetCountForDomain("avengers")
+	if err != nil {
+		t.Error("expected avengers to have no error, got", err)
+	}
+	top := res.([]topk.ResultElement)
+	if len(top) != 3 {
+		t.Error("expected avengers to have 3 elements, got", len(top))
+	}
+
+	m2, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	res, err = m2.GetCountForDomain("avengers")
+	if err != nil {
+		t.Error("expected avengers to have no error, got", err)
+	}
+	top = res.([]topk.ResultElement)
+	if len(top) != 3 {
+		t.Error("expected avengers to have 3 elements, got", len(top))
+	}
+
+	if top[0].Key != "cyclops" {
+		t.Error("expected 1st avengers key == cyclops, got", top[0].Key)
+	}
+	if top[0].Count != 3 {
+		t.Error("expected 1st avengers count == 3, got", top[0].Count)
+	}
+	if top[1].Key != "havoc" {
+		t.Error("expected 1st avengers key == havoc, got", top[1].Key)
+	}
+	if top[1].Count != 2 {
+		t.Error("expected 1st avengers count == 2, got", top[1].Count)
 	}
 }

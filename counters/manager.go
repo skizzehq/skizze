@@ -10,6 +10,7 @@ import (
 	"github.com/seiflotfy/skizze/counters/abstract"
 	"github.com/seiflotfy/skizze/counters/wrappers/cuckoofilter"
 	"github.com/seiflotfy/skizze/counters/wrappers/hllpp"
+	"github.com/seiflotfy/skizze/counters/wrappers/topk"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
@@ -29,8 +30,9 @@ var logger = utils.GetLogger()
 CreateDomain ...
 */
 func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacity uint64) error {
-	//TODO: spit errir uf domainType is invalid
-	//FIXME: no hardcoding of immutable here
+
+	//FIXME: if domainID already exists throw error
+
 	if len([]byte(domainID)) > config.MaxKeySize {
 		return errors.New("Invalid length of domain ID: " + strconv.Itoa(len(domainID)) + ". Max length allowed: " + strconv.Itoa(config.MaxKeySize))
 	}
@@ -49,6 +51,8 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 		domain, err = hllpp.NewDomain(info)
 	case abstract.PurgableCardinality:
 		domain, err = cuckoofilter.NewDomain(info)
+	case abstract.TopK:
+		domain, err = topk.NewDomain(info)
 	default:
 		return errors.New("Invalid domain type: " + domainType)
 	}
@@ -133,7 +137,7 @@ func (m *ManagerStruct) DeleteFromDomain(domainID string, values []string) error
 /*
 GetCountForDomain ...
 */
-func (m *ManagerStruct) GetCountForDomain(domainID string) (uint, error) {
+func (m *ManagerStruct) GetCountForDomain(domainID string) (interface{}, error) {
 	var val, ok = m.domains[domainID]
 	if ok == false {
 		return 0, errors.New("No such domain: " + domainID)
@@ -203,11 +207,13 @@ func (m *ManagerStruct) loadDomains() error {
 			domain, err = hllpp.NewDomainFromData(&info)
 		case abstract.PurgableCardinality:
 			domain, err = cuckoofilter.NewDomain(&info)
+		case abstract.TopK:
+			domain, err = topk.NewDomainFromData(&info)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
 		}
 		if err != nil {
-			errTxt := fmt.Sprint("Could not load domain ", info, ". Err:", err)
+			errTxt := fmt.Sprint("Could not load domain ", info, ". Err: ", err)
 			return errors.New(errTxt)
 		}
 		m.domains[info.ID] = domain
