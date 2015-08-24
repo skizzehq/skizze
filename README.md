@@ -59,12 +59,31 @@ These examples expose a variety of settings. The full data may reside in a tradi
 	Deletes a domain.
 
 ### DomainType
- - [x] <b>"cardinality"</b>: <i>query unique items of all added values (HyperLogLog: does not support remove, merge available soon, capacity up to billions)</i>
- - [x] <b>"pcardinality"</b>: <i>query unique items of all added values (CuckooFilter:like HyperLogLog but allows removing, requires way more space, recommended capacity < 10.000.000)</i>
- - [ ] <b>"frequency"</b>: <i>query occurance frequenct of values (Count-Min-Log Sketch: integration under development, recommended capacity < 1.000.000)</i>
- - [ ] <b>"pfrequency"</b>: <i>Count-Mean-Min Sketch (like Count-Min-Log but allows removing, requires more space, recommended capacity < 10.000.000)</i>
- - [ ] <b>"expiring"</b>: <i>Sliding Hyper-Log-Log (like HyperLogLog but with expiring entries)</i>
- - [x] <b>"topk"</b>: <i>Top-K Sketch (keeps track of the top k most added values to the sketch)</i>
+ - [x] <b>"cardinality"</b>: query unique items of all added values
+  	* HyperLogLog
+  	* does not support purging added values
+  	* merge available soon
+  	* capacity up to billions
+ - [x] <b>"pcardinality"</b>: query unique items of all added values
+ 	* CuckooFilter
+ 	* allows puring added values
+ 	* requires way more space than Cardinality (1 byte per unique value)
+ 	* recommended capacity < 10.000.000
+ 	* disk usage is very intensive for now, caching coming soon
+ - [ ] <b>"frequency"</b>: query occurance frequenct of values
+  	* Count-Min-Log Sketch
+  	* integration under development
+  	* recommended capacity < 1.000.000)
+ - [ ] <b>"pfrequency"</b>: query occurance frequenct of values 
+  	* Count-Mean-Min Sketch
+  	* like Count-Min-Log but allows purging values
+  	* requires more space
+  	* recommended capacity < 10.000.000
+ - [ ] <b>"expiring"</b>: query cardinality withing the last n time units
+ 	* Sliding Hyper-Log-Log
+ 	* like HyperLogLog but with expiring entries
+ - [x] <b>"topk"</b>: query the top k values added to the sketch
+ 	* Top-K Sketch
 
 
 ## Milestones
