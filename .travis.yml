@@ -10,7 +10,6 @@ install:
  - go get github.com/BurntSushi/toml
  - go get code.google.com/p/gofarmhash
  - go get github.com/boltdb/bolt
- - go get github.com/seiflotfy/count-min-log
 
 script:
  - go test -v ./...

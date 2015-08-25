@@ -8,6 +8,7 @@ import (
 
 	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/counters/abstract"
+	"github.com/seiflotfy/skizze/counters/wrappers/count-min-log"
 	"github.com/seiflotfy/skizze/counters/wrappers/cuckoofilter"
 	"github.com/seiflotfy/skizze/counters/wrappers/hllpp"
 	"github.com/seiflotfy/skizze/counters/wrappers/topk"
@@ -57,6 +58,8 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 		domain, err = cuckoofilter.NewDomain(info)
 	case abstract.TopK:
 		domain, err = topk.NewDomain(info)
+	case abstract.Frequency:
+		domain, err = cml.NewDomain(info)
 	default:
 		return errors.New("Invalid domain type: " + domainType)
 	}
@@ -215,6 +218,8 @@ func (m *ManagerStruct) loadDomains() error {
 			domain, err = cuckoofilter.NewDomain(info)
 		case abstract.TopK:
 			domain, err = topk.NewDomainFromData(info)
+		case abstract.Frequency:
+			domain, err = cml.NewDomainFromData(info)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
 		}

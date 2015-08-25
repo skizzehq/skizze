@@ -5,8 +5,8 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/seiflotfy/count-min-log"
 	"github.com/seiflotfy/skizze/counters/abstract"
+	"github.com/seiflotfy/skizze/counters/wrappers/count-min-log/count-min-log"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
@@ -95,7 +95,7 @@ func (d *Domain) RemoveMultiple(values [][]byte) (bool, error) {
 /*
 GetCount ...
 */
-func (d *Domain) GetCount() uint {
+func (d *Domain) GetCount() interface{} {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	return uint(d.impl.Count())
@@ -120,4 +120,11 @@ func (d *Domain) Save() error {
 		return err
 	}
 	return storage.GetManager().SaveInfo(d.Info.ID, infoData)
+}
+
+/*
+GetType ...
+*/
+func (d *Domain) GetType() string {
+	return d.Type
 }
