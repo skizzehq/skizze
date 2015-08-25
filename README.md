@@ -38,27 +38,15 @@ These examples expose a variety of settings. The full data may reside in a tradi
 ## API
 ### RESTful API
 
-	GET	/
-	Lists all available domains (sketches).
-
-	MERGE	/
-	Merges multiple HyperLogLog counters.
-
-	POST	/<key> {domainName: string, domainType: string, capacity: uint64}
-	Creates a new Counter.
-
-	GET	/<key>
-	Returns the count/cardinality/sketch of a domain.
-
-	PUT	/<key>	{values: [<string>, <string>]}
-	Updates a domain.
-	Adds values to a cardinality/counter to a domain.
-
-	PURGE	/<key>	{values: [<string>, <string>]}
-	Purges values from a domain.
-
-	DELETE	/<key>
-	Deletes a domain.
+| Method | Route | Parameters | Task |
+| --- | --- | --- | --- |
+| GET | / | N/A |Lists all available domains (sketches). |
+| MERGE | / | N/A | Merges multiple HyperLogLog counters. |
+| POST | /<key> | {"domainName": string, "domainType": string, "capacity": uint64} | Creates a new Counter. DomainType is mandatory. DomainTypes can be found below. |
+| GET | /<key> | N/A | Updates a domain. Adds values to a cardinality/counter to a domain. |
+| PUT | /<key> | {"values": [string, string]} | Updates a domain. Adds values to a cardinality/counter to a domain. |
+| PURGE | /<key> | {"values": [string, string]} | Purges values from a domain. |
+| DELETE | /<key> | N/A | Deletes a domain. |
 
 ### DomainType
  - [x] <b>"cardinality"</b>: query unique items of all added values
