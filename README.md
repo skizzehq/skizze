@@ -41,7 +41,7 @@ These examples expose a variety of settings. The full data may reside in a tradi
 | Method | Route | Parameters | Task |
 | --- | --- | --- | --- |
 | GET | / | N/A |Lists all available domains (sketches). |
-| MERGE | / | N/A | Merges multiple HyperLogLog counters. |
+| MERGE | / | not implmented yet | Merges multiple HyperLogLog counters. |
 | POST | /<key> | {"domainName": string, "domainType": string, "capacity": uint64} | Creates a new Counter. DomainType is mandatory. DomainTypes can be found below. |
 | GET | /<key> | N/A | Updates a domain. Adds values to a cardinality/counter to a domain. |
 | PUT | /<key> | {"values": [string, string]} | Updates a domain. Adds values to a cardinality/counter to a domain. |
