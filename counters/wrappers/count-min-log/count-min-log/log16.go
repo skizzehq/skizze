@@ -2,9 +2,20 @@ package cml
 
 import (
 	"errors"
+	"hash/fnv"
 	"math"
 	"math/rand"
+	"strconv"
+
+	"github.com/seiflotfy/skizze/counters/abstract"
 )
+
+func hash(s []byte, i uint, w uint) uint {
+	hasher := fnv.New32a()
+	hasher.Write(s)
+	hasher.Write([]byte(strconv.Itoa(int(i))))
+	return uint(hasher.Sum32()) % w
+}
 
 func value16(c uint16, exp float64) float64 {
 	if c == 0 {
@@ -35,17 +46,19 @@ type Sketch16 struct {
 	store      [][]uint16
 	totalCount uint
 	cMax       float64
+	id         string
 }
 
 /*
 NewSketch16 returns a new Count-Min-Log sketch with 16-bit registers
 */
-func NewSketch16(w uint, k uint, conservative bool, exp float64,
+func NewSketch16(id string, w uint, k uint, conservative bool, exp float64,
 	maxSample bool, progressive bool, nBits uint) (*Sketch16, error) {
 	store := make([][]uint16, k)
 	for i := uint(0); i < k; i++ {
 		store[i] = make([]uint16, w)
 	}
+	//store2 := newRegisters("id", k, w)
 	cMax := math.Pow(2.0, float64(nBits)) - 1.0
 	if cMax > math.MaxUint16 {
 		return nil,
@@ -62,14 +75,21 @@ func NewSketch16(w uint, k uint, conservative bool, exp float64,
 		store:        store,
 		totalCount:   0.0,
 		cMax:         cMax,
+		id:           id,
 	}, nil
 }
 
 /*
-NewDefaultSketch16 ...
+NewForCapacity16 returns a new Count-Min-Log sketch with 16-bit registers optimized for a given max capacity and expected error rate
 */
-func NewDefaultSketch16() (*Sketch16, error) {
-	return NewSketch16(1000000, 10, true, 1.00026, true, true, 16)
+func NewForCapacity16(info *abstract.Info, capacity uint64, e float64) (*Sketch16, error) {
+	// e = 2n/w    ==>    w = 2n/e
+	if !(e >= 0.001 && e < 1.0) {
+		return nil, errors.New("e needs to be >= 0.001 and < 1.0")
+	}
+	w := float64(2*capacity) / e
+	sketch, err := NewSketch16(info.ID, uint(w), 7, true, 1.00026, true, true, 16)
+	return sketch, err
 }
 
 func (sk *Sketch16) randomLog(c uint16, exp float64) bool {
