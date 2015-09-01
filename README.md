@@ -64,11 +64,6 @@ These examples expose a variety of settings. The full data may reside in a tradi
   	* Count-Min-Log Sketch
   	* integration under development
   	* recommended capacity < 1.000.000)
- - [ ] <b>"pfrequency"</b>: query occurance frequenct of values 
-  	* Count-Mean-Min Sketch
-  	* like Count-Min-Log but allows purging values
-  	* requires more space
-  	* recommended capacity < 10.000.000
  - [ ] <b>"expiring"</b>: query cardinality withing the last n time units
  	* Sliding Hyper-Log-Log
  	* like HyperLogLog but with expiring entries
@@ -82,7 +77,6 @@ These examples expose a variety of settings. The full data may reside in a tradi
 - [x] Integrate Cardinality Sketch (Hyperloglog++)
 - [x] Integrate CardinalityPurgable Sketch (CuckooFilte)
 - [ ] Integrate Frequency Sketch (Count-Min-Log sketch)
-- [ ] Integrate FrequencyPurgable Sketch (Count-Min sketch)
 - [ ] Integrate Expiring Sketch (Sliding Hyperloglog)
 - [x] Integrate Top (TopK)
 - [x] Store to Disk
