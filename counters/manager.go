@@ -145,13 +145,24 @@ func (m *ManagerStruct) DeleteFromDomain(domainID string, values []string) error
 /*
 GetCountForDomain ...
 */
-func (m *ManagerStruct) GetCountForDomain(domainID string) (interface{}, error) {
+func (m *ManagerStruct) GetCountForDomain(domainID string, values []string) (interface{}, error) {
 	var val, ok = m.domains[domainID]
 	if ok == false {
 		return 0, errors.New("No such domain: " + domainID)
 	}
 	var counter abstract.Counter
 	counter = val.(abstract.Counter)
+
+	if counter.GetType() == abstract.Frequency {
+		bvalues := make([][]byte, len(values), len(values))
+		for i, value := range values {
+			bvalues[i] = []byte(value)
+		}
+		return counter.GetFrequency(bvalues), nil
+	} else if counter.GetType() == abstract.TopK {
+		return counter.GetFrequency(nil), nil
+	}
+
 	count := counter.GetCount()
 	return count, nil
 }
@@ -231,4 +242,11 @@ func (m *ManagerStruct) loadDomains() error {
 		strg.LoadData(key, 0, 0)
 	}
 	return nil
+}
+
+/*
+Destroy ...
+*/
+func (m *ManagerStruct) Destroy() {
+	manager = nil
 }

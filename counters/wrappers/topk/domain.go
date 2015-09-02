@@ -111,15 +111,8 @@ func (d *Domain) RemoveMultiple(values [][]byte) (bool, error) {
 /*
 GetCount ...
 */
-func (d *Domain) GetCount() interface{} {
-	d.lock.RLock()
-	defer d.lock.RUnlock()
-	keys := d.impl.Keys()
-	result := make([]ResultElement, len(keys), len(keys))
-	for i, k := range keys {
-		result[i] = ResultElement(k)
-	}
-	return result
+func (d *Domain) GetCount() uint {
+	return 0
 }
 
 /*
@@ -150,4 +143,18 @@ GetType ...
 */
 func (d *Domain) GetType() string {
 	return d.Type
+}
+
+/*
+GetFrequency ...
+*/
+func (d *Domain) GetFrequency(values [][]byte) interface{} {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+	keys := d.impl.Keys()
+	result := make([]ResultElement, len(keys), len(keys))
+	for i, k := range keys {
+		result[i] = ResultElement(k)
+	}
+	return result
 }

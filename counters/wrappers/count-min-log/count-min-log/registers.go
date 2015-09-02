@@ -13,11 +13,12 @@ type registers struct {
 }
 
 func newRegisters(id string, d, w uint) *registers {
-	return &registers{d, w, storage.GetManager(), id}
+	manager := storage.GetManager()
+	return &registers{d, w, manager, id}
 }
 
 func (r *registers) get(i, j uint) (uint16, error) {
-	newI := i * r.d * r.w * 2
+	newI := i * r.w * 2
 	newJ := j * 2
 	raw, err := r.storage.LoadData(r.id, int64(newI+newJ), 2)
 	if err != nil {
@@ -28,11 +29,16 @@ func (r *registers) get(i, j uint) (uint16, error) {
 }
 
 func (r *registers) set(i, j uint, value uint16) error {
-	newI := i * r.d * r.w * 2
+	newI := i * r.w * 2
 	newJ := j * 2
 
 	data := make([]byte, 2)
 	binary.LittleEndian.PutUint16(data, value)
-	r.storage.SaveData(r.id, data, int64(newI+newJ))
-	return nil
+	return r.storage.SaveData(r.id, data, int64(newI+newJ))
+}
+
+func (r *registers) reset() error {
+	length := r.d * r.w * 2
+	data := make([]byte, length, length)
+	return r.storage.SaveData(r.id, data, 0)
 }

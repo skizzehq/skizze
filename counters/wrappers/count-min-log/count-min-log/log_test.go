@@ -1,15 +1,38 @@
 package cml
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/counters/abstract"
+	"github.com/seiflotfy/skizze/utils"
 )
+
+func setupTests() {
+	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_data")
+	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_info")
+	path, err := os.Getwd()
+	utils.PanicOnError(err)
+	path = filepath.Dir(path)
+	configPath := filepath.Join(path, "../../../config/default.toml")
+	os.Setenv("SKZ_CONFIG", configPath)
+	tearDownTests()
+}
+
+func tearDownTests() {
+	os.RemoveAll(config.GetConfig().GetDataDir())
+	os.RemoveAll(config.GetConfig().GetInfoDir())
+	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
+	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
+}
 
 // Ensures that Add adds to the set and Count returns the correct
 // approximation.
 func TestLog16AddAndCount(t *testing.T) {
-
+	setupTests()
+	defer tearDownTests()
 	info := &abstract.Info{ID: "ultimates",
 		Type:     abstract.Frequency,
 		Capacity: 1000000, State: make(map[string]uint64)}
@@ -46,6 +69,8 @@ func TestLog16AddAndCount(t *testing.T) {
 
 // Ensures that Reset restores the sketch to its original state.
 func TestLog16Reset(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
 	info := &abstract.Info{ID: "ultimates",
 		Type:     abstract.Frequency,
 		Capacity: 1000000, State: make(map[string]uint64)}
@@ -62,7 +87,7 @@ func TestLog16Reset(t *testing.T) {
 
 	for i := uint(0); i < log.k; i++ {
 		for j := uint(0); j < log.w; j++ {
-			if x := log.store[i][j]; x != 0 {
+			if x, _ := log.store.get(i, j); x != 0 {
 				t.Errorf("expected matrix to be completely empty, got %d", x)
 			}
 		}

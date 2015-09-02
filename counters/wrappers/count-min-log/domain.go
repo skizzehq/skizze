@@ -14,6 +14,9 @@ import (
 var logger = utils.GetLogger()
 var manager *storage.ManagerStruct
 
+const defaultEpsilon = 0.00000543657
+const defaultDelta = 0.99
+
 /*
 Domain is the toplevel domain to control the count-min-log implementation
 */
@@ -29,7 +32,7 @@ NewDomain ...
 func NewDomain(info *abstract.Info) (*Domain, error) {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
-	sketch16, _ := cml.NewDefaultSketch16()
+	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID, defaultEpsilon, defaultDelta)
 	d := Domain{info, sketch16, sync.RWMutex{}}
 	err := d.Save()
 	if err != nil {
@@ -42,13 +45,8 @@ func NewDomain(info *abstract.Info) (*Domain, error) {
 NewDomainFromData ...
 */
 func NewDomainFromData(info *abstract.Info) (*Domain, error) {
-	data, err := storage.GetManager().LoadData(info.ID, 0, 0)
-	if err != nil {
-		return nil, err
-	}
-	sketch16, _ := cml.NewDefaultSketch16()
+	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID, defaultEpsilon, defaultDelta)
 	// FIXME: create domain from new data
-	sketch16.GetCount(data)
 	return &Domain{info, sketch16, sync.RWMutex{}}, nil
 }
 
@@ -95,7 +93,7 @@ func (d *Domain) RemoveMultiple(values [][]byte) (bool, error) {
 /*
 GetCount ...
 */
-func (d *Domain) GetCount() interface{} {
+func (d *Domain) GetCount() uint {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	return uint(d.impl.Count())
@@ -127,4 +125,15 @@ GetType ...
 */
 func (d *Domain) GetType() string {
 	return d.Type
+}
+
+/*
+GetFrequency ...
+*/
+func (d *Domain) GetFrequency(values [][]byte) interface{} {
+	res := make(map[string]uint)
+	for _, value := range values {
+		res[string(value)] = uint(d.impl.GetCount(value))
+	}
+	return res
 }

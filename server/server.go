@@ -90,7 +90,7 @@ func (srv *Server) handleDomainRequest(w http.ResponseWriter, method string, dat
 	switch {
 	case method == "GET":
 		// Get a count for a specific domain
-		count, err := counterManager.GetCountForDomain(data.Domain)
+		count, err := counterManager.GetCountForDomain(data.Domain, data.Values)
 		logger.Info.Printf("[%v]: Getting counter for domain: %v", method, data.Domain)
 		res = domainResult{count, err}
 	case method == "POST":
