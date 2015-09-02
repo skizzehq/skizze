@@ -15,45 +15,45 @@ var logger = utils.GetLogger()
 var manager *storage.ManagerStruct
 
 /*
-Domain is the toplevel domain to control the HLL implementation
+Sketch is the toplevel sketch to control the HLL implementation
 */
-type Domain struct {
+type Sketch struct {
 	*abstract.Info
 	impl *hllpp.HLLPP
 	lock sync.RWMutex
 }
 
 /*
-NewDomain ...
+NewSketch ...
 */
-func NewDomain(info *abstract.Info) (*Domain, error) {
+func NewSketch(info *abstract.Info) (*Sketch, error) {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
-	d := Domain{info, hllpp.New(), sync.RWMutex{}}
+	d := Sketch{info, hllpp.New(), sync.RWMutex{}}
 	err := d.Save()
 	if err != nil {
-		logger.Error.Println("an error has occurred while saving domain: " + err.Error())
+		logger.Error.Println("an error has occurred while saving sketch: " + err.Error())
 	}
 	return &d, nil
 }
 
 /*
-NewDomainFromData ...
+NewSketchFromData ...
 */
-func NewDomainFromData(info *abstract.Info) (*Domain, error) {
+func NewSketchFromData(info *abstract.Info) (*Sketch, error) {
 	manager = storage.GetManager()
 	data, err := manager.LoadData(info.ID, 0, 0)
 	counter, err := hllpp.Unmarshal(data)
 	if err != nil {
 		return nil, err
 	}
-	return &Domain{info, counter, sync.RWMutex{}}, nil
+	return &Sketch{info, counter, sync.RWMutex{}}, nil
 }
 
 /*
 Add ...
 */
-func (d *Domain) Add(value []byte) (bool, error) {
+func (d *Sketch) Add(value []byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	d.impl.Add(value)
@@ -64,7 +64,7 @@ func (d *Domain) Add(value []byte) (bool, error) {
 /*
 AddMultiple ...
 */
-func (d *Domain) AddMultiple(values [][]byte) (bool, error) {
+func (d *Sketch) AddMultiple(values [][]byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for _, value := range values {
@@ -77,23 +77,23 @@ func (d *Domain) AddMultiple(values [][]byte) (bool, error) {
 /*
 Remove ...
 */
-func (d *Domain) Remove(value []byte) (bool, error) {
-	logger.Error.Println("This domain type does not support deletion")
-	return false, errors.New("This domain type does not support deletion")
+func (d *Sketch) Remove(value []byte) (bool, error) {
+	logger.Error.Println("This Sketch type does not support deletion")
+	return false, errors.New("This Sketch type does not support deletion")
 }
 
 /*
 RemoveMultiple ...
 */
-func (d *Domain) RemoveMultiple(values [][]byte) (bool, error) {
-	logger.Error.Println("This domain type does not support deletion")
-	return false, errors.New("This domain type does not support deletion")
+func (d *Sketch) RemoveMultiple(values [][]byte) (bool, error) {
+	logger.Error.Println("This Sketch type does not support deletion")
+	return false, errors.New("This Sketch type does not support deletion")
 }
 
 /*
 GetCount ...
 */
-func (d *Domain) GetCount() uint {
+func (d *Sketch) GetCount() uint {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	return uint(d.impl.Count())
@@ -102,14 +102,14 @@ func (d *Domain) GetCount() uint {
 /*
 Clear ...
 */
-func (d *Domain) Clear() (bool, error) {
+func (d *Sketch) Clear() (bool, error) {
 	return true, nil
 }
 
 /*
 Save ...
 */
-func (d *Domain) Save() error {
+func (d *Sketch) Save() error {
 	serialized := d.impl.Marshal()
 	err := manager.SaveData(d.Info.ID, serialized, 0)
 	if err != nil {
@@ -122,13 +122,13 @@ func (d *Domain) Save() error {
 /*
 GetType ...
 */
-func (d *Domain) GetType() string {
+func (d *Sketch) GetType() string {
 	return d.Type
 }
 
 /*
 GetFrequency ...
 */
-func (d *Domain) GetFrequency(values [][]byte) interface{} {
+func (d *Sketch) GetFrequency(values [][]byte) interface{} {
 	return nil
 }

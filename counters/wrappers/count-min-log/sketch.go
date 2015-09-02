@@ -18,42 +18,42 @@ const defaultEpsilon = 0.00000543657
 const defaultDelta = 0.99
 
 /*
-Domain is the toplevel domain to control the count-min-log implementation
+Sketch is the toplevel Sketch to control the count-min-log implementation
 */
-type Domain struct {
+type Sketch struct {
 	*abstract.Info
 	impl *cml.Sketch16
 	lock sync.RWMutex
 }
 
 /*
-NewDomain ...
+NewSketch ...
 */
-func NewDomain(info *abstract.Info) (*Domain, error) {
+func NewSketch(info *abstract.Info) (*Sketch, error) {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
 	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID, defaultEpsilon, defaultDelta)
-	d := Domain{info, sketch16, sync.RWMutex{}}
+	d := Sketch{info, sketch16, sync.RWMutex{}}
 	err := d.Save()
 	if err != nil {
-		logger.Error.Println("an error has occurred while saving domain: " + err.Error())
+		logger.Error.Println("an error has occurred while saving Sketch: " + err.Error())
 	}
 	return &d, nil
 }
 
 /*
-NewDomainFromData ...
+NewSketchFromData ...
 */
-func NewDomainFromData(info *abstract.Info) (*Domain, error) {
+func NewSketchFromData(info *abstract.Info) (*Sketch, error) {
 	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID, defaultEpsilon, defaultDelta)
-	// FIXME: create domain from new data
-	return &Domain{info, sketch16, sync.RWMutex{}}, nil
+	// FIXME: create Sketch from new data
+	return &Sketch{info, sketch16, sync.RWMutex{}}, nil
 }
 
 /*
 Add ...
 */
-func (d *Domain) Add(value []byte) (bool, error) {
+func (d *Sketch) Add(value []byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	d.impl.IncreaseCount(value)
@@ -64,7 +64,7 @@ func (d *Domain) Add(value []byte) (bool, error) {
 /*
 AddMultiple ...
 */
-func (d *Domain) AddMultiple(values [][]byte) (bool, error) {
+func (d *Sketch) AddMultiple(values [][]byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for _, value := range values {
@@ -77,23 +77,23 @@ func (d *Domain) AddMultiple(values [][]byte) (bool, error) {
 /*
 Remove ...
 */
-func (d *Domain) Remove(value []byte) (bool, error) {
-	logger.Error.Println("This domain type does not support deletion")
-	return false, errors.New("This domain type does not support deletion")
+func (d *Sketch) Remove(value []byte) (bool, error) {
+	logger.Error.Println("This Sketch type does not support deletion")
+	return false, errors.New("This Sketch type does not support deletion")
 }
 
 /*
 RemoveMultiple ...
 */
-func (d *Domain) RemoveMultiple(values [][]byte) (bool, error) {
-	logger.Error.Println("This domain type does not support deletion")
-	return false, errors.New("This domain type does not support deletion")
+func (d *Sketch) RemoveMultiple(values [][]byte) (bool, error) {
+	logger.Error.Println("This Sketch type does not support deletion")
+	return false, errors.New("This Sketch type does not support deletion")
 }
 
 /*
 GetCount ...
 */
-func (d *Domain) GetCount() uint {
+func (d *Sketch) GetCount() uint {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	return uint(d.impl.Count())
@@ -102,7 +102,7 @@ func (d *Domain) GetCount() uint {
 /*
 Clear ...
 */
-func (d *Domain) Clear() (bool, error) {
+func (d *Sketch) Clear() (bool, error) {
 	d.impl.Reset()
 	return true, nil
 }
@@ -110,7 +110,7 @@ func (d *Domain) Clear() (bool, error) {
 /*
 Save ...
 */
-func (d *Domain) Save() error {
+func (d *Sketch) Save() error {
 	count := d.impl.Count()
 	d.Info.State["count"] = uint64(count)
 	infoData, err := json.Marshal(d.Info)
@@ -123,14 +123,14 @@ func (d *Domain) Save() error {
 /*
 GetType ...
 */
-func (d *Domain) GetType() string {
+func (d *Sketch) GetType() string {
 	return d.Type
 }
 
 /*
 GetFrequency ...
 */
-func (d *Domain) GetFrequency(values [][]byte) interface{} {
+func (d *Sketch) GetFrequency(values [][]byte) interface{} {
 	res := make(map[string]uint)
 	for _, value := range values {
 		res[string(value)] = uint(d.impl.GetCount(value))

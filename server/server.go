@@ -16,8 +16,8 @@ import (
 )
 
 type requestData struct {
-	Domain     string   `json:"domain"`
-	DomainType string   `json:"domainType"`
+	Sketch     string   `json:"sketch"`
+	SketchType string   `json:"sketchType"`
 	Capacity   uint64   `json:"capacity"`
 	Values     []string `json:"values"`
 }
@@ -30,12 +30,12 @@ Server manages the http connections and communciates with the counters manager
 */
 type Server struct{}
 
-type domainsResult struct {
+type sketchesResult struct {
 	Result []string `json:"result"`
 	Error  error    `json:"error"`
 }
 
-type domainResult struct {
+type sketchResult struct {
 	Result interface{} `json:"result"`
 	Error  error       `json:"error"`
 }
@@ -55,15 +55,15 @@ func New() (*Server, error) {
 
 func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data requestData) {
 	var err error
-	var domains []string
+	var sketches []string
 	var js []byte
 
 	switch {
 	case method == "GET":
 		// Get all counters
-		domains, err = counterManager.GetDomains()
-		js, err = json.Marshal(domainsResult{domains, err})
-		logger.Info.Printf("[%v]: Getting all available domains", method)
+		sketches, err = counterManager.GetSketchs()
+		js, err = json.Marshal(sketchesResult{sketches, err})
+		logger.Info.Printf("[%v]: Getting all available sketches", method)
 	case method == "MERGE":
 		// Reserved for merging hyper log log
 		http.Error(w, "Not Implemented", http.StatusNotImplemented)
@@ -82,37 +82,37 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 
 }
 
-func (srv *Server) handleDomainRequest(w http.ResponseWriter, method string, data requestData) {
-	var res domainResult
+func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, data requestData) {
+	var res sketchResult
 	var err error
 
 	// TODO (mb): handle errors from counterManager.*
 	switch {
 	case method == "GET":
-		// Get a count for a specific domain
-		count, err := counterManager.GetCountForDomain(data.Domain, data.Values)
-		logger.Info.Printf("[%v]: Getting counter for domain: %v", method, data.Domain)
-		res = domainResult{count, err}
+		// Get a count for a specific sketch
+		count, err := counterManager.GetCountForSketch(data.Sketch, data.Values)
+		logger.Info.Printf("[%v]: Getting counter for sketch: %v", method, data.Sketch)
+		res = sketchResult{count, err}
 	case method == "POST":
-		// Create a new domain counter
-		err = counterManager.CreateDomain(data.Domain, data.DomainType, data.Capacity)
-		logger.Info.Printf("[%v]: Creating new domain: %v", method, data.Domain)
-		res = domainResult{0, err}
+		// Create a new sketch counter
+		err = counterManager.CreateSketch(data.Sketch, data.SketchType, data.Capacity)
+		logger.Info.Printf("[%v]: Creating new sketch: %v", method, data.Sketch)
+		res = sketchResult{0, err}
 	case method == "PUT":
 		// Add values to counter
-		err = counterManager.AddToDomain(data.Domain, data.Values)
-		logger.Info.Printf("[%v]: Updating counter for domain: %v", method, data.Domain)
-		res = domainResult{nil, err}
+		err = counterManager.AddToSketch(data.Sketch, data.Values)
+		logger.Info.Printf("[%v]: Updating counter for sketch: %v", method, data.Sketch)
+		res = sketchResult{nil, err}
 	case method == "PURGE":
 		// Purges values from counter
-		err = counterManager.DeleteFromDomain(data.Domain, data.Values)
-		logger.Info.Printf("[%v]: Purging values for domain: %v", method, data.Domain)
-		res = domainResult{nil, err}
+		err = counterManager.DeleteFromSketch(data.Sketch, data.Values)
+		logger.Info.Printf("[%v]: Purging values for sketch: %v", method, data.Sketch)
+		res = sketchResult{nil, err}
 	case method == "DELETE":
 		// Delete Counter
-		err := counterManager.DeleteDomain(data.Domain)
-		logger.Info.Printf("[%v]: Deleting domain: %v", method, data.Domain)
-		res = domainResult{nil, err}
+		err := counterManager.DeleteSketch(data.Sketch)
+		logger.Info.Printf("[%v]: Deleting sketch: %v", method, data.Sketch)
+		res = sketchResult{nil, err}
 	default:
 		logger.Error.Printf("[%v]: Invalid Method: %v", method, http.StatusBadRequest)
 		http.Error(w, fmt.Sprintf("Invalid Method: %s", method), http.StatusBadRequest)
@@ -130,7 +130,7 @@ func (srv *Server) handleDomainRequest(w http.ResponseWriter, method string, dat
 }
 
 func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	domain := strings.TrimSpace(r.URL.Path[1:])
+	sketch := strings.TrimSpace(r.URL.Path[1:])
 	method := r.Method
 	body, _ := ioutil.ReadAll(r.Body)
 	var data requestData
@@ -145,11 +145,11 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		data = requestData{}
 	}
 
-	if len(domain) == 0 {
+	if len(sketch) == 0 {
 		srv.handleTopRequest(w, method, data)
 	} else {
-		data.Domain = domain
-		srv.handleDomainRequest(w, method, data)
+		data.Sketch = sketch
+		srv.handleSketchRequest(w, method, data)
 	}
 }
 

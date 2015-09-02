@@ -28,13 +28,13 @@ var manager *ManagerStruct
 var logger = utils.GetLogger()
 
 /*
-CreateDomain ...
+CreateSketch ...
 */
-func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacity uint64) error {
+func (m *ManagerStruct) CreateSketch(domainID string, domainType string, capacity uint64) error {
 
 	// Check if domain with ID already exists
 	if info, ok := m.info[domainID]; ok {
-		errStr := fmt.Sprintf("Domain %s of type %s already exists", domainID, info.Type)
+		errStr := fmt.Sprintf("Sketch %s of type %s already exists", domainID, info.Type)
 		return errors.New(errStr)
 	}
 
@@ -42,7 +42,7 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 		return errors.New("Invalid length of domain ID: " + strconv.Itoa(len(domainID)) + ". Max length allowed: " + strconv.Itoa(config.MaxKeySize))
 	}
 	if domainType == "" {
-		logger.Error.Println("DomainType is mandatory and must be set!")
+		logger.Error.Println("SketchType is mandatory and must be set!")
 		return errors.New("No domain type was given!")
 	}
 	info := &abstract.Info{ID: domainID,
@@ -53,13 +53,13 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 	var err error
 	switch domainType {
 	case abstract.Cardinality:
-		domain, err = hllpp.NewDomain(info)
+		domain, err = hllpp.NewSketch(info)
 	case abstract.PurgableCardinality:
-		domain, err = cuckoofilter.NewDomain(info)
+		domain, err = cuckoofilter.NewSketch(info)
 	case abstract.TopK:
-		domain, err = topk.NewDomain(info)
+		domain, err = topk.NewSketch(info)
 	case abstract.Frequency:
-		domain, err = cml.NewDomain(info)
+		domain, err = cml.NewSketch(info)
 	default:
 		return errors.New("Invalid domain type: " + domainType)
 	}
@@ -74,9 +74,9 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 }
 
 /*
-DeleteDomain ...
+DeleteSketch ...
 */
-func (m *ManagerStruct) DeleteDomain(domainID string) error {
+func (m *ManagerStruct) DeleteSketch(domainID string) error {
 	if _, ok := m.domains[domainID]; !ok {
 		return errors.New("No such domain " + domainID)
 	}
@@ -91,9 +91,9 @@ func (m *ManagerStruct) DeleteDomain(domainID string) error {
 }
 
 /*
-GetDomains ...
+GetSketchs ...
 */
-func (m *ManagerStruct) GetDomains() ([]string, error) {
+func (m *ManagerStruct) GetSketchs() ([]string, error) {
 	// TODO: Remove dummy data and implement proper result
 	domains := make([]string, len(m.domains), len(m.domains))
 	i := 0
@@ -105,9 +105,9 @@ func (m *ManagerStruct) GetDomains() ([]string, error) {
 }
 
 /*
-AddToDomain ...
+AddToSketch ...
 */
-func (m *ManagerStruct) AddToDomain(domainID string, values []string) error {
+func (m *ManagerStruct) AddToSketch(domainID string, values []string) error {
 	var val, ok = m.domains[domainID]
 	if ok == false {
 		return errors.New("No such domain: " + domainID)
@@ -124,9 +124,9 @@ func (m *ManagerStruct) AddToDomain(domainID string, values []string) error {
 }
 
 /*
-DeleteFromDomain ...
+DeleteFromSketch ...
 */
-func (m *ManagerStruct) DeleteFromDomain(domainID string, values []string) error {
+func (m *ManagerStruct) DeleteFromSketch(domainID string, values []string) error {
 	var val, ok = m.domains[domainID]
 	if ok == false {
 		return errors.New("No such domain: " + domainID)
@@ -143,9 +143,9 @@ func (m *ManagerStruct) DeleteFromDomain(domainID string, values []string) error
 }
 
 /*
-GetCountForDomain ...
+GetCountForSketch ...
 */
-func (m *ManagerStruct) GetCountForDomain(domainID string, values []string) (interface{}, error) {
+func (m *ManagerStruct) GetCountForSketch(domainID string, values []string) (interface{}, error) {
 	var val, ok = m.domains[domainID]
 	if ok == false {
 		return 0, errors.New("No such domain: " + domainID)
@@ -188,7 +188,7 @@ func newManager() (*ManagerStruct, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = m.loadDomains()
+	err = m.loadSketchs()
 	if err != nil {
 		return nil, err
 	}
@@ -217,20 +217,20 @@ func (m *ManagerStruct) loadInfo() error {
 	return nil
 }
 
-func (m *ManagerStruct) loadDomains() error {
+func (m *ManagerStruct) loadSketchs() error {
 	strg := storage.GetManager()
 	for key, info := range m.info {
 		var domain abstract.Counter
 		var err error
 		switch info.Type {
 		case abstract.Cardinality:
-			domain, err = hllpp.NewDomainFromData(info)
+			domain, err = hllpp.NewSketchFromData(info)
 		case abstract.PurgableCardinality:
-			domain, err = cuckoofilter.NewDomain(info)
+			domain, err = cuckoofilter.NewSketch(info)
 		case abstract.TopK:
-			domain, err = topk.NewDomainFromData(info)
+			domain, err = topk.NewSketchFromData(info)
 		case abstract.Frequency:
-			domain, err = cml.NewDomainFromData(info)
+			domain, err = cml.NewSketchFromData(info)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
 		}

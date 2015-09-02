@@ -53,7 +53,7 @@ func TestNoCounters(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	domains, err := manager.GetDomains()
+	domains, err := manager.GetSketchs()
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -69,11 +69,11 @@ func TestDuplicateCounters(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	err = manager.CreateDomain("marvel", "cardinality", 10000000)
+	err = manager.CreateSketch("marvel", "cardinality", 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
-	err = manager.CreateDomain("marvel", "topk", 10000000)
+	err = manager.CreateSketch("marvel", "topk", 10000000)
 	if err == nil {
 		t.Error("Expected errors while creating domain duplicate domain, got", err)
 	}
@@ -88,7 +88,7 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	domains, err := manager.GetDomains()
+	domains, err := manager.GetSketchs()
 	if err != nil {
 		t.Error("Expected no errors while getting domains, got", err)
 	}
@@ -96,12 +96,12 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected 0 counters, got", len(domains))
 	}
 
-	err = manager.CreateDomain("marvel", "cardinality", 10000000)
+	err = manager.CreateSketch("marvel", "cardinality", 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
 
-	domains, err = manager.GetDomains()
+	domains, err = manager.GetSketchs()
 	if err != nil {
 		t.Error("Expected no errors while getting domains, got", err)
 	}
@@ -109,12 +109,12 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected 1 counters, got", len(domains))
 	}
 
-	err = manager.AddToDomain("marvel", []string{"hulk", "thor"})
+	err = manager.AddToSketch("marvel", []string{"hulk", "thor"})
 	if err != nil {
 		t.Error("Expected no errors while adding to domain, got", err)
 	}
 
-	count, err := manager.GetCountForDomain("marvel", nil)
+	count, err := manager.GetCountForSketch("marvel", nil)
 	if len(domains) != 1 {
 		t.Error("Expected 1 counters, got", len(domains))
 	}
@@ -123,12 +123,12 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected count == 2, got", count.(uint))
 	}
 
-	err = manager.DeleteDomain("marvel")
+	err = manager.DeleteSketch("marvel")
 	if err != nil {
 		t.Error("Expected no errors while deleting domain, got", err)
 	}
 
-	domains, err = manager.GetDomains()
+	domains, err = manager.GetSketchs()
 	if err != nil {
 		t.Error("Expected no errors while getting domains, got", err)
 	}
@@ -145,12 +145,12 @@ func TestPurgableCounter(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	err = manager.CreateDomain("marvel", abstract.PurgableCardinality, 10000000)
+	err = manager.CreateSketch("marvel", abstract.PurgableCardinality, 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
 
-	domains, err := manager.GetDomains()
+	domains, err := manager.GetSketchs()
 	if err != nil {
 		t.Error("Expected no errors while getting domains, got", err)
 	}
@@ -158,32 +158,32 @@ func TestPurgableCounter(t *testing.T) {
 		t.Error("Expected 1 counters, got", len(domains))
 	}
 
-	err = manager.AddToDomain("marvel", []string{"hulk", "thor"})
+	err = manager.AddToSketch("marvel", []string{"hulk", "thor"})
 	if err != nil {
 		t.Error("Expected no errors while adding to domain, got", err)
 	}
 
-	count, err := manager.GetCountForDomain("marvel", nil)
+	count, err := manager.GetCountForSketch("marvel", nil)
 	if count.(uint) != 2 {
 		t.Error("Expected count == 2, got", count.(uint))
 	}
 
-	err = manager.DeleteFromDomain("marvel", []string{"hulk"})
+	err = manager.DeleteFromSketch("marvel", []string{"hulk"})
 	if err != nil {
 		t.Error("Expected no errors while getting domains, got", err)
 	}
 
-	count, err = manager.GetCountForDomain("marvel", nil)
+	count, err = manager.GetCountForSketch("marvel", nil)
 	if count.(uint) != 1 {
 		t.Error("Expected count == 1, got", count.(uint))
 	}
 
-	err = manager.DeleteDomain("marvel")
+	err = manager.DeleteSketch("marvel")
 	if err != nil {
 		t.Error("Expected no errors while deleting domain, got", err)
 	}
 
-	domains, err = manager.GetDomains()
+	domains, err = manager.GetSketchs()
 	if err != nil {
 		t.Error("Expected no errors while getting domains, got", err)
 	}
@@ -204,7 +204,7 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 	if _, exists = m1.info["x-force"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	err = m1.CreateDomain("x-force", "cardinality", 1000000)
+	err = m1.CreateSketch("x-force", "cardinality", 1000000)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -230,12 +230,12 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateDomain("avengers", "cardinality", 1000000)
+	m1.CreateSketch("avengers", "cardinality", 1000000)
 
-	m1.AddToDomain("avengers", []string{"sabertooth",
+	m1.AddToSketch("avengers", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops"})
 
-	res, err := m1.GetCountForDomain("avengers", nil)
+	res, err := m1.GetCountForSketch("avengers", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -247,7 +247,7 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	res, err = m2.GetCountForDomain("avengers", nil)
+	res, err = m2.GetCountForSketch("avengers", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -268,12 +268,12 @@ func TestDumpLoadPurgableInfo(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	err = m1.CreateDomain("avengers", abstract.PurgableCardinality, 1000000)
+	err = m1.CreateSketch("avengers", abstract.PurgableCardinality, 1000000)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = m1.AddToDomain("avengers", []string{"hulk", "storm"})
+	err = m1.AddToSketch("avengers", []string{"hulk", "storm"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -286,7 +286,7 @@ func TestDumpLoadPurgableInfo(t *testing.T) {
 		t.Error("expected avengers to be in loaded by manager")
 	}
 
-	count, err := m2.GetCountForDomain("avengers", nil)
+	count, err := m2.GetCountForSketch("avengers", nil)
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -307,8 +307,8 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 	if _, exists := m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateDomain("avengers", "cardinality", 1000000)
-	m1.CreateDomain("x-men", "cardinality", 1000000)
+	m1.CreateSketch("avengers", "cardinality", 1000000)
+	m1.CreateSketch("x-men", "cardinality", 1000000)
 
 	fd, err := os.Open("/usr/share/dict/web2")
 	if err != nil {
@@ -335,7 +335,7 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 
 	var pFunc = func(value string) {
 		defer wg.Done()
-		m1.AddToDomain("avengers", []string{value})
+		m1.AddToSketch("avengers", []string{value})
 		resChan <- nil
 	}
 	for _, value := range values {
@@ -347,9 +347,9 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 	}
 
 	// add all values in one bulk
-	m1.AddToDomain("x-men", values)
-	count1, err := m1.GetCountForDomain("avengers", nil)
-	count2, err := m1.GetCountForDomain("x-men", nil)
+	m1.AddToSketch("x-men", values)
+	count1, err := m1.GetCountForSketch("avengers", nil)
+	count2, err := m1.GetCountForSketch("x-men", nil)
 	if count1 != count2 {
 		t.Error("expected avengers count == x-men count, got", count1, "!=", count2)
 	}
@@ -366,8 +366,8 @@ func TestExtremeParallelPurgableCounter(t *testing.T) {
 	if _, exists := m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateDomain("avengers", abstract.PurgableCardinality, 1000000)
-	m1.CreateDomain("x-men", abstract.PurgableCardinality, 1000000)
+	m1.CreateSketch("avengers", abstract.PurgableCardinality, 1000000)
+	m1.CreateSketch("x-men", abstract.PurgableCardinality, 1000000)
 
 	fd, err := os.Open("/usr/share/dict/web2")
 	if err != nil {
@@ -394,7 +394,7 @@ func TestExtremeParallelPurgableCounter(t *testing.T) {
 
 	var pFunc = func(value string) {
 		defer wg.Done()
-		m1.AddToDomain("avengers", []string{value})
+		m1.AddToSketch("avengers", []string{value})
 		resChan <- nil
 	}
 	for _, value := range values {
@@ -406,15 +406,15 @@ func TestExtremeParallelPurgableCounter(t *testing.T) {
 	}
 
 	// add all values in one bulk
-	m1.AddToDomain("x-men", values)
-	count1, err := m1.GetCountForDomain("avengers", nil)
-	count2, err := m1.GetCountForDomain("x-men", nil)
+	m1.AddToSketch("x-men", values)
+	count1, err := m1.GetCountForSketch("avengers", nil)
+	count2, err := m1.GetCountForSketch("x-men", nil)
 	if count1 != count2 {
 		t.Error("expected avengers count == x-men count, got", count1, "!=", count2)
 	}
 }
 
-func TestFailCreateDomain(t *testing.T) {
+func TestFailCreateSketch(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
@@ -424,7 +424,7 @@ func TestFailCreateDomain(t *testing.T) {
 	}
 
 	// test for unknown domainType
-	err = m1.CreateDomain("marvel", "wrong", 10000000)
+	err = m1.CreateSketch("marvel", "wrong", 10000000)
 	if err == nil {
 		t.Error("Expected errors while creating domain, got", err)
 	}
@@ -435,13 +435,13 @@ func TestFailCreateDomain(t *testing.T) {
 	}
 	domainID := string(buffer)
 	// test for too long domainID
-	err = m1.CreateDomain(domainID, "cardinality", 10000000)
+	err = m1.CreateSketch(domainID, "cardinality", 10000000)
 	if err == nil {
 		t.Error("Expected errors while creating domain, got", err)
 	}
 }
 
-func TestFailDeleteDomain(t *testing.T) {
+func TestFailDeleteSketch(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
@@ -449,13 +449,13 @@ func TestFailDeleteDomain(t *testing.T) {
 	if err != nil {
 		t.Log("Expected no errors, got", err)
 	}
-	err = m1.DeleteDomain("-1")
+	err = m1.DeleteSketch("-1")
 	if err == nil {
 		t.Error("Expected error, got", err)
 	}
 }
 
-func TestFailDeleteFromDomain(t *testing.T) {
+func TestFailDeleteFromSketch(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
@@ -463,13 +463,13 @@ func TestFailDeleteFromDomain(t *testing.T) {
 	if err != nil {
 		t.Log("Expected no errors, got", err)
 	}
-	err = m1.DeleteFromDomain("-1", []string{})
+	err = m1.DeleteFromSketch("-1", []string{})
 	if err == nil {
 		t.Error("Expected error, got", err)
 	}
 }
 
-func TestFailGetCountForDomain(t *testing.T) {
+func TestFailGetCountForSketch(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 
@@ -477,7 +477,7 @@ func TestFailGetCountForDomain(t *testing.T) {
 	if err != nil {
 		t.Log("Expected no errors, got", err)
 	}
-	_, err = m1.GetCountForDomain("-1", nil)
+	_, err = m1.GetCountForSketch("-1", nil)
 	if err == nil {
 		t.Error("Expected error, got", err)
 	}
@@ -495,12 +495,12 @@ func TestTopKCounter(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateDomain("avengers", "topk", 3)
+	m1.CreateSketch("avengers", "topk", 3)
 
-	m1.AddToDomain("avengers", []string{"sabertooth",
+	m1.AddToSketch("avengers", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
 
-	res, err := m1.GetCountForDomain("avengers", nil)
+	res, err := m1.GetCountForSketch("avengers", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -513,7 +513,7 @@ func TestTopKCounter(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	res, err = m2.GetCountForDomain("avengers", nil)
+	res, err = m2.GetCountForSketch("avengers", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -548,12 +548,12 @@ func TestCMLCounter(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateDomain("avengers", abstract.Frequency, 3)
+	m1.CreateSketch("avengers", abstract.Frequency, 3)
 
-	m1.AddToDomain("avengers", []string{"sabertooth",
+	m1.AddToSketch("avengers", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
 
-	res, err := m1.GetCountForDomain("avengers", []string{"cyclops"})
+	res, err := m1.GetCountForSketch("avengers", []string{"cyclops"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -562,7 +562,7 @@ func TestCMLCounter(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	res, err = m2.GetCountForDomain("avengers", []string{"cyclops"})
+	res, err = m2.GetCountForSketch("avengers", []string{"cyclops"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -573,7 +573,7 @@ func TestCMLCounter(t *testing.T) {
 		t.Error("expected 'cyclops' count == 3, got", v)
 	}
 
-	res, err = m2.GetCountForDomain("avengers", []string{"havoc"})
+	res, err = m2.GetCountForSketch("avengers", []string{"havoc"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}

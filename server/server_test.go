@@ -15,12 +15,12 @@ import (
 	"github.com/seiflotfy/skizze/utils"
 )
 
-type testDomainsResult struct {
+type testSketchsResult struct {
 	Result []string `json:"result"`
 	Error  error    `json:"error"`
 }
 
-type testDomainResult struct {
+type testSketchResult struct {
 	Result interface{} `json:"result"`
 	Error  error       `json:"error"`
 }
@@ -45,10 +45,10 @@ func tearDownTests() {
 	counterManager.Destroy()
 }
 
-func httpRequest(s *Server, t *testing.T, method string, domain string, body string) *httptest.ResponseRecorder {
+func httpRequest(s *Server, t *testing.T, method string, sketch string, body string) *httptest.ResponseRecorder {
 	reqBody := strings.NewReader(body)
-	fullDomain := "http://counters.io/" + domain
-	req, err := http.NewRequest(method, fullDomain, reqBody)
+	fullSketch := "http://counters.io/" + sketch
+	req, err := http.NewRequest(method, fullSketch, reqBody)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
@@ -57,21 +57,21 @@ func httpRequest(s *Server, t *testing.T, method string, domain string, body str
 	return respw
 }
 
-func unmarshalDomainsResult(resp *httptest.ResponseRecorder) testDomainsResult {
+func unmarshalSketchsResult(resp *httptest.ResponseRecorder) testSketchsResult {
 	body, _ := ioutil.ReadAll(resp.Body)
-	var r testDomainsResult
+	var r testSketchsResult
 	json.Unmarshal(body, &r)
 	return r
 }
 
-func unmarshalDomainResult(resp *httptest.ResponseRecorder) testDomainResult {
+func unmarshalSketchResult(resp *httptest.ResponseRecorder) testSketchResult {
 	body, _ := ioutil.ReadAll(resp.Body)
-	var r testDomainResult
+	var r testSketchResult
 	json.Unmarshal(body, &r)
 	return r
 }
 
-func TestDomainsInitiallyEmpty(t *testing.T) {
+func TestSketchsInitiallyEmpty(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 	s, err := New()
@@ -83,7 +83,7 @@ func TestDomainsInitiallyEmpty(t *testing.T) {
 		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
 		return
 	}
-	result := unmarshalDomainsResult(resp)
+	result := unmarshalSketchsResult(resp)
 	if len(result.Result) != 0 {
 		t.Fatalf("Initial resultCount != 0. Got %d", len(result.Result))
 	}
@@ -97,7 +97,7 @@ func TestPost(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "marvel", `{
-		"domainType": "cardinality",
+		"sketchType": "cardinality",
 		"capacity": 100000
 	}`)
 
@@ -107,7 +107,7 @@ func TestPost(t *testing.T) {
 	}
 
 	resp = httpRequest(s, t, "GET", "", `{}`)
-	result := unmarshalDomainsResult(resp)
+	result := unmarshalSketchsResult(resp)
 	if len(result.Result) != 1 {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
 	}
@@ -121,7 +121,7 @@ func TestHLL(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "marvel", `{
-		"domainType": "cardinality",
+		"sketchType": "cardinality",
 		"capacity": 100000
 	}`)
 
@@ -131,7 +131,7 @@ func TestHLL(t *testing.T) {
 	}
 
 	resp = httpRequest(s, t, "GET", "", `{}`)
-	result := unmarshalDomainsResult(resp)
+	result := unmarshalSketchsResult(resp)
 	if len(result.Result) != 1 {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
 	}
@@ -141,9 +141,9 @@ func TestHLL(t *testing.T) {
 	}`)
 
 	resp = httpRequest(s, t, "GET", "marvel", `{}`)
-	result2 := unmarshalDomainResult(resp)
+	result2 := unmarshalSketchResult(resp)
 	if result2.Result.(float64) != 3 {
-		t.Fatalf("after add resultCount != 1. Got %d", result2.Result.(float64))
+		t.Fatalf("after add resultCount != 1. Got %f.0", result2.Result.(float64))
 	}
 }
 
@@ -155,7 +155,7 @@ func TestCML(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "x-force", `{
-		"domainType": "frequency",
+		"sketchType": "frequency",
 		"capacity": 100000
 	}`)
 
@@ -165,7 +165,7 @@ func TestCML(t *testing.T) {
 	}
 
 	resp = httpRequest(s, t, "GET", "", `{}`)
-	result := unmarshalDomainsResult(resp)
+	result := unmarshalSketchsResult(resp)
 	if len(result.Result) != 1 {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
 	}
@@ -175,7 +175,7 @@ func TestCML(t *testing.T) {
 	}`)
 
 	resp = httpRequest(s, t, "GET", "x-force", `{"values": ["magneto"]}`)
-	result2 := unmarshalDomainResult(resp).Result.(map[string]interface{})
+	result2 := unmarshalSketchResult(resp).Result.(map[string]interface{})
 
 	if v, ok := result2["magneto"]; ok && uint(v.(float64)) != 2 {
 		t.Fatalf("after add resultCount != 2. Got %d", uint(v.(float64)))

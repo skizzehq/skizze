@@ -60,7 +60,7 @@ These examples expose a variety of settings. The full data may reside in a tradi
  	* requires way more space than Cardinality (1 byte per unique value)
  	* recommended capacity < 10.000.000
  	* disk usage is very intensive for now, caching coming soon
- - [ ] <b>"frequency"</b>: query occurance frequenct of values
+ - [x] <b>"frequency"</b>: query occurance frequenct of values
   	* Count-Min-Log Sketch
   	* integration under development
   	* recommended capacity < 1.000.000)
@@ -76,7 +76,7 @@ These examples expose a variety of settings. The full data may reside in a tradi
 - [x] Create domain manager
 - [x] Integrate Cardinality Sketch (Hyperloglog++)
 - [x] Integrate CardinalityPurgable Sketch (CuckooFilte)
-- [ ] Integrate Frequency Sketch (Count-Min-Log sketch)
+- [x] Integrate Frequency Sketch (Count-Min-Log sketch)
 - [ ] Integrate Expiring Sketch (Sliding Hyperloglog)
 - [x] Integrate Top (TopK)
 - [x] Store to Disk
