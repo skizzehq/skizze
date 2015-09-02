@@ -93,7 +93,7 @@ func (d *Domain) RemoveMultiple(values [][]byte) (bool, error) {
 /*
 GetCount ...
 */
-func (d *Domain) GetCount() interface{} {
+func (d *Domain) GetCount() uint {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	return uint(d.impl.Count())
@@ -124,4 +124,11 @@ GetType ...
 */
 func (d *Domain) GetType() string {
 	return d.Type
+}
+
+/*
+GetFrequency ...
+*/
+func (d *Domain) GetFrequency(values [][]byte) interface{} {
+	return nil
 }

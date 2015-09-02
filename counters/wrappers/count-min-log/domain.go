@@ -1,14 +1,12 @@
-package topk
+package cml
 
 import (
-	"bytes"
-	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"sync"
 
 	"github.com/seiflotfy/skizze/counters/abstract"
-	"github.com/seiflotfy/skizze/counters/wrappers/topk/go-topk"
+	"github.com/seiflotfy/skizze/counters/wrappers/count-min-log/count-min-log"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
@@ -16,19 +14,17 @@ import (
 var logger = utils.GetLogger()
 var manager *storage.ManagerStruct
 
+const defaultEpsilon = 0.00000543657
+const defaultDelta = 0.99
+
 /*
-Domain is the toplevel domain to control the HLL implementation
+Domain is the toplevel domain to control the count-min-log implementation
 */
 type Domain struct {
 	*abstract.Info
-	impl *topk.Stream
+	impl *cml.Sketch16
 	lock sync.RWMutex
 }
-
-/*
-ResultElement ...
-*/
-type ResultElement topk.Element
 
 /*
 NewDomain ...
@@ -36,7 +32,8 @@ NewDomain ...
 func NewDomain(info *abstract.Info) (*Domain, error) {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
-	d := Domain{info, topk.New(int(info.Capacity)), sync.RWMutex{}}
+	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID, defaultEpsilon, defaultDelta)
+	d := Domain{info, sketch16, sync.RWMutex{}}
 	err := d.Save()
 	if err != nil {
 		logger.Error.Println("an error has occurred while saving domain: " + err.Error())
@@ -48,22 +45,9 @@ func NewDomain(info *abstract.Info) (*Domain, error) {
 NewDomainFromData ...
 */
 func NewDomainFromData(info *abstract.Info) (*Domain, error) {
-	manager = storage.GetManager()
-	data, err := manager.LoadData(info.ID, 0, 0)
-	if err != nil {
-		return nil, err
-	}
-
-	var network bytes.Buffer // Stand-in for a network connection
-	network.Write(data)
-	dec := gob.NewDecoder(&network) // Will read from network.
-
-	var counter topk.Stream
-	err = dec.Decode(&counter)
-	if err != nil {
-		return nil, err
-	}
-	return &Domain{info, &counter, sync.RWMutex{}}, nil
+	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID, defaultEpsilon, defaultDelta)
+	// FIXME: create domain from new data
+	return &Domain{info, sketch16, sync.RWMutex{}}, nil
 }
 
 /*
@@ -72,8 +56,7 @@ Add ...
 func (d *Domain) Add(value []byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
-	str := string(value)
-	d.impl.Insert(str, 1)
+	d.impl.IncreaseCount(value)
 	d.Save()
 	return true, nil
 }
@@ -85,8 +68,7 @@ func (d *Domain) AddMultiple(values [][]byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for _, value := range values {
-		str := string(value)
-		d.impl.Insert(str, 1)
+		d.impl.IncreaseCount(value)
 	}
 	d.Save()
 	return true, nil
@@ -112,13 +94,16 @@ func (d *Domain) RemoveMultiple(values [][]byte) (bool, error) {
 GetCount ...
 */
 func (d *Domain) GetCount() uint {
-	return 0
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+	return uint(d.impl.Count())
 }
 
 /*
 Clear ...
 */
 func (d *Domain) Clear() (bool, error) {
+	d.impl.Reset()
 	return true, nil
 }
 
@@ -126,16 +111,13 @@ func (d *Domain) Clear() (bool, error) {
 Save ...
 */
 func (d *Domain) Save() error {
-	var network bytes.Buffer        // Stand-in for a network connection
-	enc := gob.NewEncoder(&network) // Will write to network.
-	// Encode (send) the value.
-	err := enc.Encode(d.impl)
-	err = manager.SaveData(d.Info.ID, network.Bytes(), 0)
+	count := d.impl.Count()
+	d.Info.State["count"] = uint64(count)
+	infoData, err := json.Marshal(d.Info)
 	if err != nil {
 		return err
 	}
-	info, _ := json.Marshal(d.Info)
-	return manager.SaveInfo(d.Info.ID, info)
+	return storage.GetManager().SaveInfo(d.Info.ID, infoData)
 }
 
 /*
@@ -149,12 +131,9 @@ func (d *Domain) GetType() string {
 GetFrequency ...
 */
 func (d *Domain) GetFrequency(values [][]byte) interface{} {
-	d.lock.RLock()
-	defer d.lock.RUnlock()
-	keys := d.impl.Keys()
-	result := make([]ResultElement, len(keys), len(keys))
-	for i, k := range keys {
-		result[i] = ResultElement(k)
+	res := make(map[string]uint)
+	for _, value := range values {
+		res[string(value)] = uint(d.impl.GetCount(value))
 	}
-	return result
+	return res
 }

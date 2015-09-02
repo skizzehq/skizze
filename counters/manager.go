@@ -8,6 +8,7 @@ import (
 
 	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/counters/abstract"
+	"github.com/seiflotfy/skizze/counters/wrappers/count-min-log"
 	"github.com/seiflotfy/skizze/counters/wrappers/cuckoofilter"
 	"github.com/seiflotfy/skizze/counters/wrappers/hllpp"
 	"github.com/seiflotfy/skizze/counters/wrappers/topk"
@@ -57,6 +58,8 @@ func (m *ManagerStruct) CreateDomain(domainID string, domainType string, capacit
 		domain, err = cuckoofilter.NewDomain(info)
 	case abstract.TopK:
 		domain, err = topk.NewDomain(info)
+	case abstract.Frequency:
+		domain, err = cml.NewDomain(info)
 	default:
 		return errors.New("Invalid domain type: " + domainType)
 	}
@@ -142,13 +145,24 @@ func (m *ManagerStruct) DeleteFromDomain(domainID string, values []string) error
 /*
 GetCountForDomain ...
 */
-func (m *ManagerStruct) GetCountForDomain(domainID string) (interface{}, error) {
+func (m *ManagerStruct) GetCountForDomain(domainID string, values []string) (interface{}, error) {
 	var val, ok = m.domains[domainID]
 	if ok == false {
 		return 0, errors.New("No such domain: " + domainID)
 	}
 	var counter abstract.Counter
 	counter = val.(abstract.Counter)
+
+	if counter.GetType() == abstract.Frequency {
+		bvalues := make([][]byte, len(values), len(values))
+		for i, value := range values {
+			bvalues[i] = []byte(value)
+		}
+		return counter.GetFrequency(bvalues), nil
+	} else if counter.GetType() == abstract.TopK {
+		return counter.GetFrequency(nil), nil
+	}
+
 	count := counter.GetCount()
 	return count, nil
 }
@@ -215,6 +229,8 @@ func (m *ManagerStruct) loadDomains() error {
 			domain, err = cuckoofilter.NewDomain(info)
 		case abstract.TopK:
 			domain, err = topk.NewDomainFromData(info)
+		case abstract.Frequency:
+			domain, err = cml.NewDomainFromData(info)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
 		}
@@ -226,4 +242,11 @@ func (m *ManagerStruct) loadDomains() error {
 		strg.LoadData(key, 0, 0)
 	}
 	return nil
+}
+
+/*
+Destroy ...
+*/
+func (m *ManagerStruct) Destroy() {
+	manager = nil
 }

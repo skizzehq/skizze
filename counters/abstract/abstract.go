@@ -8,9 +8,10 @@ type Counter interface {
 	AddMultiple([][]byte) (bool, error)
 	Remove([]byte) (bool, error)
 	RemoveMultiple([][]byte) (bool, error)
-	GetCount() interface{}
+	GetCount() uint
 	Clear() (bool, error)
 	GetType() string
+	GetFrequency([][]byte) interface{}
 }
 
 /*

@@ -43,6 +43,7 @@ func tearDownTests() {
 	os.RemoveAll(config.GetConfig().GetInfoDir())
 	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
 	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
+	manager.Destroy()
 }
 
 func TestNoCounters(t *testing.T) {
@@ -113,7 +114,7 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors while adding to domain, got", err)
 	}
 
-	count, err := manager.GetCountForDomain("marvel")
+	count, err := manager.GetCountForDomain("marvel", nil)
 	if len(domains) != 1 {
 		t.Error("Expected 1 counters, got", len(domains))
 	}
@@ -162,7 +163,7 @@ func TestPurgableCounter(t *testing.T) {
 		t.Error("Expected no errors while adding to domain, got", err)
 	}
 
-	count, err := manager.GetCountForDomain("marvel")
+	count, err := manager.GetCountForDomain("marvel", nil)
 	if count.(uint) != 2 {
 		t.Error("Expected count == 2, got", count.(uint))
 	}
@@ -172,7 +173,7 @@ func TestPurgableCounter(t *testing.T) {
 		t.Error("Expected no errors while getting domains, got", err)
 	}
 
-	count, err = manager.GetCountForDomain("marvel")
+	count, err = manager.GetCountForDomain("marvel", nil)
 	if count.(uint) != 1 {
 		t.Error("Expected count == 1, got", count.(uint))
 	}
@@ -234,7 +235,7 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	m1.AddToDomain("avengers", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops"})
 
-	res, err := m1.GetCountForDomain("avengers")
+	res, err := m1.GetCountForDomain("avengers", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -246,7 +247,7 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	res, err = m2.GetCountForDomain("avengers")
+	res, err = m2.GetCountForDomain("avengers", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -285,7 +286,7 @@ func TestDumpLoadPurgableInfo(t *testing.T) {
 		t.Error("expected avengers to be in loaded by manager")
 	}
 
-	count, err := m2.GetCountForDomain("avengers")
+	count, err := m2.GetCountForDomain("avengers", nil)
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -347,8 +348,8 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 
 	// add all values in one bulk
 	m1.AddToDomain("x-men", values)
-	count1, err := m1.GetCountForDomain("avengers")
-	count2, err := m1.GetCountForDomain("x-men")
+	count1, err := m1.GetCountForDomain("avengers", nil)
+	count2, err := m1.GetCountForDomain("x-men", nil)
 	if count1 != count2 {
 		t.Error("expected avengers count == x-men count, got", count1, "!=", count2)
 	}
@@ -406,8 +407,8 @@ func TestExtremeParallelPurgableCounter(t *testing.T) {
 
 	// add all values in one bulk
 	m1.AddToDomain("x-men", values)
-	count1, err := m1.GetCountForDomain("avengers")
-	count2, err := m1.GetCountForDomain("x-men")
+	count1, err := m1.GetCountForDomain("avengers", nil)
+	count2, err := m1.GetCountForDomain("x-men", nil)
 	if count1 != count2 {
 		t.Error("expected avengers count == x-men count, got", count1, "!=", count2)
 	}
@@ -476,7 +477,7 @@ func TestFailGetCountForDomain(t *testing.T) {
 	if err != nil {
 		t.Log("Expected no errors, got", err)
 	}
-	_, err = m1.GetCountForDomain("-1")
+	_, err = m1.GetCountForDomain("-1", nil)
 	if err == nil {
 		t.Error("Expected error, got", err)
 	}
@@ -499,7 +500,7 @@ func TestTopKCounter(t *testing.T) {
 	m1.AddToDomain("avengers", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
 
-	res, err := m1.GetCountForDomain("avengers")
+	res, err := m1.GetCountForDomain("avengers", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -512,7 +513,7 @@ func TestTopKCounter(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	res, err = m2.GetCountForDomain("avengers")
+	res, err = m2.GetCountForDomain("avengers", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -532,5 +533,54 @@ func TestTopKCounter(t *testing.T) {
 	}
 	if top[1].Count != 2 {
 		t.Error("expected 1st avengers count == 2, got", top[1].Count)
+	}
+}
+
+func TestCMLCounter(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+
+	var exists bool
+	m1, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if _, exists = m1.info["avengers"]; exists {
+		t.Error("expected avengers to not be initially loaded by manager")
+	}
+	m1.CreateDomain("avengers", abstract.Frequency, 3)
+
+	m1.AddToDomain("avengers", []string{"sabertooth",
+		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
+
+	res, err := m1.GetCountForDomain("avengers", []string{"cyclops"})
+	if err != nil {
+		t.Error("expected avengers to have no error, got", err)
+	}
+
+	m2, err := newManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	res, err = m2.GetCountForDomain("avengers", []string{"cyclops"})
+	if err != nil {
+		t.Error("expected avengers to have no error, got", err)
+	}
+	counts := res.(map[string]uint)
+	if v, ok := counts["cyclops"]; !ok {
+		t.Error("expected to find 'cyclops' in avengers, got", ok)
+	} else if v != 3 {
+		t.Error("expected 'cyclops' count == 3, got", v)
+	}
+
+	res, err = m2.GetCountForDomain("avengers", []string{"havoc"})
+	if err != nil {
+		t.Error("expected avengers to have no error, got", err)
+	}
+	counts = res.(map[string]uint)
+	if v, ok := counts["havoc"]; !ok {
+		t.Error("expected to find 'havoc' in avengers, got", ok)
+	} else if v != 2 {
+		t.Error("expected 'havoc' count == 2, got", v)
 	}
 }

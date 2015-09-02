@@ -21,8 +21,8 @@ type testDomainsResult struct {
 }
 
 type testDomainResult struct {
-	Result uint  `json:"result"`
-	Error  error `json:"error"`
+	Result interface{} `json:"result"`
+	Error  error       `json:"error"`
 }
 
 func setupTests() {
@@ -42,6 +42,7 @@ func tearDownTests() {
 	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
 	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
 	storage.CloseInfoDB()
+	counterManager.Destroy()
 }
 
 func httpRequest(s *Server, t *testing.T, method string, domain string, body string) *httptest.ResponseRecorder {
@@ -141,7 +142,42 @@ func TestHLL(t *testing.T) {
 
 	resp = httpRequest(s, t, "GET", "marvel", `{}`)
 	result2 := unmarshalDomainResult(resp)
-	if result2.Result != 3 {
-		t.Fatalf("after add resultCount != 1. Got %d", result2.Result)
+	if result2.Result.(float64) != 3 {
+		t.Fatalf("after add resultCount != 1. Got %d", result2.Result.(float64))
+	}
+}
+
+func TestCML(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+	s, err := New()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	resp := httpRequest(s, t, "POST", "x-force", `{
+		"domainType": "frequency",
+		"capacity": 100000
+	}`)
+
+	if resp.Code != 200 {
+		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
+		return
+	}
+
+	resp = httpRequest(s, t, "GET", "", `{}`)
+	result := unmarshalDomainsResult(resp)
+	if len(result.Result) != 1 {
+		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
+	}
+
+	resp = httpRequest(s, t, "PUT", "x-force", `{
+		"values": ["magneto", "wasp", "beast", "magneto"]
+	}`)
+
+	resp = httpRequest(s, t, "GET", "x-force", `{"values": ["magneto"]}`)
+	result2 := unmarshalDomainResult(resp).Result.(map[string]interface{})
+
+	if v, ok := result2["magneto"]; ok && uint(v.(float64)) != 2 {
+		t.Fatalf("after add resultCount != 2. Got %d", uint(v.(float64)))
 	}
 }
