@@ -30,10 +30,8 @@ These examples expose a variety of settings. The full data may reside in a tradi
 
 ## Other example problems?
 * I want to know if a uri is in my spam list (spam list over a million entries)
-* I want to know the number of users like my post (a like being subject to change)
 * I want to know how may times oliver watched a video (counting frequencies)
-* I want to know how many unique users visited my website in the last 3 hours? (sliding hyperloglog)
-* I want to know the top 10 countries of users experiencing a crash (sliding hyperloglog)
+* I want to know the top 10 players most frequent players of my new game (topK)
 
 ## API
 ### RESTful API
@@ -54,19 +52,10 @@ These examples expose a variety of settings. The full data may reside in a tradi
   	* does not support purging added values
   	* merge available soon
   	* capacity up to billions
- - [x] <b>"pcardinality"</b>: query unique items of all added values
- 	* CuckooFilter
- 	* allows puring added values
- 	* requires way more space than Cardinality (1 byte per unique value)
- 	* recommended capacity < 10.000.000
- 	* disk usage is very intensive for now, caching coming soon
  - [x] <b>"frequency"</b>: query occurance frequenct of values
   	* Count-Min-Log Sketch
   	* integration under development
   	* recommended capacity < 1.000.000)
- - [ ] <b>"expiring"</b>: query cardinality withing the last n time units
- 	* Sliding Hyper-Log-Log
- 	* like HyperLogLog but with expiring entries
  - [x] <b>"topk"</b>: query the top k values added to the sketch
  	* Top-K Sketch
 
@@ -75,9 +64,7 @@ These examples expose a variety of settings. The full data may reside in a tradi
 - [x] Design and implement REST API
 - [x] Create domain manager
 - [x] Integrate Cardinality Sketch (Hyperloglog++)
-- [x] Integrate CardinalityPurgable Sketch (CuckooFilte)
 - [x] Integrate Frequency Sketch (Count-Min-Log sketch)
-- [ ] Integrate Expiring Sketch (Sliding Hyperloglog)
 - [x] Integrate Top (TopK)
 - [x] Store to Disk
 - [ ] Replication on multiple servers
