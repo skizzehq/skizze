@@ -137,61 +137,6 @@ func TestDefaultCounter(t *testing.T) {
 	}
 }
 
-func TestPurgableCounter(t *testing.T) {
-	setupTests()
-	defer tearDownTests()
-
-	manager, err := newManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
-	err = manager.CreateSketch("marvel", abstract.PurgableCardinality, 10000000)
-	if err != nil {
-		t.Error("Expected no errors while creating domain, got", err)
-	}
-
-	domains, err := manager.GetSketchs()
-	if err != nil {
-		t.Error("Expected no errors while getting domains, got", err)
-	}
-	if len(domains) != 1 {
-		t.Error("Expected 1 counters, got", len(domains))
-	}
-
-	err = manager.AddToSketch("marvel", []string{"hulk", "thor"})
-	if err != nil {
-		t.Error("Expected no errors while adding to domain, got", err)
-	}
-
-	count, err := manager.GetCountForSketch("marvel", nil)
-	if count.(uint) != 2 {
-		t.Error("Expected count == 2, got", count.(uint))
-	}
-
-	err = manager.DeleteFromSketch("marvel", []string{"hulk"})
-	if err != nil {
-		t.Error("Expected no errors while getting domains, got", err)
-	}
-
-	count, err = manager.GetCountForSketch("marvel", nil)
-	if count.(uint) != 1 {
-		t.Error("Expected count == 1, got", count.(uint))
-	}
-
-	err = manager.DeleteSketch("marvel")
-	if err != nil {
-		t.Error("Expected no errors while deleting domain, got", err)
-	}
-
-	domains, err = manager.GetSketchs()
-	if err != nil {
-		t.Error("Expected no errors while getting domains, got", err)
-	}
-	if len(domains) != 0 {
-		t.Error("Expected 0 counters, got", len(domains))
-	}
-}
-
 func TestDumpLoadDefaultInfo(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
@@ -256,46 +201,6 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	}
 }
 
-func TestDumpLoadPurgableInfo(t *testing.T) {
-	setupTests()
-	defer tearDownTests()
-
-	var exists bool
-	m1, err := newManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
-	if _, exists = m1.info["avengers"]; exists {
-		t.Error("expected avengers to not be initially loaded by manager")
-	}
-	err = m1.CreateSketch("avengers", abstract.PurgableCardinality, 1000000)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = m1.AddToSketch("avengers", []string{"hulk", "storm"})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	m2, err := newManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
-	if _, exists = m2.info["avengers"]; !exists {
-		t.Error("expected avengers to be in loaded by manager")
-	}
-
-	count, err := m2.GetCountForSketch("avengers", nil)
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
-
-	if count.(uint) != 2 {
-		t.Error("Expected count == 2, got", count.(uint))
-	}
-}
-
 func TestExtremeParallelDefaultCounter(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
@@ -309,65 +214,6 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 	}
 	m1.CreateSketch("avengers", "cardinality", 1000000)
 	m1.CreateSketch("x-men", "cardinality", 1000000)
-
-	fd, err := os.Open("/usr/share/dict/web2")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	scanner := bufio.NewScanner(fd)
-
-	i := 0
-	values := []string{} //{"a", "aam"} //"doorknob", "doorless"
-	for scanner.Scan() {
-		s := []byte(scanner.Text())
-		values = append(values, string(s))
-		i++
-		if i == 10000 {
-			break
-		}
-	}
-
-	// Add all values in a go routine per value
-	var wg sync.WaitGroup
-	defer wg.Wait()
-	resChan := make(chan interface{})
-
-	var pFunc = func(value string) {
-		defer wg.Done()
-		m1.AddToSketch("avengers", []string{value})
-		resChan <- nil
-	}
-	for _, value := range values {
-		wg.Add(1)
-		go pFunc(value)
-	}
-	for j := 0; j < len(values); j++ {
-		<-resChan
-	}
-
-	// add all values in one bulk
-	m1.AddToSketch("x-men", values)
-	count1, err := m1.GetCountForSketch("avengers", nil)
-	count2, err := m1.GetCountForSketch("x-men", nil)
-	if count1 != count2 {
-		t.Error("expected avengers count == x-men count, got", count1, "!=", count2)
-	}
-}
-
-func TestExtremeParallelPurgableCounter(t *testing.T) {
-	setupTests()
-	defer tearDownTests()
-
-	m1, err := newManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
-	if _, exists := m1.info["avengers"]; exists {
-		t.Error("expected avengers to not be initially loaded by manager")
-	}
-	m1.CreateSketch("avengers", abstract.PurgableCardinality, 1000000)
-	m1.CreateSketch("x-men", abstract.PurgableCardinality, 1000000)
 
 	fd, err := os.Open("/usr/share/dict/web2")
 	if err != nil {

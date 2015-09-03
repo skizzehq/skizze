@@ -9,7 +9,6 @@ import (
 	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/counters/abstract"
 	"github.com/seiflotfy/skizze/counters/wrappers/count-min-log"
-	"github.com/seiflotfy/skizze/counters/wrappers/cuckoofilter"
 	"github.com/seiflotfy/skizze/counters/wrappers/hllpp"
 	"github.com/seiflotfy/skizze/counters/wrappers/topk"
 	"github.com/seiflotfy/skizze/storage"
@@ -54,8 +53,6 @@ func (m *ManagerStruct) CreateSketch(domainID string, domainType string, capacit
 	switch domainType {
 	case abstract.Cardinality:
 		domain, err = hllpp.NewSketch(info)
-	case abstract.PurgableCardinality:
-		domain, err = cuckoofilter.NewSketch(info)
 	case abstract.TopK:
 		domain, err = topk.NewSketch(info)
 	case abstract.Frequency:
@@ -225,8 +222,6 @@ func (m *ManagerStruct) loadSketchs() error {
 		switch info.Type {
 		case abstract.Cardinality:
 			domain, err = hllpp.NewSketchFromData(info)
-		case abstract.PurgableCardinality:
-			domain, err = cuckoofilter.NewSketch(info)
 		case abstract.TopK:
 			domain, err = topk.NewSketchFromData(info)
 		case abstract.Frequency:
