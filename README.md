@@ -1,11 +1,11 @@
 # Skizze
 
 [![Build Status](https://travis-ci.org/seiflotfy/skizze.svg?branch=master)](https://travis-ci.org/seiflotfy/skizze)
-[![license](http://img.shields.io/badge/license-Apache-blue.svg)](https://raw.githubusercontent.com/seiflotfy/counts/master/LICENSE)
-[![Join the chat at https://gitter.im/seiflotfy/counts](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/seiflotfy/counts?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![license](http://img.shields.io/badge/license-Apache-blue.svg)](https://raw.githubusercontent.com/seiflotfy/skizze/master/LICENSE)
+[![Join the chat at https://gitter.im/seiflotfy/skizze](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/seiflotfy/skizze?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
-A domain-sketch data store to deal with all problems around counting and sketching using probabilistic data-structures.
+Skizze ([ˈskɪt͡sə]: german for sketch) is a sketch data store to deal with all problems around counting and sketching using probabilistic data-structures.
 
 Unlike a Key-Value store, Skizze does not store values, but rather appends values to a sketch for a specified domain, allowing you to solve frequency and cardinality queries in near O(1) time, with minimal memory footprint.
 
@@ -15,10 +15,14 @@ Unlike a Key-Value store, Skizze does not store values, but rather appends value
 
 ## Motivation
 
+In computer science, streaming algorithms are algorithms for processing data streams in which the input is presented as a sequence of items and can be examined in only a few passes (typically just one). These algorithms have limited memory available to them (much less than the input size) and also limited processing time per item.
+
+These constraints may mean that an algorithm produces an approximate answer based on a summary or "sketch" or "synopse" of the data stream in memory.
+
 From [Synopses for Massive Data: Samples, Histograms, Wavelets, Sketches](http://db.cs.berkeley.edu/cs286/papers/synopses-fntdb2012.pdf)
 By Graham Cormode, Minos Garofalakis, Peter J. Haas and Chris Jermaine
 
-#####The Need for Synopses
+#####The Need for Synopses (Sketches)
 The use of synopses is essential for managing the massive data that arises in modern information management scenarios. When handling large datasets, from gigabytes to petabytes in size, it is often impractical to operate on them in full. Instead, it is much more convenient to build a synopsis, and then use this synopsis to analyze the data. This approach captures a variety of use-cases:
 
 * A search engine collects logs of every search made, amounting to billions of queries every day. It would be too slow, and energy-intensive, to look for trends and patterns on the full data. Instead, it is preferable to use a synopsis that is guaranteed to preserve most of the as-yet undiscovered patterns in the data.
@@ -47,16 +51,16 @@ These examples expose a variety of settings. The full data may reside in a tradi
 | DELETE | /<key> | N/A | Deletes a domain. |
 
 ### DomainType
- - [x] <b>"cardinality"</b>: query unique items of all added values
+ - <b>"cardinality"</b>: query unique items of all added values
   	* HyperLogLog
   	* does not support purging added values
   	* merge available soon
   	* capacity up to billions
- - [x] <b>"frequency"</b>: query occurance frequenct of values
+ - <b>"frequency"</b>: query occurance frequenct of values
   	* Count-Min-Log Sketch
   	* integration under development
   	* recommended capacity < 1.000.000)
- - [x] <b>"topk"</b>: query the top k values added to the sketch
+ - <b>"topk"</b>: query the top k values added to the sketch
  	* Top-K Sketch
 
 
