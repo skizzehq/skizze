@@ -31,7 +31,7 @@ These examples expose a variety of settings. The full data may reside in a tradi
 ## Other example problems?
 * I want to know if a uri is in my spam list (spam list over a million entries)
 * I want to know how may times oliver watched a video (counting frequencies)
-* I want to know the top 10 players most frequent players of my new game (topK)
+* I want to know the top 10 most frequent players of my new game (topK)
 
 ## API
 ### RESTful API
@@ -39,7 +39,7 @@ These examples expose a variety of settings. The full data may reside in a tradi
 | Method | Route | Parameters | Task |
 | --- | --- | --- | --- |
 | GET | / | N/A |Lists all available domains (sketches). |
-| MERGE | / | not implmented yet | Merges multiple HyperLogLog counters. |
+| MERGE | / | not implemented yet | Merges multiple HyperLogLog counters. |
 | POST | /<key> | {"domainName": string, "domainType": string, "capacity": uint64} | Creates a new Counter. DomainType is mandatory. DomainTypes can be found below. |
 | GET | /<key> | N/A | Updates a domain. Adds values to a cardinality/counter to a domain. |
 | PUT | /<key> | {"values": [string, string]} | Updates a domain. Adds values to a cardinality/counter to a domain. |
