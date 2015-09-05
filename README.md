@@ -7,7 +7,7 @@
 
 Skizze ([ˈskɪt͡sə]: german for sketch) is a sketch data store to deal with all problems around counting and sketching using probabilistic data-structures.
 
-Unlike a Key-Value store, Skizze does not store values, but rather appends values to a sketch for a specified domain, allowing you to solve frequency and cardinality queries in near O(1) time, with minimal memory footprint.
+Unlike a Key-Value store, Skizze does not store values, but rather appends values to a defined sketches, allowing one to solve frequency and cardinality queries in near O(1) time, with minimal memory footprint.
 
 <b>Note:</b> Data structures that can grow too big to reside in memory are read and written from/to disk directly via open stream to make sure we can maintain a high number of sketches.
 
@@ -29,15 +29,15 @@ Skizze is a (fire and forget) service that provides a probabilistic data structu
 ## API
 ### RESTful API
 
-| Method | Route | Parameters | Task |
-| --- | --- | --- | --- |
-| GET | / | N/A |Lists all available domains (sketches). |
-| MERGE | / | not implemented yet | Merges multiple HyperLogLog counters. |
-| POST | /<key> | {"domainName": string, "domainType": string, "capacity": uint64} | Creates a new Counter. DomainType is mandatory. DomainTypes can be found below. |
-| GET | /<key> | N/A | Updates a domain. Adds values to a cardinality/counter to a domain. |
-| PUT | /<key> | {"values": [string, string]} | Updates a domain. Adds values to a cardinality/counter to a domain. |
-| PURGE | /<key> | {"values": [string, string]} | Purges values from a domain. |
-| DELETE | /<key> | N/A | Deletes a domain. |
+| Method | Route      | Parameters                   | Task |
+| ---    | ---        | ---                          | --- |
+| GET    | /          | N/A                          | Lists all available sketches (sketches) |
+| MERGE  | /          | not implemented yet          | Merges multiple sketches of the same <type> if they support merging |
+| POST   | /$type/$id | {"capacity": uint64}         | Creates a new <type> sketch with id: <id> |
+| GET    | /$type/$id | (optional) {"values": [string, string]} | Get cardinality/frequency/rank of a sketch (for given values if supported by the sketch type) |
+| PUT    | /$type/$id | {"values": [string, string]} | Updates a sketch by adding values to it |
+| PURGE  | /$type/$id | {"values": [string, string]} | Updates a sketch by purging values from it |
+| DELETE | /$type/$id | N/A                          | Deletes a sketch. |
 
 ### DomainType
  - <b>"cardinality"</b>: query unique items of all added values
