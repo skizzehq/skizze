@@ -15,27 +15,16 @@ Unlike a Key-Value store, Skizze does not store values, but rather appends value
 
 ## Motivation
 
-In computer science, streaming algorithms are algorithms for processing data streams in which the input is presented as a sequence of items and can be examined in only a few passes (typically just one). These algorithms have limited memory available to them (much less than the input size) and also limited processing time per item.
+Statistical analysis and mining of huge multi-terabyte data sets is a common task nowadays, especially in the areas like web analytics and Internet advertising. Analysis of such large data sets often requires powerful distributed data stores like Hadoop and heavy data processing with techniques like MapReduce. This approach often leads to heavyweight high-latency analytical processes and poor applicability to realtime use cases. On the other hand, when one is interested only in simple additive metrics like total page views or average price of conversion, it is obvious that raw data can be efficiently summarized, for example, on a daily basis or using simple in-stream counters.  Computation of more advanced metrics like a number of unique visitor or most frequent items is more challenging and requires a lot of resources if implemented straightforwardly.
 
-These constraints may mean that an algorithm produces an approximate answer based on a summary or "sketch" or "synopse" of the data stream in memory.
+Skizze is a (fire and forget) service that provides a probabilistic data structures (sketches) storage that allow one to estimate these and many other metrics and trade precision of the estimations for the memory consumption. These data structures can be used both as temporary data accumulators in query processing procedures and, perhaps more important, as a compact – sometimes astonishingly compact – replacement of raw data in stream-based computing.
 
-From [Synopses for Massive Data: Samples, Histograms, Wavelets, Sketches](http://db.cs.berkeley.edu/cs286/papers/synopses-fntdb2012.pdf)
-By Graham Cormode, Minos Garofalakis, Peter J. Haas and Chris Jermaine
-
-#####The Need for Synopses (Sketches)
-The use of synopses is essential for managing the massive data that arises in modern information management scenarios. When handling large datasets, from gigabytes to petabytes in size, it is often impractical to operate on them in full. Instead, it is much more convenient to build a synopsis, and then use this synopsis to analyze the data. This approach captures a variety of use-cases:
-
-* A search engine collects logs of every search made, amounting to billions of queries every day. It would be too slow, and energy-intensive, to look for trends and patterns on the full data. Instead, it is preferable to use a synopsis that is guaranteed to preserve most of the as-yet undiscovered patterns in the data.
-* A team of analysts for a retail chain would like to study the impact of different promotions and pricing strategies on sales of different items. It is not cost-effective to give each analyst the resources needed to study the national sales data in full, but by working with synopses of the data, each analyst can perform their explorations on their own laptops.
-* A large cellphone provider wants to track the health of its network by studying statistics of calls made in different regions, on hardware from different manufacturers, under different levels of contention, and so on. The volume of information is too large to retain in a database, but instead the provider can build a synopsis of the data as it is observed live, and then use the synopsis off-line for further analysis.
-
-These examples expose a variety of settings. The full data may reside in a traditional data warehouse, where it is indexed and accessible, but is too costly to work on in full. In other cases, the data is stored as flat files in a distributed file system; or it may never be stored in full, but be accessible only as it is observed in a streaming fashion. Sometimes synopsis construction is a one-time process, and sometimes we need to update the synopsis as the base data is modified or as accuracy requirements change. In all cases though, being able to construct a high quality synopsis enables much faster and more scalable data analysis.
-
-
-## Other example problems?
-* I want to know if a uri is in my spam list (spam list over a million entries)
-* I want to know how may times oliver watched a video (counting frequencies)
-* I want to know the top 10 most frequent players of my new game (topK)
+## Example queries/use cases?
+* How many distinct elements are in the data set (i.e. what is the cardinality of the data set)?
+* What are the most frequent elements (the terms “heavy hitters” and “top-k elements” are also used)?
+* What are the frequencies of the most frequent elements?
+* How many elements belong to the specified range (range query, in SQL it looks like  SELECT count(v) WHERE v >= c1 AND v < c2)?
+* Does the data set contain a particular element (membership query)?
 
 ## API
 ### RESTful API
