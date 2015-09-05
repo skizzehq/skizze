@@ -16,10 +16,10 @@ import (
 )
 
 type requestData struct {
-	Sketch     string   `json:"sketch"`
-	SketchType string   `json:"sketchType"`
-	Capacity   uint64   `json:"capacity"`
-	Values     []string `json:"values"`
+	id       string
+	typ      string
+	Capacity uint64   `json:"capacity"`
+	Values   []string `json:"values"`
 }
 
 var logger = utils.GetLogger()
@@ -90,28 +90,28 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 	switch {
 	case method == "GET":
 		// Get a count for a specific sketch
-		count, err := counterManager.GetCountForSketch(data.Sketch, data.Values)
-		logger.Info.Printf("[%v]: Getting counter for sketch: %v", method, data.Sketch)
+		count, err := counterManager.GetCountForSketch(data.id, data.Values)
+		logger.Info.Printf("[%v]: Getting counter for sketch: %v", method, data.id)
 		res = sketchResult{count, err}
 	case method == "POST":
 		// Create a new sketch counter
-		err = counterManager.CreateSketch(data.Sketch, data.SketchType, data.Capacity)
-		logger.Info.Printf("[%v]: Creating new sketch: %v", method, data.Sketch)
+		err = counterManager.CreateSketch(data.id, data.typ, data.Capacity)
+		logger.Info.Printf("[%v]: Creating new sketch: %v", method, data.id)
 		res = sketchResult{0, err}
 	case method == "PUT":
 		// Add values to counter
-		err = counterManager.AddToSketch(data.Sketch, data.Values)
-		logger.Info.Printf("[%v]: Updating counter for sketch: %v", method, data.Sketch)
+		err = counterManager.AddToSketch(data.id, data.Values)
+		logger.Info.Printf("[%v]: Updating counter for sketch: %v", method, data.id)
 		res = sketchResult{nil, err}
 	case method == "PURGE":
 		// Purges values from counter
-		err = counterManager.DeleteFromSketch(data.Sketch, data.Values)
-		logger.Info.Printf("[%v]: Purging values for sketch: %v", method, data.Sketch)
+		err = counterManager.DeleteFromSketch(data.id, data.Values)
+		logger.Info.Printf("[%v]: Purging values for sketch: %v", method, data.id)
 		res = sketchResult{nil, err}
 	case method == "DELETE":
 		// Delete Counter
-		err := counterManager.DeleteSketch(data.Sketch)
-		logger.Info.Printf("[%v]: Deleting sketch: %v", method, data.Sketch)
+		err := counterManager.DeleteSketch(data.id)
+		logger.Info.Printf("[%v]: Deleting sketch: %v", method, data.id)
 		res = sketchResult{nil, err}
 	default:
 		logger.Error.Printf("[%v]: Invalid Method: %v", method, http.StatusBadRequest)
@@ -130,8 +130,8 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 }
 
 func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	sketch := strings.TrimSpace(r.URL.Path[1:])
 	method := r.Method
+	paths := strings.Split(r.URL.Path[1:], "/")
 	body, _ := ioutil.ReadAll(r.Body)
 	var data requestData
 	if len(body) > 0 {
@@ -145,10 +145,11 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		data = requestData{}
 	}
 
-	if len(sketch) == 0 {
+	if len(paths) == 1 {
 		srv.handleTopRequest(w, method, data)
-	} else {
-		data.Sketch = sketch
+	} else if len(paths) == 2 {
+		data.typ = strings.TrimSpace(string(paths[0]))
+		data.id = strings.TrimSpace(strings.Join(paths[1:], "/"))
 		srv.handleSketchRequest(w, method, data)
 	}
 }

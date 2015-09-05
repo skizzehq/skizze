@@ -96,8 +96,7 @@ func TestPost(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	resp := httpRequest(s, t, "POST", "marvel", `{
-		"sketchType": "cardinality",
+	resp := httpRequest(s, t, "POST", "cardinality/marvel", `{
 		"capacity": 100000
 	}`)
 
@@ -120,8 +119,7 @@ func TestHLL(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	resp := httpRequest(s, t, "POST", "marvel", `{
-		"sketchType": "cardinality",
+	resp := httpRequest(s, t, "POST", "cardinality/marvel", `{
 		"capacity": 100000
 	}`)
 
@@ -136,11 +134,11 @@ func TestHLL(t *testing.T) {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
 	}
 
-	resp = httpRequest(s, t, "PUT", "marvel", `{
+	resp = httpRequest(s, t, "PUT", "cardinality/marvel", `{
 		"values": ["magneto", "wasp", "beast"]
 	}`)
 
-	resp = httpRequest(s, t, "GET", "marvel", `{}`)
+	resp = httpRequest(s, t, "GET", "cardinality/marvel", `{}`)
 	result2 := unmarshalSketchResult(resp)
 	if result2.Result.(float64) != 3 {
 		t.Fatalf("after add resultCount != 1. Got %f.0", result2.Result.(float64))
@@ -154,7 +152,7 @@ func TestCML(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	resp := httpRequest(s, t, "POST", "x-force", `{
+	resp := httpRequest(s, t, "POST", "frequency/x-force", `{
 		"sketchType": "frequency",
 		"capacity": 100000
 	}`)
@@ -170,11 +168,11 @@ func TestCML(t *testing.T) {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
 	}
 
-	resp = httpRequest(s, t, "PUT", "x-force", `{
+	resp = httpRequest(s, t, "PUT", "frequency/x-force", `{
 		"values": ["magneto", "wasp", "beast", "magneto"]
 	}`)
 
-	resp = httpRequest(s, t, "GET", "x-force", `{"values": ["magneto"]}`)
+	resp = httpRequest(s, t, "GET", "frequency/x-force", `{"values": ["magneto"]}`)
 	result2 := unmarshalSketchResult(resp).Result.(map[string]interface{})
 
 	if v, ok := result2["magneto"]; ok && uint(v.(float64)) != 2 {
