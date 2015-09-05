@@ -39,25 +39,11 @@ Skizze is a (fire and forget) service that provides a probabilistic data structu
 | PURGE  | /$type/$id | {"values": [string, string]} | Updates a sketch by purging values from it |
 | DELETE | /$type/$id | N/A                          | Deletes a sketch. |
 
-### DomainType
- - <b>"cardinality"</b>: query unique items of all added values
-  	* HyperLogLog
-  	* does not support purging added values
-  	* merge available soon
-  	* capacity up to billions
- - <b>"frequency"</b>: query occurance frequenct of values
-  	* Count-Min-Log Sketch
-  	* integration under development
-  	* recommended capacity < 1.000.000)
- - <b>"topk"</b>: query the top k values added to the sketch
- 	* Top-K Sketch
+### Sketch Types
 
+| type  | purpose     | Sketch               | Description                              | Notes |
+| ---   | ---         | ---                  | ---                                      | ---   |
+| hllpp | cardinality | HyperLogLog++        | query unique items from all added values | capacity up to billions, does not support purging added values |
+| cml   | frequency   | Count-Min-Log Sketch | query frequency of unique values added   | N/A |
+| topk  | rank + frequncy | Top-k Sketch | query the top k values added to the sketch | N/A |
 
-## Milestones
-- [x] Design and implement REST API
-- [x] Create domain manager
-- [x] Integrate Cardinality Sketch (Hyperloglog++)
-- [x] Integrate Frequency Sketch (Count-Min-Log sketch)
-- [x] Integrate Top (TopK)
-- [x] Store to Disk
-- [ ] Replication on multiple servers
