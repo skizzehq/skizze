@@ -69,7 +69,7 @@ func TestDuplicateCounters(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	err = manager.CreateSketch("marvel", "cardinality", 10000000)
+	err = manager.CreateSketch("marvel", "hllpp", 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
@@ -96,7 +96,7 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected 0 counters, got", len(domains))
 	}
 
-	err = manager.CreateSketch("marvel", "cardinality", 10000000)
+	err = manager.CreateSketch("marvel", "hllpp", 10000000)
 	if err != nil {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
@@ -149,7 +149,7 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 	if _, exists = m1.info["x-force"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	err = m1.CreateSketch("x-force", "cardinality", 1000000)
+	err = m1.CreateSketch("x-force", "hllpp", 1000000)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,7 +175,7 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateSketch("avengers", "cardinality", 1000000)
+	m1.CreateSketch("avengers", "hllpp", 1000000)
 
 	m1.AddToSketch("avengers", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops"})
@@ -212,8 +212,8 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 	if _, exists := m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateSketch("avengers", "cardinality", 1000000)
-	m1.CreateSketch("x-men", "cardinality", 1000000)
+	m1.CreateSketch("avengers", "hllpp", 1000000)
+	m1.CreateSketch("x-men", "hllpp", 1000000)
 
 	fd, err := os.Open("/usr/share/dict/web2")
 	if err != nil {
@@ -281,7 +281,7 @@ func TestFailCreateSketch(t *testing.T) {
 	}
 	domainID := string(buffer)
 	// test for too long domainID
-	err = m1.CreateSketch(domainID, "cardinality", 10000000)
+	err = m1.CreateSketch(domainID, "hllpp", 10000000)
 	if err == nil {
 		t.Error("Expected errors while creating domain, got", err)
 	}
@@ -394,7 +394,7 @@ func TestCMLCounter(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateSketch("avengers", abstract.Frequency, 3)
+	m1.CreateSketch("avengers", abstract.CML, 3)
 
 	m1.AddToSketch("avengers", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})

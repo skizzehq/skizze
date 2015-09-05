@@ -31,8 +31,7 @@ Frequency	=> Count-min sketch
 Expirable	=> Sliding HLL
 */
 const (
-	Default     = "default"
-	Cardinality = "cardinality"
-	Frequency   = "frequency"
-	TopK        = "topk"
+	HLLPP = "hllpp"
+	CML   = "cml"
+	TopK  = "topk"
 )

@@ -51,11 +51,11 @@ func (m *ManagerStruct) CreateSketch(domainID string, domainType string, capacit
 	var domain abstract.Counter
 	var err error
 	switch domainType {
-	case abstract.Cardinality:
+	case abstract.HLLPP:
 		domain, err = hllpp.NewSketch(info)
 	case abstract.TopK:
 		domain, err = topk.NewSketch(info)
-	case abstract.Frequency:
+	case abstract.CML:
 		domain, err = cml.NewSketch(info)
 	default:
 		return errors.New("Invalid domain type: " + domainType)
@@ -150,7 +150,7 @@ func (m *ManagerStruct) GetCountForSketch(domainID string, values []string) (int
 	var counter abstract.Counter
 	counter = val.(abstract.Counter)
 
-	if counter.GetType() == abstract.Frequency {
+	if counter.GetType() == abstract.CML {
 		bvalues := make([][]byte, len(values), len(values))
 		for i, value := range values {
 			bvalues[i] = []byte(value)
@@ -220,11 +220,11 @@ func (m *ManagerStruct) loadSketchs() error {
 		var domain abstract.Counter
 		var err error
 		switch info.Type {
-		case abstract.Cardinality:
+		case abstract.HLLPP:
 			domain, err = hllpp.NewSketchFromData(info)
 		case abstract.TopK:
 			domain, err = topk.NewSketchFromData(info)
-		case abstract.Frequency:
+		case abstract.CML:
 			domain, err = cml.NewSketchFromData(info)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
