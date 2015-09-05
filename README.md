@@ -23,7 +23,7 @@ Skizze is a (fire and forget) service that provides a probabilistic data structu
 * How many distinct elements are in the data set (i.e. what is the cardinality of the data set)?
 * What are the most frequent elements (the terms “heavy hitters” and “top-k elements” are also used)?
 * What are the frequencies of the most frequent elements?
-* How many elements belong to the specified range (range query, in SQL it looks like  SELECT count(v) WHERE v >= c1 AND v < c2)?
+* How many elements belong to the specified range (range query, in SQL it looks like `SELECT count(v) WHERE v >= c1 AND v < c2)?`
 * Does the data set contain a particular element (membership query)?
 
 ## API
