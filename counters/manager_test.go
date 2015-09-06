@@ -53,7 +53,7 @@ func TestNoCounters(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	domains, err := manager.GetSketchs()
+	domains, err := manager.GetSketches()
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -88,7 +88,7 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	domains, err := manager.GetSketchs()
+	domains, err := manager.GetSketches()
 	if err != nil {
 		t.Error("Expected no errors while getting domains, got", err)
 	}
@@ -101,7 +101,7 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors while creating domain, got", err)
 	}
 
-	domains, err = manager.GetSketchs()
+	domains, err = manager.GetSketches()
 	if err != nil {
 		t.Error("Expected no errors while getting domains, got", err)
 	}
@@ -128,7 +128,7 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors while deleting domain, got", err)
 	}
 
-	domains, err = manager.GetSketchs()
+	domains, err = manager.GetSketches()
 	if err != nil {
 		t.Error("Expected no errors while getting domains, got", err)
 	}

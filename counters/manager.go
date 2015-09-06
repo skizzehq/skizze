@@ -88,9 +88,9 @@ func (m *ManagerStruct) DeleteSketch(domainID string) error {
 }
 
 /*
-GetSketchs ...
+GetSketches ...
 */
-func (m *ManagerStruct) GetSketchs() ([]string, error) {
+func (m *ManagerStruct) GetSketches() ([]string, error) {
 	// TODO: Remove dummy data and implement proper result
 	domains := make([]string, len(m.domains), len(m.domains))
 	i := 0
@@ -185,7 +185,7 @@ func newManager() (*ManagerStruct, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = m.loadSketchs()
+	err = m.loadSketches()
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +214,7 @@ func (m *ManagerStruct) loadInfo() error {
 	return nil
 }
 
-func (m *ManagerStruct) loadSketchs() error {
+func (m *ManagerStruct) loadSketches() error {
 	strg := storage.GetManager()
 	for key, info := range m.info {
 		var domain abstract.Counter
