@@ -90,7 +90,7 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 	switch {
 	case method == "GET":
 		// Get a count for a specific sketch
-		count, err := counterManager.GetCountForSketch(data.id, data.Values)
+		count, err := counterManager.GetCountForSketch(data.id, data.typ, data.Values)
 		logger.Info.Printf("[%v]: Getting counter for sketch: %v", method, data.id)
 		res = sketchResult{count, err}
 	case method == "POST":
@@ -100,17 +100,17 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 		res = sketchResult{0, err}
 	case method == "PUT":
 		// Add values to counter
-		err = counterManager.AddToSketch(data.id, data.Values)
+		err = counterManager.AddToSketch(data.id, data.typ, data.Values)
 		logger.Info.Printf("[%v]: Updating counter for sketch: %v", method, data.id)
 		res = sketchResult{nil, err}
 	case method == "PURGE":
 		// Purges values from counter
-		err = counterManager.DeleteFromSketch(data.id, data.Values)
+		err = counterManager.DeleteFromSketch(data.id, data.typ, data.Values)
 		logger.Info.Printf("[%v]: Purging values for sketch: %v", method, data.id)
 		res = sketchResult{nil, err}
 	case method == "DELETE":
 		// Delete Counter
-		err := counterManager.DeleteSketch(data.id)
+		err := counterManager.DeleteSketch(data.id, data.typ)
 		logger.Info.Printf("[%v]: Deleting sketch: %v", method, data.id)
 		res = sketchResult{nil, err}
 	default:

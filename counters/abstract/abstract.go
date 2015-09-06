@@ -11,6 +11,7 @@ type Counter interface {
 	GetCount() uint
 	Clear() (bool, error)
 	GetType() string
+	GetID() string
 	GetFrequency([][]byte) interface{}
 }
 

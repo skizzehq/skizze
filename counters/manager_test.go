@@ -73,7 +73,7 @@ func TestDuplicateCounters(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors while creating sketch, got", err)
 	}
-	err = manager.CreateSketch("marvel", "topk", 10000000)
+	err = manager.CreateSketch("marvel", "hllpp", 10000000)
 	if err == nil {
 		t.Error("Expected errors while creating sketch duplicate sketch, got", err)
 	}
@@ -109,12 +109,12 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected 1 counters, got", len(sketches))
 	}
 
-	err = manager.AddToSketch("marvel", []string{"hulk", "thor"})
+	err = manager.AddToSketch("marvel", "hllpp", []string{"hulk", "thor"})
 	if err != nil {
 		t.Error("Expected no errors while adding to sketch, got", err)
 	}
 
-	count, err := manager.GetCountForSketch("marvel", nil)
+	count, err := manager.GetCountForSketch("marvel", "hllpp", nil)
 	if len(sketches) != 1 {
 		t.Error("Expected 1 counters, got", len(sketches))
 	}
@@ -123,7 +123,7 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected count == 2, got", count.(uint))
 	}
 
-	err = manager.DeleteSketch("marvel")
+	err = manager.DeleteSketch("marvel", "hllpp")
 	if err != nil {
 		t.Error("Expected no errors while deleting sketch, got", err)
 	}
@@ -146,8 +146,8 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	if _, exists = m1.info["x-force"]; exists {
-		t.Error("expected avengers to not be initially loaded by manager")
+	if _, exists = m1.info["x-force.hllpp"]; exists {
+		t.Error("expected x-force to not be initially loaded by manager")
 	}
 	err = m1.CreateSketch("x-force", "hllpp", 1000000)
 	if err != nil {
@@ -158,7 +158,7 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	if _, exists = m2.info["x-force"]; !exists {
+	if _, exists = m2.info["x-force.hllpp"]; !exists {
 		t.Error("expected x-force to be in loaded by manager")
 	}
 }
@@ -177,10 +177,10 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	}
 	m1.CreateSketch("avengers", "hllpp", 1000000)
 
-	m1.AddToSketch("avengers", []string{"sabertooth",
+	m1.AddToSketch("avengers", "hllpp", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops"})
 
-	res, err := m1.GetCountForSketch("avengers", nil)
+	res, err := m1.GetCountForSketch("avengers", "hllpp", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -192,7 +192,7 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	res, err = m2.GetCountForSketch("avengers", nil)
+	res, err = m2.GetCountForSketch("avengers", "hllpp", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -240,7 +240,7 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 
 	var pFunc = func(value string) {
 		defer wg.Done()
-		m1.AddToSketch("avengers", []string{value})
+		m1.AddToSketch("avengers", "hllpp", []string{value})
 		resChan <- nil
 	}
 	for _, value := range values {
@@ -252,9 +252,9 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 	}
 
 	// add all values in one bulk
-	m1.AddToSketch("x-men", values)
-	count1, err := m1.GetCountForSketch("avengers", nil)
-	count2, err := m1.GetCountForSketch("x-men", nil)
+	m1.AddToSketch("x-men", "hllpp", values)
+	count1, err := m1.GetCountForSketch("avengers", "hllpp", nil)
+	count2, err := m1.GetCountForSketch("x-men", "hllpp", nil)
 	if count1 != count2 {
 		t.Error("expected avengers count == x-men count, got", count1, "!=", count2)
 	}
@@ -295,7 +295,7 @@ func TestFailDeleteSketch(t *testing.T) {
 	if err != nil {
 		t.Log("Expected no errors, got", err)
 	}
-	err = m1.DeleteSketch("-1")
+	err = m1.DeleteSketch("-1", "hllpp")
 	if err == nil {
 		t.Error("Expected error, got", err)
 	}
@@ -309,7 +309,7 @@ func TestFailDeleteFromSketch(t *testing.T) {
 	if err != nil {
 		t.Log("Expected no errors, got", err)
 	}
-	err = m1.DeleteFromSketch("-1", []string{})
+	err = m1.DeleteFromSketch("-1", "hlpp", []string{})
 	if err == nil {
 		t.Error("Expected error, got", err)
 	}
@@ -323,7 +323,7 @@ func TestFailGetCountForSketch(t *testing.T) {
 	if err != nil {
 		t.Log("Expected no errors, got", err)
 	}
-	_, err = m1.GetCountForSketch("-1", nil)
+	_, err = m1.GetCountForSketch("-1", "hllpp", nil)
 	if err == nil {
 		t.Error("Expected error, got", err)
 	}
@@ -343,10 +343,10 @@ func TestTopKCounter(t *testing.T) {
 	}
 	m1.CreateSketch("avengers", "topk", 3)
 
-	m1.AddToSketch("avengers", []string{"sabertooth",
+	err = m1.AddToSketch("avengers", "topk", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
 
-	res, err := m1.GetCountForSketch("avengers", nil)
+	res, err := m1.GetCountForSketch("avengers", "topk", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -359,7 +359,7 @@ func TestTopKCounter(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	res, err = m2.GetCountForSketch("avengers", nil)
+	res, err = m2.GetCountForSketch("avengers", "topk", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -396,10 +396,10 @@ func TestCMLCounter(t *testing.T) {
 	}
 	m1.CreateSketch("avengers", abstract.CML, 3)
 
-	m1.AddToSketch("avengers", []string{"sabertooth",
+	m1.AddToSketch("avengers", "cml", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
 
-	res, err := m1.GetCountForSketch("avengers", []string{"cyclops"})
+	res, err := m1.GetCountForSketch("avengers", "cml", []string{"cyclops"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -408,7 +408,7 @@ func TestCMLCounter(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	res, err = m2.GetCountForSketch("avengers", []string{"cyclops"})
+	res, err = m2.GetCountForSketch("avengers", "cml", []string{"cyclops"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -419,7 +419,7 @@ func TestCMLCounter(t *testing.T) {
 		t.Error("expected 'cyclops' count == 3, got", v)
 	}
 
-	res, err = m2.GetCountForSketch("avengers", []string{"havoc"})
+	res, err = m2.GetCountForSketch("avengers", "cml", []string{"havoc"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}

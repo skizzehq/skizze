@@ -146,6 +146,13 @@ func (d *Sketch) GetType() string {
 }
 
 /*
+GetID ...
+*/
+func (d *Sketch) GetID() string {
+	return d.ID
+}
+
+/*
 GetFrequency ...
 */
 func (d *Sketch) GetFrequency(values [][]byte) interface{} {

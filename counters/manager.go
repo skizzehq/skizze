@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/counters/abstract"
@@ -19,8 +18,8 @@ import (
 ManagerStruct is responsible for manipulating the counters and syncing to disk
 */
 type ManagerStruct struct {
-	sketchs map[string]abstract.Counter
-	info    map[string]*abstract.Info
+	sketches map[string]abstract.Counter
+	info     map[string]*abstract.Info
 }
 
 var manager *ManagerStruct
@@ -30,21 +29,23 @@ var logger = utils.GetLogger()
 CreateSketch ...
 */
 func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, capacity uint64) error {
+	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
 
 	// Check if sketch with ID already exists
-	if info, ok := m.info[sketchID]; ok {
-		errStr := fmt.Sprintf("Sketch %s of type %s already exists", sketchID, info.Type)
+	if info, ok := m.info[id]; ok {
+		errStr := fmt.Sprintf("Sketch %s of type %s already exists", id, info.Type)
 		return errors.New(errStr)
 	}
 
-	if len([]byte(sketchID)) > config.MaxKeySize {
-		return errors.New("Invalid length of sketch ID: " + strconv.Itoa(len(sketchID)) + ". Max length allowed: " + strconv.Itoa(config.MaxKeySize))
+	if len([]byte(id)) > config.MaxKeySize {
+		errStr := fmt.Sprintf("Invalid length of sketch ID: %d. Max length allowed: %d", len(id), config.MaxKeySize)
+		return errors.New(errStr)
 	}
 	if sketchType == "" {
 		logger.Error.Println("SketchType is mandatory and must be set!")
 		return errors.New("No sketch type was given!")
 	}
-	info := &abstract.Info{ID: sketchID,
+	info := &abstract.Info{ID: id,
 		Type:     sketchType,
 		Capacity: capacity,
 		State:    make(map[string]uint64)}
@@ -65,7 +66,7 @@ func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, capacit
 		errTxt := fmt.Sprint("Could not load sketch ", info, ". Err:", err)
 		return errors.New(errTxt)
 	}
-	m.sketchs[info.ID] = sketch
+	m.sketches[info.ID] = sketch
 	m.dumpInfo(info)
 	return nil
 }
@@ -73,18 +74,20 @@ func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, capacit
 /*
 DeleteSketch ...
 */
-func (m *ManagerStruct) DeleteSketch(sketchID string) error {
-	if _, ok := m.sketchs[sketchID]; !ok {
+func (m *ManagerStruct) DeleteSketch(sketchID string, sketchType string) error {
+	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
+
+	if _, ok := m.sketches[id]; !ok {
 		return errors.New("No such sketch " + sketchID)
 	}
-	delete(m.sketchs, sketchID)
-	delete(m.info, sketchID)
+	delete(m.sketches, id)
+	delete(m.info, id)
 	manager := storage.GetManager()
-	err := manager.DeleteInfo(sketchID)
+	err := manager.DeleteInfo(id)
 	if err != nil {
 		return err
 	}
-	return manager.DeleteData(sketchID)
+	return manager.DeleteData(id)
 }
 
 /*
@@ -92,22 +95,27 @@ GetSketches ...
 */
 func (m *ManagerStruct) GetSketches() ([]string, error) {
 	// TODO: Remove dummy data and implement proper result
-	sketchs := make([]string, len(m.sketchs), len(m.sketchs))
+	sketches := make([]string, len(m.sketches), len(m.sketches))
 	i := 0
-	for k := range m.sketchs {
-		sketchs[i] = k
+	for _, v := range m.sketches {
+		typ := v.GetType()
+		id := v.GetID()
+		sketches[i] = fmt.Sprintf("%s/%s", typ, id[:len(id)-len(typ)-1])
 		i++
 	}
-	return sketchs, nil
+	return sketches, nil
 }
 
 /*
 AddToSketch ...
 */
-func (m *ManagerStruct) AddToSketch(sketchID string, values []string) error {
-	var val, ok = m.sketchs[sketchID]
+func (m *ManagerStruct) AddToSketch(sketchID string, sketchType string, values []string) error {
+	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
+
+	var val, ok = m.sketches[id]
 	if ok == false {
-		return errors.New("No such sketch: " + sketchID)
+		errStr := fmt.Sprintf("No such sketch %s of type %s found", sketchID, sketchType)
+		return errors.New(errStr)
 	}
 	var counter abstract.Counter
 	counter = val.(abstract.Counter)
@@ -123,8 +131,8 @@ func (m *ManagerStruct) AddToSketch(sketchID string, values []string) error {
 /*
 DeleteFromSketch ...
 */
-func (m *ManagerStruct) DeleteFromSketch(sketchID string, values []string) error {
-	var val, ok = m.sketchs[sketchID]
+func (m *ManagerStruct) DeleteFromSketch(sketchID string, sketchType string, values []string) error {
+	var val, ok = m.sketches[sketchID]
 	if ok == false {
 		return errors.New("No such sketch: " + sketchID)
 	}
@@ -142,10 +150,12 @@ func (m *ManagerStruct) DeleteFromSketch(sketchID string, values []string) error
 /*
 GetCountForSketch ...
 */
-func (m *ManagerStruct) GetCountForSketch(sketchID string, values []string) (interface{}, error) {
-	var val, ok = m.sketchs[sketchID]
+func (m *ManagerStruct) GetCountForSketch(sketchID string, sketchType string, values []string) (interface{}, error) {
+	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
+	var val, ok = m.sketches[id]
 	if ok == false {
-		return 0, errors.New("No such sketch: " + sketchID)
+		errStr := fmt.Sprintf("No such sketch %s of type %s found", sketchID, sketchType)
+		return 0, errors.New(errStr)
 	}
 	var counter abstract.Counter
 	counter = val.(abstract.Counter)
@@ -179,8 +189,8 @@ func GetManager() (*ManagerStruct, error) {
 }
 
 func newManager() (*ManagerStruct, error) {
-	sketchs := make(map[string]abstract.Counter)
-	m := &ManagerStruct{sketchs, make(map[string]*abstract.Info)}
+	sketches := make(map[string]abstract.Counter)
+	m := &ManagerStruct{sketches, make(map[string]*abstract.Info)}
 	err := m.loadInfo()
 	if err != nil {
 		return nil, err
@@ -233,7 +243,7 @@ func (m *ManagerStruct) loadSketches() error {
 			errTxt := fmt.Sprint("Could not load sketch ", info, ". Err: ", err)
 			return errors.New(errTxt)
 		}
-		m.sketchs[info.ID] = sketch
+		m.sketches[info.ID] = sketch
 		strg.LoadData(key, 0, 0)
 	}
 	return nil
