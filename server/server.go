@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/facebookgo/grace/gracehttp"
 	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/counters"
 	"github.com/seiflotfy/skizze/storage"
@@ -166,6 +167,7 @@ func (srv *Server) Run() {
 	port := int(conf.GetPort())
 	logger.Info.Println("Server up and running on port: " + strconv.Itoa(port))
 	http.ListenAndServe(":"+strconv.Itoa(port), srv)
+	gracehttp.Serve(&http.Server{Addr: ":" + strconv.Itoa(port), Handler: srv})
 }
 
 /*
