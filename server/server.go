@@ -61,7 +61,7 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 	switch {
 	case method == "GET":
 		// Get all counters
-		sketches, err = counterManager.GetSketchs()
+		sketches, err = counterManager.GetSketches()
 		js, err = json.Marshal(sketchesResult{sketches, err})
 		logger.Info.Printf("[%v]: Getting all available sketches", method)
 	case method == "MERGE":
