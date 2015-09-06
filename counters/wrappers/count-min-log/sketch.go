@@ -14,7 +14,7 @@ import (
 var logger = utils.GetLogger()
 var manager *storage.ManagerStruct
 
-const defaultEpsilon = 0.00000543657
+const defaultEpsilon = 0.000003397855
 const defaultDelta = 0.99
 
 /*
@@ -32,11 +32,27 @@ NewSketch ...
 func NewSketch(info *abstract.Info) (*Sketch, error) {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
-	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID, defaultEpsilon, defaultDelta)
+	epsilon := 0.0
+	if eps, ok := info.Properties["epsilon"]; ok {
+		epsilon = eps
+	} else {
+		epsilon = defaultEpsilon
+		info.Properties["epsilon"] = epsilon
+	}
+
+	delta := 0.0
+	if d, ok := info.Properties["delta"]; ok {
+		delta = d
+	} else {
+		delta = defaultDelta
+		info.Properties["delta"] = delta
+	}
+
+	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID, epsilon, delta)
 	d := Sketch{info, sketch16, sync.RWMutex{}}
 	err := d.Save()
 	if err != nil {
-		logger.Error.Println("an error has occurred while saving Sketch: " + err.Error())
+		logger.Error.Printf("an error has occurred while saving Sketch: %s", err.Error())
 	}
 	return &d, nil
 }
@@ -45,7 +61,8 @@ func NewSketch(info *abstract.Info) (*Sketch, error) {
 NewSketchFromData ...
 */
 func NewSketchFromData(info *abstract.Info) (*Sketch, error) {
-	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID, defaultEpsilon, defaultDelta)
+	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID,
+		info.Properties["epsilon"], info.Properties["delta"])
 	// FIXME: create Sketch from new data
 	return &Sketch{info, sketch16, sync.RWMutex{}}, nil
 }

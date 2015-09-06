@@ -36,7 +36,7 @@ NewSketch ...
 func NewSketch(info *abstract.Info) (*Sketch, error) {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
-	d := Sketch{info, topk.New(int(info.Capacity)), sync.RWMutex{}}
+	d := Sketch{info, topk.New(int(info.Properties["capacity"])), sync.RWMutex{}}
 	err := d.Save()
 	if err != nil {
 		logger.Error.Println("an error has occurred while saving sketch: " + err.Error())

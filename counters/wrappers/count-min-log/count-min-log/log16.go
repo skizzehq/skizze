@@ -55,7 +55,7 @@ NewSketch16ForEpsilonDelta ...
 func NewSketch16ForEpsilonDelta(id string, epsilon, delta float64) (*Sketch16, error) {
 	var (
 		width = uint(math.Ceil(math.E / epsilon))
-		depth = uint(math.Ceil(math.Log(1 / delta)))
+		depth = uint(math.Ceil(math.Log(1 / (1 - delta))))
 	)
 	return NewSketch16(id, width, depth, true, 1.00026, true, true, 16)
 }

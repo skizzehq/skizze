@@ -16,12 +16,10 @@ import (
 )
 
 type requestData struct {
-	id       string
-	typ      string
-	Capacity uint64   `json:"capacity"`
-	Error    float64  `json:"error"`
-	Storage  string   `json:"storage"`
-	Values   []string `json:"values"`
+	id         string
+	typ        string
+	Properties map[string]float64 `json:"properties"`
+	Values     []string           `json:"values"`
 }
 
 var logger = utils.GetLogger()
@@ -97,7 +95,7 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 		res = sketchResult{count, err}
 	case method == "POST":
 		// Create a new sketch counter
-		err = counterManager.CreateSketch(data.id, data.typ, data.Capacity)
+		err = counterManager.CreateSketch(data.id, data.typ, data.Properties)
 		logger.Info.Printf("[%v]: Creating new sketch: %v", method, data.id)
 		res = sketchResult{0, err}
 	case method == "PUT":
@@ -145,6 +143,10 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		data = requestData{}
+	}
+
+	if data.Properties == nil {
+		data.Properties = make(map[string]float64)
 	}
 
 	if len(paths) == 1 {

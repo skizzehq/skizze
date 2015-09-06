@@ -34,8 +34,9 @@ func TestLog16AddAndCount(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 	info := &abstract.Info{ID: "ultimates",
-		Type:     abstract.CML,
-		Capacity: 1000000, State: make(map[string]uint64)}
+		Type:       abstract.CML,
+		Properties: map[string]float64{},
+		State:      make(map[string]uint64)}
 
 	log, _ := NewForCapacity16(info, 1000, 0.01)
 
@@ -72,8 +73,9 @@ func TestLog16Reset(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 	info := &abstract.Info{ID: "ultimates",
-		Type:     abstract.CML,
-		Capacity: 1000000, State: make(map[string]uint64)}
+		Type:       abstract.CML,
+		Properties: map[string]float64{},
+		State:      make(map[string]uint64)}
 	log, _ := NewForCapacity16(info, 1000, 0.001)
 	log.IncreaseCount([]byte("a"))
 	log.IncreaseCount([]byte("b"))

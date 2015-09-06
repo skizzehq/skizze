@@ -35,9 +35,10 @@ func TestCMLCounter(t *testing.T) {
 	defer tearDownTests()
 
 	sketch, err := NewSketch(&abstract.Info{
-		ID:    "avengers",
-		Type:  abstract.CML,
-		State: make(map[string]uint64)})
+		ID:         "avengers",
+		Type:       abstract.CML,
+		Properties: make(map[string]float64),
+		State:      make(map[string]uint64)})
 
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)

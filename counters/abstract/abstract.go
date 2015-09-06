@@ -19,10 +19,10 @@ type Counter interface {
 Info ...
 */
 type Info struct {
-	ID       string            `json:"id"`
-	Type     string            `json:"type"`
-	Capacity uint64            `json:"capacity"`
-	State    map[string]uint64 `json:"state"`
+	ID         string             `json:"id"`
+	Type       string             `json:"type"`
+	State      map[string]uint64  `json:"state"`
+	Properties map[string]float64 `json:"properties"`
 }
 
 /*

@@ -69,11 +69,14 @@ func TestDuplicateCounters(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	err = manager.CreateSketch("marvel", "hllpp", 10000000)
+
+	props := map[string]float64{"capacity": 10000000.0}
+
+	err = manager.CreateSketch("marvel", "hllpp", props)
 	if err != nil {
 		t.Error("Expected no errors while creating sketch, got", err)
 	}
-	err = manager.CreateSketch("marvel", "hllpp", 10000000)
+	err = manager.CreateSketch("marvel", "hllpp", props)
 	if err == nil {
 		t.Error("Expected errors while creating sketch duplicate sketch, got", err)
 	}
@@ -96,7 +99,8 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected 0 counters, got", len(sketches))
 	}
 
-	err = manager.CreateSketch("marvel", "hllpp", 10000000)
+	props := map[string]float64{"capacity": 10000000.0}
+	err = manager.CreateSketch("marvel", "hllpp", props)
 	if err != nil {
 		t.Error("Expected no errors while creating sketch, got", err)
 	}
@@ -149,7 +153,9 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 	if _, exists = m1.info["x-force.hllpp"]; exists {
 		t.Error("expected x-force to not be initially loaded by manager")
 	}
-	err = m1.CreateSketch("x-force", "hllpp", 1000000)
+
+	props := map[string]float64{"capacity": 10000000.0}
+	err = m1.CreateSketch("x-force", "hllpp", props)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,7 +181,9 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateSketch("avengers", "hllpp", 1000000)
+
+	props := map[string]float64{"capacity": 10000000.0}
+	m1.CreateSketch("avengers", "hllpp", props)
 
 	m1.AddToSketch("avengers", "hllpp", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops"})
@@ -212,8 +220,10 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 	if _, exists := m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateSketch("avengers", "hllpp", 1000000)
-	m1.CreateSketch("x-men", "hllpp", 1000000)
+
+	props := map[string]float64{"capacity": 10000000.0}
+	m1.CreateSketch("avengers", "hllpp", props)
+	m1.CreateSketch("x-men", "hllpp", props)
 
 	fd, err := os.Open("/usr/share/dict/web2")
 	if err != nil {
@@ -270,7 +280,8 @@ func TestFailCreateSketch(t *testing.T) {
 	}
 
 	// test for unknown sketchType
-	err = m1.CreateSketch("marvel", "wrong", 10000000)
+	props := map[string]float64{"capacity": 10000000.0}
+	err = m1.CreateSketch("marvel", "wrong", props)
 	if err == nil {
 		t.Error("Expected errors while creating sketch, got", err)
 	}
@@ -281,7 +292,7 @@ func TestFailCreateSketch(t *testing.T) {
 	}
 	sketchID := string(buffer)
 	// test for too long sketchID
-	err = m1.CreateSketch(sketchID, "hllpp", 10000000)
+	err = m1.CreateSketch(sketchID, "hllpp", props)
 	if err == nil {
 		t.Error("Expected errors while creating sketch, got", err)
 	}
@@ -341,7 +352,8 @@ func TestTopKCounter(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateSketch("avengers", "topk", 3)
+	props := map[string]float64{"capacity": 3.0}
+	m1.CreateSketch("avengers", "topk", props)
 
 	err = m1.AddToSketch("avengers", "topk", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
@@ -394,7 +406,8 @@ func TestCMLCounter(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	m1.CreateSketch("avengers", abstract.CML, 3)
+	props := map[string]float64{"epsilon": 0.5}
+	m1.CreateSketch("avengers", abstract.CML, props)
 
 	m1.AddToSketch("avengers", "cml", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})

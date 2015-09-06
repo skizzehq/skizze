@@ -97,7 +97,7 @@ func TestPost(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "hllpp/marvel", `{
-		"capacity": 100000
+		"properties": {"capacity": 100000}
 	}`)
 
 	if resp.Code != 200 {
@@ -120,7 +120,7 @@ func TestHLL(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "hllpp/marvel", `{
-		"capacity": 100000
+		"properties": {"capacity": 100000}
 	}`)
 
 	if resp.Code != 200 {
@@ -153,7 +153,7 @@ func TestCML(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "cml/x-force", `{
-		"capacity": 100000
+		"properties": {"epsilon": 0.05, "delta": 0.99}
 	}`)
 
 	if resp.Code != 200 {
@@ -177,4 +177,46 @@ func TestCML(t *testing.T) {
 	if v, ok := result2["magneto"]; ok && uint(v.(float64)) != 2 {
 		t.Fatalf("after add resultCount != 2. Got %d", uint(v.(float64)))
 	}
+}
+
+func TestTopK(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+	s, err := New()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	resp := httpRequest(s, t, "POST", "topk/x-force", `{
+		"properties": {
+			"capacity": 100
+		}
+	}`)
+
+	if resp.Code != 200 {
+		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
+		return
+	}
+
+	resp = httpRequest(s, t, "GET", "", `{}`)
+	result := unmarshalSketchsResult(resp)
+	if len(result.Result) != 1 {
+		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
+	}
+
+	resp = httpRequest(s, t, "PUT", "topk/x-force", `{
+			"values": ["magneto", "wasp", "beast", "magneto"]
+		}`)
+
+	resp = httpRequest(s, t, "GET", "topk/x-force", `{"values": ["magneto"]}`)
+
+	result2 := unmarshalSketchResult(resp).Result.([]interface{})
+	res := make([]map[string]interface{}, len(result2))
+	for i, v := range result2 {
+		res[i] = v.(map[string]interface{})
+	}
+
+	if v, ok := res[0]["Key"]; ok && v.(string) != "magneto" {
+		t.Fatalf("Expected \"magneto\" in first position, got, %s", v.(string))
+	}
+
 }

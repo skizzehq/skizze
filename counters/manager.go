@@ -28,7 +28,7 @@ var logger = utils.GetLogger()
 /*
 CreateSketch ...
 */
-func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, capacity uint64) error {
+func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, props map[string]float64) error {
 	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
 
 	// Check if sketch with ID already exists
@@ -46,9 +46,9 @@ func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, capacit
 		return errors.New("No sketch type was given!")
 	}
 	info := &abstract.Info{ID: id,
-		Type:     sketchType,
-		Capacity: capacity,
-		State:    make(map[string]uint64)}
+		Type:       sketchType,
+		Properties: props,
+		State:      make(map[string]uint64)}
 	var sketch abstract.Counter
 	var err error
 	switch sketchType {
