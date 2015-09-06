@@ -5,7 +5,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/seiflotfy/skizze/counters/abstract"
@@ -59,9 +58,6 @@ func NewSketchFromData(info *abstract.Info) (*Sketch, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("==============>", info)
-
 	var network bytes.Buffer // Stand-in for a network connection
 	network.Write(data)
 	dec := gob.NewDecoder(&network) // Will read from network.

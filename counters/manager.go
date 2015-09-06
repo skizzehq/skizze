@@ -32,7 +32,6 @@ func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, props m
 	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
 
 	// Check if sketch with ID already exists
-	fmt.Println("====>", id)
 	if info, ok := m.info[id]; ok {
 		errStr := fmt.Sprintf("Sketch %s of type %s already exists", sketchID, info.Type)
 		return errors.New(errStr)
@@ -67,7 +66,7 @@ func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, props m
 		errTxt := fmt.Sprint("Could not load sketch ", info, ". Err:", err)
 		return errors.New(errTxt)
 	}
-	m.sketches[info.ID] = sketch
+	m.sketches[id] = sketch
 	m.dumpInfo(info)
 	return nil
 }
@@ -162,7 +161,6 @@ func (m *ManagerStruct) GetCountForSketch(sketchID string, sketchType string, va
 	counter = val.(abstract.Counter)
 
 	if counter.GetType() == abstract.CML {
-		fmt.Println("================")
 		bvalues := make([][]byte, len(values), len(values))
 		for i, value := range values {
 			bvalues[i] = []byte(value)
@@ -204,22 +202,22 @@ func newManager() (*ManagerStruct, error) {
 	return m, nil
 }
 
-func (m *ManagerStruct) dumpInfo(i *abstract.Info) {
-	m.info[i.ID] = i
+func (m *ManagerStruct) dumpInfo(info *abstract.Info) {
+	m.info[info.ID] = info
 	manager := storage.GetManager()
-	infoData, err := json.Marshal(i)
+	infoData, err := json.Marshal(info)
 	utils.PanicOnError(err)
-	manager.SaveInfo(i.ID, infoData)
+	manager.SaveInfo(info.ID, infoData)
 }
 
 func (m *ManagerStruct) loadInfo() error {
 	manager := storage.GetManager()
-	var infoStruct abstract.Info
 	infos, err := manager.LoadAllInfo()
 	if err != nil {
 		return err
 	}
 	for _, infoData := range infos {
+		var infoStruct abstract.Info
 		json.Unmarshal(infoData, &infoStruct)
 		m.info[infoStruct.ID] = &infoStruct
 	}
