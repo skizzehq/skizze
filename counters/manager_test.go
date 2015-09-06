@@ -53,12 +53,12 @@ func TestNoCounters(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	domains, err := manager.GetSketches()
+	sketches, err := manager.GetSketches()
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	if len(domains) != 0 {
-		t.Error("Expected 0 counters, got", len(domains))
+	if len(sketches) != 0 {
+		t.Error("Expected 0 counters, got", len(sketches))
 	}
 }
 
@@ -71,11 +71,11 @@ func TestDuplicateCounters(t *testing.T) {
 	}
 	err = manager.CreateSketch("marvel", "hllpp", 10000000)
 	if err != nil {
-		t.Error("Expected no errors while creating domain, got", err)
+		t.Error("Expected no errors while creating sketch, got", err)
 	}
 	err = manager.CreateSketch("marvel", "topk", 10000000)
 	if err == nil {
-		t.Error("Expected errors while creating domain duplicate domain, got", err)
+		t.Error("Expected errors while creating sketch duplicate sketch, got", err)
 	}
 }
 
@@ -88,35 +88,35 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	domains, err := manager.GetSketches()
+	sketches, err := manager.GetSketches()
 	if err != nil {
-		t.Error("Expected no errors while getting domains, got", err)
+		t.Error("Expected no errors while getting sketches, got", err)
 	}
-	if len(domains) != 0 {
-		t.Error("Expected 0 counters, got", len(domains))
+	if len(sketches) != 0 {
+		t.Error("Expected 0 counters, got", len(sketches))
 	}
 
 	err = manager.CreateSketch("marvel", "hllpp", 10000000)
 	if err != nil {
-		t.Error("Expected no errors while creating domain, got", err)
+		t.Error("Expected no errors while creating sketch, got", err)
 	}
 
-	domains, err = manager.GetSketches()
+	sketches, err = manager.GetSketches()
 	if err != nil {
-		t.Error("Expected no errors while getting domains, got", err)
+		t.Error("Expected no errors while getting sketches, got", err)
 	}
-	if len(domains) != 1 {
-		t.Error("Expected 1 counters, got", len(domains))
+	if len(sketches) != 1 {
+		t.Error("Expected 1 counters, got", len(sketches))
 	}
 
 	err = manager.AddToSketch("marvel", []string{"hulk", "thor"})
 	if err != nil {
-		t.Error("Expected no errors while adding to domain, got", err)
+		t.Error("Expected no errors while adding to sketch, got", err)
 	}
 
 	count, err := manager.GetCountForSketch("marvel", nil)
-	if len(domains) != 1 {
-		t.Error("Expected 1 counters, got", len(domains))
+	if len(sketches) != 1 {
+		t.Error("Expected 1 counters, got", len(sketches))
 	}
 
 	if count.(uint) != 2 {
@@ -125,15 +125,15 @@ func TestDefaultCounter(t *testing.T) {
 
 	err = manager.DeleteSketch("marvel")
 	if err != nil {
-		t.Error("Expected no errors while deleting domain, got", err)
+		t.Error("Expected no errors while deleting sketch, got", err)
 	}
 
-	domains, err = manager.GetSketches()
+	sketches, err = manager.GetSketches()
 	if err != nil {
-		t.Error("Expected no errors while getting domains, got", err)
+		t.Error("Expected no errors while getting sketches, got", err)
 	}
-	if len(domains) != 0 {
-		t.Error("Expected 0 counters, got", len(domains))
+	if len(sketches) != 0 {
+		t.Error("Expected 0 counters, got", len(sketches))
 	}
 }
 
@@ -269,21 +269,21 @@ func TestFailCreateSketch(t *testing.T) {
 		t.Log("Expected no errors, got", err)
 	}
 
-	// test for unknown domainType
+	// test for unknown sketchType
 	err = m1.CreateSketch("marvel", "wrong", 10000000)
 	if err == nil {
-		t.Error("Expected errors while creating domain, got", err)
+		t.Error("Expected errors while creating sketch, got", err)
 	}
 
 	buffer := make([]byte, config.MaxKeySize+1)
 	for i := 0; i < config.MaxKeySize+1; i++ {
 		buffer[i] = byte(49) // ascii 1
 	}
-	domainID := string(buffer)
-	// test for too long domainID
-	err = m1.CreateSketch(domainID, "hllpp", 10000000)
+	sketchID := string(buffer)
+	// test for too long sketchID
+	err = m1.CreateSketch(sketchID, "hllpp", 10000000)
 	if err == nil {
-		t.Error("Expected errors while creating domain, got", err)
+		t.Error("Expected errors while creating sketch, got", err)
 	}
 }
 

@@ -19,7 +19,7 @@ import (
 ManagerStruct is responsible for manipulating the counters and syncing to disk
 */
 type ManagerStruct struct {
-	domains map[string]abstract.Counter
+	sketchs map[string]abstract.Counter
 	info    map[string]*abstract.Info
 }
 
@@ -29,43 +29,43 @@ var logger = utils.GetLogger()
 /*
 CreateSketch ...
 */
-func (m *ManagerStruct) CreateSketch(domainID string, domainType string, capacity uint64) error {
+func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, capacity uint64) error {
 
-	// Check if domain with ID already exists
-	if info, ok := m.info[domainID]; ok {
-		errStr := fmt.Sprintf("Sketch %s of type %s already exists", domainID, info.Type)
+	// Check if sketch with ID already exists
+	if info, ok := m.info[sketchID]; ok {
+		errStr := fmt.Sprintf("Sketch %s of type %s already exists", sketchID, info.Type)
 		return errors.New(errStr)
 	}
 
-	if len([]byte(domainID)) > config.MaxKeySize {
-		return errors.New("Invalid length of domain ID: " + strconv.Itoa(len(domainID)) + ". Max length allowed: " + strconv.Itoa(config.MaxKeySize))
+	if len([]byte(sketchID)) > config.MaxKeySize {
+		return errors.New("Invalid length of sketch ID: " + strconv.Itoa(len(sketchID)) + ". Max length allowed: " + strconv.Itoa(config.MaxKeySize))
 	}
-	if domainType == "" {
+	if sketchType == "" {
 		logger.Error.Println("SketchType is mandatory and must be set!")
-		return errors.New("No domain type was given!")
+		return errors.New("No sketch type was given!")
 	}
-	info := &abstract.Info{ID: domainID,
-		Type:     domainType,
+	info := &abstract.Info{ID: sketchID,
+		Type:     sketchType,
 		Capacity: capacity,
 		State:    make(map[string]uint64)}
-	var domain abstract.Counter
+	var sketch abstract.Counter
 	var err error
-	switch domainType {
+	switch sketchType {
 	case abstract.HLLPP:
-		domain, err = hllpp.NewSketch(info)
+		sketch, err = hllpp.NewSketch(info)
 	case abstract.TopK:
-		domain, err = topk.NewSketch(info)
+		sketch, err = topk.NewSketch(info)
 	case abstract.CML:
-		domain, err = cml.NewSketch(info)
+		sketch, err = cml.NewSketch(info)
 	default:
-		return errors.New("Invalid domain type: " + domainType)
+		return errors.New("Invalid sketch type: " + sketchType)
 	}
 
 	if err != nil {
-		errTxt := fmt.Sprint("Could not load domain ", info, ". Err:", err)
+		errTxt := fmt.Sprint("Could not load sketch ", info, ". Err:", err)
 		return errors.New(errTxt)
 	}
-	m.domains[info.ID] = domain
+	m.sketchs[info.ID] = sketch
 	m.dumpInfo(info)
 	return nil
 }
@@ -73,18 +73,18 @@ func (m *ManagerStruct) CreateSketch(domainID string, domainType string, capacit
 /*
 DeleteSketch ...
 */
-func (m *ManagerStruct) DeleteSketch(domainID string) error {
-	if _, ok := m.domains[domainID]; !ok {
-		return errors.New("No such domain " + domainID)
+func (m *ManagerStruct) DeleteSketch(sketchID string) error {
+	if _, ok := m.sketchs[sketchID]; !ok {
+		return errors.New("No such sketch " + sketchID)
 	}
-	delete(m.domains, domainID)
-	delete(m.info, domainID)
+	delete(m.sketchs, sketchID)
+	delete(m.info, sketchID)
 	manager := storage.GetManager()
-	err := manager.DeleteInfo(domainID)
+	err := manager.DeleteInfo(sketchID)
 	if err != nil {
 		return err
 	}
-	return manager.DeleteData(domainID)
+	return manager.DeleteData(sketchID)
 }
 
 /*
@@ -92,22 +92,22 @@ GetSketches ...
 */
 func (m *ManagerStruct) GetSketches() ([]string, error) {
 	// TODO: Remove dummy data and implement proper result
-	domains := make([]string, len(m.domains), len(m.domains))
+	sketchs := make([]string, len(m.sketchs), len(m.sketchs))
 	i := 0
-	for k := range m.domains {
-		domains[i] = k
+	for k := range m.sketchs {
+		sketchs[i] = k
 		i++
 	}
-	return domains, nil
+	return sketchs, nil
 }
 
 /*
 AddToSketch ...
 */
-func (m *ManagerStruct) AddToSketch(domainID string, values []string) error {
-	var val, ok = m.domains[domainID]
+func (m *ManagerStruct) AddToSketch(sketchID string, values []string) error {
+	var val, ok = m.sketchs[sketchID]
 	if ok == false {
-		return errors.New("No such domain: " + domainID)
+		return errors.New("No such sketch: " + sketchID)
 	}
 	var counter abstract.Counter
 	counter = val.(abstract.Counter)
@@ -123,10 +123,10 @@ func (m *ManagerStruct) AddToSketch(domainID string, values []string) error {
 /*
 DeleteFromSketch ...
 */
-func (m *ManagerStruct) DeleteFromSketch(domainID string, values []string) error {
-	var val, ok = m.domains[domainID]
+func (m *ManagerStruct) DeleteFromSketch(sketchID string, values []string) error {
+	var val, ok = m.sketchs[sketchID]
 	if ok == false {
-		return errors.New("No such domain: " + domainID)
+		return errors.New("No such sketch: " + sketchID)
 	}
 	var counter abstract.Counter
 	counter = val.(abstract.Counter)
@@ -142,10 +142,10 @@ func (m *ManagerStruct) DeleteFromSketch(domainID string, values []string) error
 /*
 GetCountForSketch ...
 */
-func (m *ManagerStruct) GetCountForSketch(domainID string, values []string) (interface{}, error) {
-	var val, ok = m.domains[domainID]
+func (m *ManagerStruct) GetCountForSketch(sketchID string, values []string) (interface{}, error) {
+	var val, ok = m.sketchs[sketchID]
 	if ok == false {
-		return 0, errors.New("No such domain: " + domainID)
+		return 0, errors.New("No such sketch: " + sketchID)
 	}
 	var counter abstract.Counter
 	counter = val.(abstract.Counter)
@@ -179,8 +179,8 @@ func GetManager() (*ManagerStruct, error) {
 }
 
 func newManager() (*ManagerStruct, error) {
-	domains := make(map[string]abstract.Counter)
-	m := &ManagerStruct{domains, make(map[string]*abstract.Info)}
+	sketchs := make(map[string]abstract.Counter)
+	m := &ManagerStruct{sketchs, make(map[string]*abstract.Info)}
 	err := m.loadInfo()
 	if err != nil {
 		return nil, err
@@ -217,23 +217,23 @@ func (m *ManagerStruct) loadInfo() error {
 func (m *ManagerStruct) loadSketches() error {
 	strg := storage.GetManager()
 	for key, info := range m.info {
-		var domain abstract.Counter
+		var sketch abstract.Counter
 		var err error
 		switch info.Type {
 		case abstract.HLLPP:
-			domain, err = hllpp.NewSketchFromData(info)
+			sketch, err = hllpp.NewSketchFromData(info)
 		case abstract.TopK:
-			domain, err = topk.NewSketchFromData(info)
+			sketch, err = topk.NewSketchFromData(info)
 		case abstract.CML:
-			domain, err = cml.NewSketchFromData(info)
+			sketch, err = cml.NewSketchFromData(info)
 		default:
 			logger.Info.Println("Invalid counter type", info.Type)
 		}
 		if err != nil {
-			errTxt := fmt.Sprint("Could not load domain ", info, ". Err: ", err)
+			errTxt := fmt.Sprint("Could not load sketch ", info, ". Err: ", err)
 			return errors.New(errTxt)
 		}
-		m.domains[info.ID] = domain
+		m.sketchs[info.ID] = sketch
 		strg.LoadData(key, 0, 0)
 	}
 	return nil
