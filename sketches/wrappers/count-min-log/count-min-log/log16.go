@@ -7,7 +7,7 @@ import (
 	"math/rand"
 	"strconv"
 
-	"github.com/seiflotfy/skizze/counters/abstract"
+	"github.com/seiflotfy/skizze/sketches/abstract"
 )
 
 func hash(s []byte, i uint, w uint) uint {

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/seiflotfy/skizze/config"
-	"github.com/seiflotfy/skizze/counters/abstract"
+	"github.com/seiflotfy/skizze/sketches/abstract"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )

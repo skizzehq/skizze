@@ -11,7 +11,7 @@ import (
 
 	"github.com/facebookgo/grace/gracehttp"
 	"github.com/seiflotfy/skizze/config"
-	"github.com/seiflotfy/skizze/counters"
+	"github.com/seiflotfy/skizze/sketches"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
@@ -24,10 +24,10 @@ type requestData struct {
 }
 
 var logger = utils.GetLogger()
-var counterManager *counters.ManagerStruct
+var sketchesManager *sketches.ManagerStruct
 
 /*
-Server manages the http connections and communciates with the counters manager
+Server manages the http connections and communciates with the sketches manager
 */
 type Server struct{}
 
@@ -46,7 +46,7 @@ New returns a new Server
 */
 func New() (*Server, error) {
 	var err error
-	counterManager, err = counters.GetManager()
+	sketchesManager, err = sketches.GetManager()
 	if err != nil {
 		return nil, err
 	}
@@ -61,8 +61,8 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 
 	switch {
 	case method == "GET":
-		// Get all counters
-		sketches, err = counterManager.GetSketches()
+		// Get all sketches
+		sketches, err = sketchesManager.GetSketches()
 		js, err = json.Marshal(sketchesResult{sketches, err})
 		logger.Info.Printf("[%v]: Getting all available sketches", method)
 	case method == "MERGE":
@@ -87,31 +87,31 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 	var res sketchResult
 	var err error
 
-	// TODO (mb): handle errors from counterManager.*
+	// TODO (mb): handle errors from sketchesManager.*
 	switch {
 	case method == "GET":
 		// Get a count for a specific sketch
-		count, err := counterManager.GetCountForSketch(data.id, data.typ, data.Values)
+		count, err := sketchesManager.GetCountForSketch(data.id, data.typ, data.Values)
 		logger.Info.Printf("[%v]: Getting info from sketch: %v of type %s", method, data.id, data.typ)
 		res = sketchResult{count, err}
 	case method == "POST":
 		// Create a new sketch counter
-		err = counterManager.CreateSketch(data.id, data.typ, data.Properties)
+		err = sketchesManager.CreateSketch(data.id, data.typ, data.Properties)
 		logger.Info.Printf("[%v]: Creating new sketch: %v of type %s", method, data.id, data.typ)
 		res = sketchResult{0, err}
 	case method == "PUT":
 		// Add values to counter
-		err = counterManager.AddToSketch(data.id, data.typ, data.Values)
+		err = sketchesManager.AddToSketch(data.id, data.typ, data.Values)
 		logger.Info.Printf("[%v]: Updating counter for sketch: %v of type %s", method, data.id, data.typ)
 		res = sketchResult{nil, err}
 	case method == "PURGE":
 		// Purges values from counter
-		err = counterManager.DeleteFromSketch(data.id, data.typ, data.Values)
+		err = sketchesManager.DeleteFromSketch(data.id, data.typ, data.Values)
 		logger.Info.Printf("[%v]: Purging values for sketch: %v of type %s", method, data.id, data.typ)
 		res = sketchResult{nil, err}
 	case method == "DELETE":
 		// Delete Counter
-		err := counterManager.DeleteSketch(data.id, data.typ)
+		err := sketchesManager.DeleteSketch(data.id, data.typ)
 		logger.Info.Printf("[%v]: Deleting sketch: %v of type %s", method, data.id, data.typ)
 		res = sketchResult{nil, err}
 	default:
@@ -121,7 +121,6 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 	}
 
 	if res.Error != nil {
-		fmt.Println(err)
 		http.Error(w, fmt.Sprintf("Error with operation %s on %s: %s", method, data.id, res.Error.Error()), http.StatusBadRequest)
 		return
 	}

@@ -1,9 +1,9 @@
 package abstract
 
 /*
-Counter ...
+Sketch ...
 */
-type Counter interface {
+type Sketch interface {
 	Add([]byte) (bool, error)
 	AddMultiple([][]byte) (bool, error)
 	Remove([]byte) (bool, error)

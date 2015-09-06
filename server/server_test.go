@@ -42,12 +42,12 @@ func tearDownTests() {
 	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
 	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
 	storage.CloseInfoDB()
-	counterManager.Destroy()
+	sketchesManager.Destroy()
 }
 
 func httpRequest(s *Server, t *testing.T, method string, sketch string, body string) *httptest.ResponseRecorder {
 	reqBody := strings.NewReader(body)
-	fullSketch := "http://counters.io/" + sketch
+	fullSketch := "http://skizze.io/" + sketch
 	req, err := http.NewRequest(method, fullSketch, reqBody)
 	if err != nil {
 		t.Fatalf("%s", err)

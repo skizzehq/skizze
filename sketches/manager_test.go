@@ -1,4 +1,4 @@
-package counters
+package sketches
 
 import (
 	"bufio"
@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/seiflotfy/skizze/config"
-	"github.com/seiflotfy/skizze/counters/abstract"
-	"github.com/seiflotfy/skizze/counters/wrappers/topk"
+	"github.com/seiflotfy/skizze/sketches/abstract"
+	"github.com/seiflotfy/skizze/sketches/wrappers/topk"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
@@ -46,7 +46,7 @@ func tearDownTests() {
 	manager.Destroy()
 }
 
-func TestNoCounters(t *testing.T) {
+func TestNoSketches(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 	var manager, err = newManager()
@@ -58,11 +58,11 @@ func TestNoCounters(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	if len(sketches) != 0 {
-		t.Error("Expected 0 counters, got", len(sketches))
+		t.Error("Expected 0 sketches, got", len(sketches))
 	}
 }
 
-func TestDuplicateCounters(t *testing.T) {
+func TestDuplicateSketches(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
 	var manager, err = newManager()
@@ -96,7 +96,7 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors while getting sketches, got", err)
 	}
 	if len(sketches) != 0 {
-		t.Error("Expected 0 counters, got", len(sketches))
+		t.Error("Expected 0 sketches, got", len(sketches))
 	}
 
 	props := map[string]float64{"capacity": 10000000.0}
@@ -110,7 +110,7 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors while getting sketches, got", err)
 	}
 	if len(sketches) != 1 {
-		t.Error("Expected 1 counters, got", len(sketches))
+		t.Error("Expected 1 sketches, got", len(sketches))
 	}
 
 	err = manager.AddToSketch("marvel", "hllpp", []string{"hulk", "thor"})
@@ -120,7 +120,7 @@ func TestDefaultCounter(t *testing.T) {
 
 	count, err := manager.GetCountForSketch("marvel", "hllpp", nil)
 	if len(sketches) != 1 {
-		t.Error("Expected 1 counters, got", len(sketches))
+		t.Error("Expected 1 sketches, got", len(sketches))
 	}
 
 	if count.(uint) != 2 {
@@ -137,7 +137,7 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors while getting sketches, got", err)
 	}
 	if len(sketches) != 0 {
-		t.Error("Expected 0 counters, got", len(sketches))
+		t.Error("Expected 0 sketches, got", len(sketches))
 	}
 }
 
