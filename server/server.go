@@ -120,8 +120,13 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 		return
 	}
 
-	js, err := json.Marshal(res)
+	if res.Error != nil {
+		fmt.Println(err)
+		http.Error(w, fmt.Sprintf("Error with operation %s on %s: %s", method, data.id, res.Error.Error()), http.StatusBadRequest)
+		return
+	}
 
+	js, err := json.Marshal(res)
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)

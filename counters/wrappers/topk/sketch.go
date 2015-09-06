@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/seiflotfy/skizze/counters/abstract"
@@ -15,6 +16,8 @@ import (
 
 var logger = utils.GetLogger()
 var manager *storage.ManagerStruct
+
+const defaultCapacity = 100.0
 
 /*
 Sketch is the toplevel sketch to control the HLL implementation
@@ -36,6 +39,9 @@ NewSketch ...
 func NewSketch(info *abstract.Info) (*Sketch, error) {
 	manager = storage.GetManager()
 	manager.Create(info.ID)
+	if info.Properties["capacity"] == 0 {
+		info.Properties["capacity"] = defaultCapacity
+	}
 	d := Sketch{info, topk.New(int(info.Properties["capacity"])), sync.RWMutex{}}
 	err := d.Save()
 	if err != nil {
@@ -53,6 +59,8 @@ func NewSketchFromData(info *abstract.Info) (*Sketch, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println("==============>", info)
 
 	var network bytes.Buffer // Stand-in for a network connection
 	network.Write(data)

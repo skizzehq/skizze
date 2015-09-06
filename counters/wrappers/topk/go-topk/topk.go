@@ -19,6 +19,7 @@ package topk
 
 import (
 	"container/heap"
+	"fmt"
 	"hash/fnv"
 	"sort"
 )
@@ -99,7 +100,7 @@ func New(n int) *Stream {
 
 // Insert adds an element to the stream to be tracked
 func (s *Stream) Insert(x string, count int) {
-
+	fmt.Println("=========>", x)
 	h := fnv.New32a()
 	h.Write([]byte(x))
 	xhash := int(h.Sum32()) % len(s.Alphas)

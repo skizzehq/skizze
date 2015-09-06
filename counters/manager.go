@@ -32,8 +32,9 @@ func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, props m
 	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
 
 	// Check if sketch with ID already exists
+	fmt.Println("====>", id)
 	if info, ok := m.info[id]; ok {
-		errStr := fmt.Sprintf("Sketch %s of type %s already exists", id, info.Type)
+		errStr := fmt.Sprintf("Sketch %s of type %s already exists", sketchID, info.Type)
 		return errors.New(errStr)
 	}
 
@@ -161,6 +162,7 @@ func (m *ManagerStruct) GetCountForSketch(sketchID string, sketchType string, va
 	counter = val.(abstract.Counter)
 
 	if counter.GetType() == abstract.CML {
+		fmt.Println("================")
 		bvalues := make([][]byte, len(values), len(values))
 		for i, value := range values {
 			bvalues[i] = []byte(value)
