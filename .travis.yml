@@ -12,7 +12,6 @@ install:
  - go get github.com/boltdb/bolt
  - go get github.com/facebookgo/httpdown
  - go get github.com/facebookgo/grace/gracehttp
- - go get -u
 
 script:
  - go test -v ./...
