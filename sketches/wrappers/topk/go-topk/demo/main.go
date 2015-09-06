@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/seiflotfy/skizze/counters/wrappers/topk/go-topk"
+	"github.com/seiflotfy/skizze/sketches/wrappers/topk/go-topk"
 )
 
 func main() {
