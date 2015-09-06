@@ -19,6 +19,8 @@ type requestData struct {
 	id       string
 	typ      string
 	Capacity uint64   `json:"capacity"`
+	Error    float64  `json:"error"`
+	Storage  string   `json:"storage"`
 	Values   []string `json:"values"`
 }
 
