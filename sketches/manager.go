@@ -37,20 +37,25 @@ func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, props m
 		return errors.New(errStr)
 	}
 
+	// Check that id length does not exceed MaxKeySize
 	if len([]byte(id)) > config.MaxKeySize {
 		errStr := fmt.Sprintf("Invalid length of sketch ID: %d. Max length allowed: %d", len(id), config.MaxKeySize)
 		return errors.New(errStr)
 	}
+
+	// Make sure sketchType is set
 	if sketchType == "" {
 		logger.Error.Println("SketchType is mandatory and must be set!")
 		return errors.New("No sketch type was given!")
 	}
+
 	info := &abstract.Info{ID: id,
 		Type:       sketchType,
 		Properties: props,
 		State:      make(map[string]uint64)}
 	var sketch abstract.Sketch
 	var err error
+
 	switch sketchType {
 	case abstract.HLLPP:
 		sketch, err = hllpp.NewSketch(info)
