@@ -20,8 +20,8 @@ Skizze is communicated with via a RESTful API. All methods apply on all differen
 | GET    | /          | N/A                          | Lists all available sketches (sketches) |
 | MERGE  | /          | not implemented yet          | Merges multiple sketches of the same <type> if they support merging |
 | POST   | /$type/$id | {"capacity": uint64}         | Creates a new <type> sketch with id: <id> |
-| GET    | /$type/$id | (optional) {"values": [string, string]} | Get cardinality/frequency/rank of a sketch (for given values if supported by the sketch type) |
-| PUT    | /$type/$id | {"values": [string, string]} | Updates a sketch by adding values to it |
-| PURGE  | /$type/$id | {"values": [string, string]} | Updates a sketch by purging values from it |
+| GET    | /$type/$id | (optional) {"values": [string, ...]} | Get cardinality/frequency/rank of a sketch (for given values if supported by the sketch type) |
+| PUT    | /$type/$id | {"values": [string, ...]} | Updates a sketch by adding values to it |
+| PURGE  | /$type/$id | {"values": [string, ...]} | Updates a sketch by purging values from it |
 | DELETE | /$type/$id | N/A                          | Deletes a sketch. |
 
