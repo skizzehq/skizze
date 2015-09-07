@@ -8,9 +8,7 @@ Skizze ([ˈskɪt͡sə]: german for sketch) is a sketch data store to deal with a
 
 Unlike a Key-Value store, Skizze does not store values, but rather appends values to a defined sketches, allowing one to solve frequency and cardinality queries in near O(1) time, with minimal memory footprint.
 
-<b>Note:</b> Data structures that can grow too big to reside in memory are read and written from/to disk directly via open stream to make sure we can maintain a high number of sketches.
-
-#### Current status ==> pre-Alpha
+<b> Current status ==> pre-Alpha </b>
 
 ## Motivation
 
@@ -26,6 +24,9 @@ Skizze is a (fire and forget) service that provides a probabilistic data structu
 * Does the data set contain a particular element (membership query)?
 
 ## API
+
+<b>Note:</b> Data structures that can grow too big to reside in memory are read and written from/to disk directly via open stream to make sure we can maintain a high number of sketches.
+
 ### RESTful API
 
 | Method | Route      | Parameters                   | Task |
