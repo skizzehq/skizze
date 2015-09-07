@@ -5,6 +5,14 @@ Skizze is communicated with via a RESTful API. All methods apply on all differen
 ## Quick Overview
 <b>Note:</b> Data structures that can grow too big to reside in memory are read and written from/to disk directly via open stream to make sure we can maintain a high number of sketches.
 
+### Sketch Types
+
+| type  | purpose     | Sketch               | Description                              | Notes |
+| ---   | ---         | ---                  | ---                                      | ---   |
+| hllpp | cardinality | HyperLogLog++        | query unique items from all added values | capacity up to billions, does not support purging added values |
+| cml   | frequency   | Count-Min-Log Sketch | query frequency of unique values added   | N/A |
+| topk  | rank + frequncy | Top-k Sketch | query the top k values added to the sketch | N/A |
+
 ### RESTful API
 
 | Method | Route      | Parameters                   | Task |
@@ -16,12 +24,4 @@ Skizze is communicated with via a RESTful API. All methods apply on all differen
 | PUT    | /$type/$id | {"values": [string, string]} | Updates a sketch by adding values to it |
 | PURGE  | /$type/$id | {"values": [string, string]} | Updates a sketch by purging values from it |
 | DELETE | /$type/$id | N/A                          | Deletes a sketch. |
-
-### Sketch Types
-
-| type  | purpose     | Sketch               | Description                              | Notes |
-| ---   | ---         | ---                  | ---                                      | ---   |
-| hllpp | cardinality | HyperLogLog++        | query unique items from all added values | capacity up to billions, does not support purging added values |
-| cml   | frequency   | Count-Min-Log Sketch | query frequency of unique values added   | N/A |
-| topk  | rank + frequncy | Top-k Sketch | query the top k values added to the sketch | N/A |
 
