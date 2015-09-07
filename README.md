@@ -23,4 +23,4 @@ Skizze is a (fire and forget) service that provides a probabilistic data structu
 
 ## API
 
-See [API](file:///Users/seif/Projects/go/src/github.com/seiflotfy/skizze/api.html)
+See [API](http://seiflotfy.github.io/skizze/api.html)
