@@ -1,4 +1,4 @@
-# Skizze API
+# API reference
 
 Skizze is communicated with via a RESTful API. All methods apply on all different types of sketches (with optional parameters)
 
