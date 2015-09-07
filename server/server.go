@@ -92,7 +92,7 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 	case method == "GET":
 		// Get a count for a specific sketch
 		count, err := sketchesManager.GetCountForSketch(data.id, data.typ, data.Values)
-		logger.Info.Printf("[%v]: Getting info from sketch: %v of type %s", method, data.id, data.typ)
+		logger.Info.Printf("[%v]: Getting state for sketch: %v of type %s", method, data.id, data.typ)
 		res = sketchResult{count, err}
 	case method == "POST":
 		// Create a new sketch counter
@@ -102,12 +102,12 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 	case method == "PUT":
 		// Add values to counter
 		err = sketchesManager.AddToSketch(data.id, data.typ, data.Values)
-		logger.Info.Printf("[%v]: Updating counter for sketch: %v of type %s", method, data.id, data.typ)
+		logger.Info.Printf("[%v]: Adding values to sketch: %v of type %s", method, data.id, data.typ)
 		res = sketchResult{nil, err}
 	case method == "PURGE":
 		// Purges values from counter
 		err = sketchesManager.DeleteFromSketch(data.id, data.typ, data.Values)
-		logger.Info.Printf("[%v]: Purging values for sketch: %v of type %s", method, data.id, data.typ)
+		logger.Info.Printf("[%v]: Purging values from sketch: %v of type %s", method, data.id, data.typ)
 		res = sketchResult{nil, err}
 	case method == "DELETE":
 		// Delete Counter
@@ -139,6 +139,7 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	paths := strings.Split(r.URL.Path[1:], "/")
 	body, _ := ioutil.ReadAll(r.Body)
 	var data requestData
+
 	if len(body) > 0 {
 		err := json.Unmarshal(body, &data)
 		if err != nil {
