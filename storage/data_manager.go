@@ -44,11 +44,6 @@ func (m *ManagerStruct) DeleteData(ID string) error {
 		v.(*os.File).Close()
 	}
 	path := filepath.Join(dataPath, ID)
-	/*
-		if _, err := os.Stat(path); err != nil {
-			return nil
-		}
-	*/
 	return os.Remove(path)
 }
 
