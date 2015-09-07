@@ -14,7 +14,7 @@ Statistical analysis and mining of huge multi-terabyte data sets is a common tas
 
 Skizze is a (fire and forget) service that provides a probabilistic data structures (sketches) storage that allows estimation of these and many other metrics, with a trade off in precision of the estimations for the memory consumption. These data structures can be used both as temporary data accumulators in query processing procedures and, perhaps more important, as a compact – sometimes astonishingly compact – replacement of raw data in stream-based computing.
 
-## Example queries/use cases?
+## Example use cases (queries)?
 * How many distinct elements are in the data set (i.e. what is the cardinality of the data set)?
 * What are the most frequent elements (the terms “heavy hitters” and “top-k elements” are also used)?
 * What are the frequencies of the most frequent elements?
