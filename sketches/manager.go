@@ -129,8 +129,8 @@ func (m *ManagerStruct) AddToSketch(sketchID string, sketchType string, values [
 	for i, value := range values {
 		bytes[i] = []byte(value)
 	}
-	sketch.AddMultiple(bytes)
-	return nil
+	_, err := sketch.AddMultiple(bytes)
+	return err
 }
 
 /*
@@ -223,15 +223,17 @@ func (m *ManagerStruct) loadInfo() error {
 	}
 	for _, infoData := range infos {
 		var infoStruct abstract.Info
-		json.Unmarshal(infoData, &infoStruct)
+		err := json.Unmarshal(infoData, &infoStruct)
+		if err != nil {
+			return err
+		}
 		m.info[infoStruct.ID] = &infoStruct
 	}
 	return nil
 }
 
 func (m *ManagerStruct) loadSketches() error {
-	strg := storage.GetManager()
-	for key, info := range m.info {
+	for _, info := range m.info {
 		var sketch abstract.Sketch
 		var err error
 		switch info.Type {
@@ -249,7 +251,6 @@ func (m *ManagerStruct) loadSketches() error {
 			return errors.New(errTxt)
 		}
 		m.sketches[info.ID] = sketch
-		strg.LoadData(key, 0, 0)
 	}
 	return nil
 }

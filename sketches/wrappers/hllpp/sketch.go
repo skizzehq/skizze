@@ -28,9 +28,12 @@ NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
 	manager = storage.GetManager()
-	manager.Create(info.ID)
+	err := manager.Create(info.ID)
+	if err != nil {
+		return nil, err
+	}
 	d := Sketch{info, hllpp.New(), sync.RWMutex{}}
-	err := d.Save()
+	err = d.Save()
 	if err != nil {
 		logger.Error.Println("an error has occurred while saving sketch: " + err.Error())
 	}
@@ -57,7 +60,10 @@ func (d *Sketch) Add(value []byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	d.impl.Add(value)
-	d.Save()
+	err := d.Save()
+	if err != nil {
+		return false, err
+	}
 	return true, nil
 }
 
@@ -70,7 +76,10 @@ func (d *Sketch) AddMultiple(values [][]byte) (bool, error) {
 	for _, value := range values {
 		d.impl.Add(value)
 	}
-	d.Save()
+	err := d.Save()
+	if err != nil {
+		return false, err
+	}
 	return true, nil
 }
 
