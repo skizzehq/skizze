@@ -43,7 +43,8 @@ type Sketch16 struct {
 	progressive  bool
 	nBits        uint
 
-	store      *registers
+	store      [][]uint16 //*registers
+	registers  *registers
 	totalCount uint
 	cMax       float64
 	id         string
@@ -65,14 +66,13 @@ NewSketch16 returns a new Count-Min-Log sketch with 16-bit registers
 */
 func NewSketch16(id string, w uint, k uint, conservative bool, exp float64,
 	maxSample bool, progressive bool, nBits uint) (*Sketch16, error) {
-	store := newRegisters(id, k, w)
-	//store2 := newRegisters("id", k, w)
+
 	cMax := math.Pow(2.0, float64(nBits)) - 1.0
 	if cMax > math.MaxUint16 {
 		return nil,
 			errors.New("using 16 bit registers allows a max nBits value of 16")
 	}
-	return &Sketch16{
+	sketch := &Sketch16{
 		w:            w,
 		k:            k,
 		conservative: conservative,
@@ -80,11 +80,20 @@ func NewSketch16(id string, w uint, k uint, conservative bool, exp float64,
 		maxSample:    maxSample,
 		progressive:  progressive,
 		nBits:        nBits,
-		store:        store,
 		totalCount:   0.0,
 		cMax:         cMax,
 		id:           id,
-	}, nil
+		registers:    newRegisters(id, k, w),
+	}
+	store, _ := sketch.registers.load()
+	if len(store) == 0 {
+		store = make([][]uint16, k, k)
+		for i := range store {
+			store[i] = make([]uint16, w, w)
+		}
+	}
+	sketch.store = store
+	return sketch, nil
 }
 
 /*
@@ -96,7 +105,7 @@ func NewForCapacity16(info *abstract.Info, capacity uint64, e float64) (*Sketch1
 		return nil, errors.New("e needs to be >= 0.001 and < 1.0")
 	}
 	w := float64(2*capacity) / (e * 7)
-	sketch, err := NewSketch16(info.ID, uint(w), 7, true, 1.00026, true, true, 16)
+	sketch, err := NewSketch16(info.ID, uint(w), 2, true, 1.00026, true, true, 16)
 	return sketch, err
 }
 
@@ -116,8 +125,11 @@ func (sk *Sketch16) getExp(c uint16) float64 {
 Reset the Sketch to a fresh state (all counters set to 0)
 */
 func (sk *Sketch16) Reset() {
-	sk.store = newRegisters(sk.id, sk.k, sk.w)
-	sk.store.reset()
+	sk.store = make([][]uint16, sk.k, sk.k)
+	for i := range sk.store {
+		sk.store[i] = make([]uint16, sk.w, sk.w)
+	}
+	sk.registers.save(sk.store)
 	sk.totalCount = 0
 }
 
@@ -130,8 +142,7 @@ func (sk *Sketch16) IncreaseCount(s []byte) (bool, float64) {
 	vmin := uint16(math.MaxUint16)
 	vmax := uint16(0)
 	for i := range v {
-		//v[i] = sk.store[i][hash(s, uint(i), sk.w)]
-		v[i], _ = sk.store.get(uint(i), hash(s, uint(i), sk.w))
+		v[i] = sk.store[i][hash(s, uint(i), sk.w)]
 		if v[i] < vmin {
 			vmin = v[i]
 		}
@@ -156,11 +167,13 @@ func (sk *Sketch16) IncreaseCount(s []byte) (bool, float64) {
 		for i := uint(0); i < sk.k; i++ {
 			nc := v[i]
 			if !sk.conservative || vmin == nc {
-				sk.store.set(uint(i), hash(s, i, sk.w), nc+1)
+				sk.store[i][hash(s, i, sk.w)] = nc + 1
 			}
 		}
+		sk.registers.save(sk.store)
 		return increase, fullValue16(vmin+1, sk.getExp(vmin+1))
 	}
+	sk.registers.save(sk.store)
 	return false, fullValue16(vmin, sk.getExp(vmin))
 }
 
@@ -170,7 +183,7 @@ GetCount returns the count of `s`
 func (sk *Sketch16) GetCount(s []byte) float64 {
 	clmin := uint16(math.MaxUint16)
 	for i := uint(0); i < sk.k; i++ {
-		cl, _ := sk.store.get(uint(i), hash(s, uint(i), sk.w))
+		cl := sk.store[i][hash(s, i, sk.w)]
 		if cl < clmin {
 			clmin = cl
 		}

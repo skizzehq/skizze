@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 
+	_ "net/http/pprof"
+
 	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/server"
 	"github.com/seiflotfy/skizze/utils"

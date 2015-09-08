@@ -89,9 +89,29 @@ func TestLog16Reset(t *testing.T) {
 
 	for i := uint(0); i < log.k; i++ {
 		for j := uint(0); j < log.w; j++ {
-			if x, _ := log.store.get(i, j); x != 0 {
+			if x := log.store[i][j]; x != 0 {
 				t.Errorf("expected matrix to be completely empty, got %d", x)
 			}
 		}
 	}
 }
+
+/*
+func TestLog16Reset(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+	info := &abstract.Info{ID: "ultimates",
+		Type:       abstract.CML,
+		Properties: map[string]float64{},
+		State:      make(map[string]uint64)}
+	log, _ := NewForCapacity16(info, 10, 0.9)
+	log.store[0][0] = 1
+	log.store[0][2] = 1
+	log.store[1][2] = 1
+	//fmt.Println(log.store)
+	//fmt.Println("======") //, len(log.store), len(log.store[0]))
+	log.registers.save(log.store)
+	//fmt.Println("=====================")
+	log.store, _ = log.registers.load()
+}
+*/
