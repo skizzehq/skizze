@@ -47,23 +47,27 @@ func TestLog16AddAndCount(t *testing.T) {
 	log.IncreaseCount([]byte("d"))
 	log.IncreaseCount([]byte("a"))
 	log.IncreaseCount([]byte("a"))
-	if count := log.GetCount([]byte("a")); uint(count) != 3 {
+	if count, err := log.GetCount([]byte("a")); err != nil {
+		t.Error("expected no error, got", err)
+	} else if uint(count) != 3 {
 		t.Errorf("expected 3, got %d", uint(count))
 	}
 
-	if count := log.GetCount([]byte("b")); uint(count) != 2 {
+	if count, err := log.GetCount([]byte("b")); err != nil {
+		t.Error("expected no error, got", err)
+	} else if uint(count) != 2 {
 		t.Errorf("expected 2, got %d", uint(count))
 	}
 
-	if count := log.GetCount([]byte("c")); uint(count) != 1 {
+	if count, err := log.GetCount([]byte("c")); err != nil {
+		t.Error("expected no error, got", err)
+	} else if uint(count) != 1 {
 		t.Errorf("expected 1, got %d", uint(count))
 	}
 
-	if count := log.GetCount([]byte("d")); uint(count) != 1 {
-		t.Errorf("expected 1, got %d", uint(count))
-	}
-
-	if count := log.GetCount([]byte("x")); uint(count) != 0 {
+	if count, err := log.GetCount([]byte("x")); err != nil {
+		t.Error("expected no error, got", err)
+	} else if uint(count) != 0 {
 		t.Errorf("expected 0, got %d", uint(count))
 	}
 }

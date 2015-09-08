@@ -41,7 +41,10 @@ DeleteData ...
 func (m *ManagerStruct) DeleteData(ID string) error {
 	v, ok := m.cache.Peek(ID)
 	if ok {
-		v.(*os.File).Close()
+		err := v.(*os.File).Close()
+		if err != nil {
+			logger.Error.Println(err)
+		}
 	}
 	path := filepath.Join(dataPath, ID)
 	return os.Remove(path)

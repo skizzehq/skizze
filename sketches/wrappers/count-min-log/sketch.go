@@ -31,7 +31,10 @@ NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
 	manager = storage.GetManager()
-	manager.Create(info.ID)
+	err := manager.Create(info.ID)
+	if err != nil {
+		return nil, err
+	}
 	epsilon := 0.0
 	if eps, ok := info.Properties["epsilon"]; ok {
 		epsilon = eps
@@ -50,7 +53,7 @@ func NewSketch(info *abstract.Info) (*Sketch, error) {
 
 	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID, epsilon, delta)
 	d := Sketch{info, sketch16, sync.RWMutex{}}
-	err := d.Save()
+	err = d.Save()
 	if err != nil {
 		logger.Error.Printf("an error has occurred while saving Sketch: %s", err.Error())
 	}
@@ -73,8 +76,15 @@ Add ...
 func (d *Sketch) Add(value []byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
-	d.impl.IncreaseCount(value)
-	d.Save()
+	_, _, err := d.impl.IncreaseCount(value)
+	if err != nil {
+		logger.Error.Println(err)
+		return false, err
+	}
+	err = d.Save()
+	if err != nil {
+		logger.Error.Println(err)
+	}
 	return true, nil
 }
 
@@ -85,9 +95,16 @@ func (d *Sketch) AddMultiple(values [][]byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for _, value := range values {
-		d.impl.IncreaseCount(value)
+		_, _, err := d.impl.IncreaseCount(value)
+		if err != nil {
+			logger.Error.Println(err)
+			return false, err
+		}
 	}
-	d.Save()
+	err := d.Save()
+	if err != nil {
+		logger.Error.Println(err)
+	}
 	return true, nil
 }
 
@@ -120,7 +137,10 @@ func (d *Sketch) GetCount() uint {
 Clear ...
 */
 func (d *Sketch) Clear() (bool, error) {
-	d.impl.Reset()
+	err := d.impl.Reset()
+	if err != nil {
+		return false, err
+	}
 	return true, nil
 }
 
@@ -128,6 +148,10 @@ func (d *Sketch) Clear() (bool, error) {
 Save ...
 */
 func (d *Sketch) Save() error {
+	err := d.impl.Save()
+	if err != nil {
+		return err
+	}
 	count := d.impl.Count()
 	d.Info.State["count"] = uint64(count)
 	infoData, err := json.Marshal(d.Info)
@@ -157,7 +181,8 @@ GetFrequency ...
 func (d *Sketch) GetFrequency(values [][]byte) interface{} {
 	res := make(map[string]uint)
 	for _, value := range values {
-		res[string(value)] = uint(d.impl.GetCount(value))
+		count, _ := d.impl.GetCount(value)
+		res[string(value)] = uint(count)
 	}
 	return res
 }

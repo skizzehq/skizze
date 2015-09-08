@@ -11,6 +11,7 @@ import (
 
 var conf *config.Config
 var dataPath string
+var logger = utils.GetLogger()
 
 // ManagerStruct the storage should deal with 2 types of on disk files, info and data
 // info describes a domain and can be used to load back from disk the settings
@@ -31,7 +32,10 @@ func newManager() *ManagerStruct {
 	}
 	cache, err := lru.NewWithEvict(cacheSize, func(k interface{}, v interface{}) {
 		f := v.(*os.File)
-		f.Close()
+		err := f.Close()
+		if err != nil {
+			logger.Error.Println(err)
+		}
 	})
 	utils.PanicOnError(err)
 	err = os.MkdirAll(dataPath, 0777)

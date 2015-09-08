@@ -2,19 +2,17 @@ package cml
 
 import (
 	"errors"
-	"hash/fnv"
 	"math"
 	"math/rand"
-	"strconv"
+
+	"github.com/dgryski/go-farm"
 
 	"github.com/seiflotfy/skizze/sketches/abstract"
 )
 
-func hash(s []byte, i uint, w uint) uint {
-	hasher := fnv.New32a()
-	hasher.Write(s)
-	hasher.Write([]byte(strconv.Itoa(int(i))))
-	return uint(hasher.Sum32()) % w
+func hash(s []byte, i uint, w uint) (uint, error) {
+	v := farm.Hash64WithSeed(s, uint64(i))
+	return uint(v) % w, nil
 }
 
 func value16(c uint16, exp float64) float64 {
@@ -124,25 +122,26 @@ func (sk *Sketch16) getExp(c uint16) float64 {
 /*
 Reset the Sketch to a fresh state (all counters set to 0)
 */
-func (sk *Sketch16) Reset() {
+func (sk *Sketch16) Reset() error {
 	sk.store = make([][]uint16, sk.k, sk.k)
 	for i := range sk.store {
 		sk.store[i] = make([]uint16, sk.w, sk.w)
 	}
-	sk.registers.save(sk.store)
+	err := sk.registers.save(sk.store)
 	sk.totalCount = 0
+	return err
 }
 
-/*
-IncreaseCount increases the count of `s` by one, return true if added and the current count of `s`
-*/
-func (sk *Sketch16) IncreaseCount(s []byte) (bool, float64) {
-	sk.totalCount++
+func (sk *Sketch16) getV(s []byte) ([]uint16, uint16, uint16, error) {
 	v := make([]uint16, sk.k)
 	vmin := uint16(math.MaxUint16)
 	vmax := uint16(0)
 	for i := range v {
-		v[i] = sk.store[i][hash(s, uint(i), sk.w)]
+		h, err := hash(s, uint(i), sk.w)
+		if err != nil {
+			return nil, 0, 0, err
+		}
+		v[i] = sk.store[i][h]
 		if v[i] < vmin {
 			vmin = v[i]
 		}
@@ -150,7 +149,18 @@ func (sk *Sketch16) IncreaseCount(s []byte) (bool, float64) {
 			vmax = v[i]
 		}
 	}
+	return v, vmin, vmax, nil
+}
 
+/*
+IncreaseCount increases the count of `s` by one, return true if added and the current count of `s`
+*/
+func (sk *Sketch16) IncreaseCount(s []byte) (bool, float64, error) {
+	sk.totalCount++
+	v, vmin, vmax, err := sk.getV(s)
+	if err != nil {
+		return false, -1, err
+	}
 	var c uint16
 	if sk.maxSample {
 		c = vmax
@@ -159,7 +169,7 @@ func (sk *Sketch16) IncreaseCount(s []byte) (bool, float64) {
 	}
 
 	if float64(c) > sk.cMax {
-		return false, 0.0
+		return false, 0.0, nil
 	}
 
 	increase := sk.randomLog(c, 0.0)
@@ -167,40 +177,49 @@ func (sk *Sketch16) IncreaseCount(s []byte) (bool, float64) {
 		for i := uint(0); i < sk.k; i++ {
 			nc := v[i]
 			if !sk.conservative || vmin == nc {
-				sk.store[i][hash(s, i, sk.w)] = nc + 1
+				h, err := hash(s, uint(i), sk.w)
+				if err != nil {
+					return false, -1, err
+				}
+				sk.store[i][h] = nc + 1
 			}
 		}
-		sk.registers.save(sk.store)
-		return increase, fullValue16(vmin+1, sk.getExp(vmin+1))
+		return increase, fullValue16(vmin+1, sk.getExp(vmin+1)), nil
 	}
-	sk.registers.save(sk.store)
-	return false, fullValue16(vmin, sk.getExp(vmin))
+	return false, fullValue16(vmin, sk.getExp(vmin)), nil
 }
 
 /*
 GetCount returns the count of `s`
 */
-func (sk *Sketch16) GetCount(s []byte) float64 {
+func (sk *Sketch16) GetCount(s []byte) (float64, error) {
 	clmin := uint16(math.MaxUint16)
 	for i := uint(0); i < sk.k; i++ {
-		cl := sk.store[i][hash(s, i, sk.w)]
+		h, err := hash(s, uint(i), sk.w)
+		if err != nil {
+			return -1, err
+		}
+		cl := sk.store[i][h]
 		if cl < clmin {
 			clmin = cl
 		}
 	}
 	c := clmin
-	return fullValue16(c, sk.getExp(c))
+	return fullValue16(c, sk.getExp(c)), nil
 }
 
 /*
 GetProbability returns the error probability of `s`
 */
-func (sk *Sketch16) GetProbability(s []byte) float64 {
-	v := sk.GetCount(s)
-	if v > 0 {
-		return v / float64(sk.totalCount)
+func (sk *Sketch16) GetProbability(s []byte) (float64, error) {
+	v, err := sk.GetCount(s)
+	if err != nil {
+		return -1, err
 	}
-	return 0
+	if v > 0 {
+		return v / float64(sk.totalCount), nil
+	}
+	return 0, nil
 }
 
 /*
@@ -208,4 +227,11 @@ Count returns the total count
 */
 func (sk *Sketch16) Count() uint {
 	return sk.totalCount
+}
+
+/*
+Save ...
+*/
+func (sk *Sketch16) Save() error {
+	return sk.registers.save(sk.store)
 }
