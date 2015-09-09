@@ -37,12 +37,16 @@ NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
 	manager = storage.GetManager()
-	manager.Create(info.ID)
+	err := manager.Create(info.ID)
+	if err != nil {
+		logger.Error.Println("an error has occurred while creating sketch: " + err.Error())
+		return nil, err
+	}
 	if info.Properties["capacity"] == 0 {
 		info.Properties["capacity"] = defaultCapacity
 	}
 	d := Sketch{info, topk.New(int(info.Properties["capacity"])), sync.RWMutex{}}
-	err := d.Save()
+	err = d.Save()
 	if err != nil {
 		logger.Error.Println("an error has occurred while saving sketch: " + err.Error())
 	}
@@ -56,10 +60,15 @@ func NewSketchFromData(info *abstract.Info) (*Sketch, error) {
 	manager = storage.GetManager()
 	data, err := manager.LoadData(info.ID, 0, 0)
 	if err != nil {
+		logger.Error.Println("an error has occurred while creating sketch from data: " + err.Error())
 		return nil, err
 	}
 	var network bytes.Buffer // Stand-in for a network connection
-	network.Write(data)
+	_, err = network.Write(data)
+	if err != nil {
+		logger.Error.Println("an error has occurred while loading sketch from data: " + err.Error())
+		return nil, err
+	}
 	dec := gob.NewDecoder(&network) // Will read from network.
 
 	var counter topk.Stream
@@ -77,8 +86,15 @@ func (d *Sketch) Add(value []byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	str := string(value)
-	d.impl.Insert(str, 1)
-	d.Save()
+	err := d.impl.Insert(str, 1)
+	if err != nil {
+		logger.Error.Println("an error has occurred while populating sketch: " + err.Error())
+		return false, err
+	}
+	err = d.Save()
+	if err != nil {
+		logger.Error.Println("an error has occurred while saving sketch: " + err.Error())
+	}
 	return true, nil
 }
 
@@ -90,9 +106,16 @@ func (d *Sketch) AddMultiple(values [][]byte) (bool, error) {
 	defer d.lock.Unlock()
 	for _, value := range values {
 		str := string(value)
-		d.impl.Insert(str, 1)
+		err := d.impl.Insert(str, 1)
+		if err != nil {
+			logger.Error.Println("an error has occurred while populating sketch: " + err.Error())
+			return false, err
+		}
 	}
-	d.Save()
+	err := d.Save()
+	if err != nil {
+		logger.Error.Println("an error has occurred while saving sketch: " + err.Error())
+	}
 	return true, nil
 }
 

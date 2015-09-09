@@ -98,35 +98,41 @@ func New(n int) *Stream {
 }
 
 // Insert adds an element to the stream to be tracked
-func (s *Stream) Insert(x string, count int) {
+func (s *Stream) Insert(x string, count int) error {
 	h := fnv.New32a()
-	h.Write([]byte(x))
+	_, err := h.Write([]byte(x))
+	if err != nil {
+		return err
+	}
 	xhash := int(h.Sum32()) % len(s.Alphas)
 
 	// are we tracking this element?
 	if idx, ok := s.K.M[x]; ok {
 		s.K.Elts[idx].Count += count
 		heap.Fix(&s.K, idx)
-		return
+		return nil
 	}
 
 	// can we track more elements?
 	if len(s.K.Elts) < s.N {
 		// there is free space
 		heap.Push(&s.K, Element{Key: x, Count: count})
-		return
+		return nil
 	}
 
 	if s.Alphas[xhash]+count < s.K.Elts[0].Count {
 		s.Alphas[xhash] += count
-		return
+		return nil
 	}
 
 	// replace the current minimum element
 	minKey := s.K.Elts[0].Key
 
 	h.Reset()
-	h.Write([]byte(minKey))
+	_, err = h.Write([]byte(minKey))
+	if err != nil {
+		return err
+	}
 	mkhash := int(h.Sum32()) % len(s.Alphas)
 	s.Alphas[mkhash] = s.K.Elts[0].Count
 
@@ -140,6 +146,7 @@ func (s *Stream) Insert(x string, count int) {
 	s.K.M[x] = 0
 
 	heap.Fix(&s.K, 0)
+	return nil
 }
 
 // Keys returns the current estimates for the most frequent elements

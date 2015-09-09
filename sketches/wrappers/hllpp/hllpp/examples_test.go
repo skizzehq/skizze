@@ -42,7 +42,7 @@ func ExampleHLLPP_Marshal() {
 	h.Add([]byte("hobbledehoyhood"))
 
 	serialized := h.Marshal()
-	h, err := Unmarshal(serialized)
+	_, err := Unmarshal(serialized)
 	if err != nil {
 		panic(err)
 	}

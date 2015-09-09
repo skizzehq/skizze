@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/seiflotfy/skizze/sketches/wrappers/topk/go-topk"
+	"github.com/seiflotfy/skizze/utils"
 )
 
 func main() {
@@ -56,7 +57,10 @@ func main() {
 			count = 1
 		}
 
-		tk.Insert(item, count)
+		err := tk.Insert(item, count)
+		if err != nil {
+			utils.GetLogger().Error.Println(err)
+		}
 	}
 
 	if err := sc.Err(); err != nil {

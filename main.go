@@ -21,14 +21,13 @@ func main() {
 
 	//TODO: Add arguments for dataDir and infoDir
 
-	os.Setenv("COUNTS_PORT", strconv.Itoa(int(port)))
+	err := os.Setenv("COUNTS_PORT", strconv.Itoa(int(port)))
+	utils.PanicOnError(err)
 
 	logger.Info.Println("Starting counts...")
 	conf := config.GetConfig()
 	logger.Info.Println("Using data dir: ", conf.GetDataDir())
 	server, err := server.New()
-	if err != nil {
-		panic(err)
-	}
+	utils.PanicOnError(err)
 	server.Run()
 }

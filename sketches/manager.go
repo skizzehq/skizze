@@ -208,11 +208,13 @@ func newManager() (*ManagerStruct, error) {
 }
 
 func (m *ManagerStruct) dumpInfo(info *abstract.Info) {
+	// FIXME: Should we panic here?
 	m.info[info.ID] = info
 	manager := storage.GetManager()
 	infoData, err := json.Marshal(info)
 	utils.PanicOnError(err)
-	manager.SaveInfo(info.ID, infoData)
+	err = manager.SaveInfo(info.ID, infoData)
+	utils.PanicOnError(err)
 }
 
 func (m *ManagerStruct) loadInfo() error {

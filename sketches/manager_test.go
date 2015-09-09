@@ -53,7 +53,8 @@ func TestNoSketches(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	sketches, err := manager.GetSketches()
+	var sketches []string
+	sketches, err = manager.GetSketches()
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -91,7 +92,8 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	sketches, err := manager.GetSketches()
+	var sketches []string
+	sketches, err = manager.GetSketches()
 	if err != nil {
 		t.Error("Expected no errors while getting sketches, got", err)
 	}
@@ -118,7 +120,8 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors while adding to sketch, got", err)
 	}
 
-	count, err := manager.GetCountForSketch("marvel", "hllpp", nil)
+	var count interface{}
+	count, err = manager.GetCountForSketch("marvel", "hllpp", nil)
 	if len(sketches) != 1 {
 		t.Error("Expected 1 sketches, got", len(sketches))
 	}
@@ -412,7 +415,7 @@ func TestCMLCounter(t *testing.T) {
 	m1.AddToSketch("avengers", "cml", []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
 
-	res, err := m1.GetCountForSketch("avengers", "cml", []string{"cyclops"})
+	_, err = m1.GetCountForSketch("avengers", "cml", []string{"cyclops"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -421,6 +424,8 @@ func TestCMLCounter(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
+
+	var res interface{}
 	res, err = m2.GetCountForSketch("avengers", "cml", []string{"cyclops"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
