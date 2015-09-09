@@ -76,7 +76,9 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
+		if _, err := w.Write(js); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	} else {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -126,10 +128,12 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 	}
 
 	js, err := json.Marshal(res)
-	if err == nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	} else {
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if _, err := w.Write(js); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -171,15 +175,19 @@ func (srv *Server) Run() {
 	conf := config.GetConfig()
 	port := int(conf.GetPort())
 	logger.Info.Println("Server up and running on port: " + strconv.Itoa(port))
-	http.ListenAndServe(":"+strconv.Itoa(port), srv)
-	gracehttp.Serve(&http.Server{Addr: ":" + strconv.Itoa(port), Handler: srv})
+	err := http.ListenAndServe(":"+strconv.Itoa(port), srv)
+	utils.PanicOnError(err)
+	err = gracehttp.Serve(&http.Server{Addr: ":" + strconv.Itoa(port), Handler: srv})
+	utils.PanicOnError(err)
 }
 
 /*
 Stop ...
 */
 func (srv *Server) Stop() {
+	//FIXME make sure everything is written to disk
 	logger.Info.Println("Stopping server...")
-	storage.CloseInfoDB()
+	err := storage.CloseInfoDB()
+	utils.PanicOnError(err)
 	os.Exit(0)
 }
