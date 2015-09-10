@@ -3,7 +3,6 @@ package cml
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/seiflotfy/skizze/sketches/abstract"
@@ -52,7 +51,7 @@ func NewSketch(info *abstract.Info) (*Sketch, error) {
 		info.Properties["delta"] = delta
 	}
 
-	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID, epsilon, delta)
+	sketch16, _ := cml.NewSketch16ForEpsilonDelta(epsilon, delta)
 	d := Sketch{info, sketch16, sync.RWMutex{}}
 	err = d.Save()
 	if err != nil {
@@ -66,17 +65,11 @@ NewSketchFromData ...
 */
 func NewSketchFromData(info *abstract.Info) (*Sketch, error) {
 	manager = storage.GetManager()
-	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID,
-		info.Properties["epsilon"], info.Properties["delta"])
-	raw, err := manager.LoadData(info.ID, 0, 0)
+	b, err := manager.LoadData(info.ID, 0, 0)
 	if err != nil {
 		return nil, err
 	}
-	store, err := sketch16.Deserialize(raw)
-	if err != nil {
-		return nil, err
-	}
-	sketch16.SetRegisters(store)
+	sketch16, _ := cml.Unmarshall16(b)
 	return &Sketch{info, sketch16, sync.RWMutex{}}, nil
 }
 
@@ -86,12 +79,8 @@ Add ...
 func (d *Sketch) Add(value []byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
-	_, _, err := d.impl.IncreaseCount(value)
-	if err != nil {
-		logger.Error.Println(err)
-		return false, err
-	}
-	err = d.Save()
+	d.impl.IncreaseCount(value)
+	err := d.Save()
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -105,11 +94,7 @@ func (d *Sketch) AddMultiple(values [][]byte) (bool, error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for _, value := range values {
-		_, _, err := d.impl.IncreaseCount(value)
-		if err != nil {
-			logger.Error.Println(err)
-			return false, err
-		}
+		d.impl.IncreaseCount(value)
 	}
 	err := d.Save()
 	if err != nil {
@@ -138,19 +123,14 @@ func (d *Sketch) RemoveMultiple(values [][]byte) (bool, error) {
 GetCount ...
 */
 func (d *Sketch) GetCount() uint {
-	d.lock.RLock()
-	defer d.lock.RUnlock()
-	return uint(d.impl.Count())
+	return 0
 }
 
 /*
 Clear ...
 */
 func (d *Sketch) Clear() (bool, error) {
-	err := d.impl.Reset()
-	if err != nil {
-		return false, err
-	}
+	d.impl.Reset()
 	return true, nil
 }
 
@@ -158,8 +138,7 @@ func (d *Sketch) Clear() (bool, error) {
 Save ...
 */
 func (d *Sketch) Save() error {
-	fmt.Println("====saving")
-	data, err := d.impl.Serialize()
+	data, err := d.impl.Marshall()
 	if err != nil {
 		return err
 	}
@@ -167,15 +146,13 @@ func (d *Sketch) Save() error {
 	if err != nil {
 		return err
 	}
-	count := d.impl.Count()
+	count := d.impl.TotalCount()
 	d.Info.State["count"] = uint64(count)
 	infoData, err := json.Marshal(d.Info)
 	if err != nil {
 		return err
 	}
-	fmt.Println("====almost done")
 	err = storage.GetManager().SaveInfo(d.Info.ID, infoData)
-	fmt.Println("====error done", err)
 	return err
 }
 
@@ -199,7 +176,7 @@ GetFrequency ...
 func (d *Sketch) GetFrequency(values [][]byte) interface{} {
 	res := make(map[string]uint)
 	for _, value := range values {
-		count, _ := d.impl.GetCount(value)
+		count := d.impl.Frequency(value)
 		res[string(value)] = uint(count)
 	}
 	return res

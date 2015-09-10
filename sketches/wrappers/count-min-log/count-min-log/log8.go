@@ -7,52 +7,63 @@ import (
 	"math"
 )
 
-func value16(c uint16, exp float64) float64 {
+func value8(c uint8, exp float64) float64 {
 	if c == 0 {
 		return 0.0
 	}
 	return math.Pow(exp, float64(c-1))
 }
 
-func fullValue16(c uint16, exp float64) float64 {
+func fullValue8(c uint8, exp float64) float64 {
 	if c <= 1 {
-		return value16(c, exp)
+		return value8(c, exp)
 	}
-	return (1.0 - value16(c+1, exp)) / (1.0 - exp)
+	return (1.0 - value8(c+1, exp)) / (1.0 - exp)
 }
 
 /*
-Sketch16 is a Count-Min-Log sketch 16-bit registers
+Sketch8 is a Count-Min-Log sketch 8-bit registers
 */
-type Sketch16 struct {
-	maxSample    bool
-	progressive  bool
-	conservative bool
+type Sketch8 struct {
 	w            uint
 	k            uint
-	nBits        uint
-	totalCount   uint
+	conservative bool
 	exp          float64
-	cMax         float64
+	maxSample    bool
+	progressive  bool
+	nBits        uint
 
-	store [][]uint16
+	store      [][]uint8
+	totalCount uint
+	cMax       float64
 }
 
 /*
-NewSketch16 returns a new Count-Min-Log sketch with 16-bit registers
+NewSketch8ForEpsilonDelta ...
 */
-func NewSketch16(w uint, k uint, conservative bool, exp float64,
-	maxSample bool, progressive bool, nBits uint) (*Sketch16, error) {
-	store := make([][]uint16, k, k)
+func NewSketch8ForEpsilonDelta(epsilon, delta float64) (*Sketch8, error) {
+	var (
+		width = uint(math.Ceil(math.E / epsilon))
+		depth = uint(math.Ceil(math.Log(1 / delta)))
+	)
+	return NewSketch8(width, depth, true, 1.00026, true, true, 16)
+}
+
+/*
+NewSketch8 returns a new Count-Min-Log sketch with 8-bit registers
+*/
+func NewSketch8(w uint, k uint, conservative bool, exp float64,
+	maxSample bool, progressive bool, nBits uint) (*Sketch8, error) {
+	store := make([][]uint8, k, k)
 	for i := uint(0); i < k; i++ {
-		store[i] = make([]uint16, w, w)
+		store[i] = make([]uint8, w, w)
 	}
 	cMax := math.Pow(2.0, float64(nBits)) - 1.0
-	if cMax > math.MaxUint16 {
+	if cMax > math.MaxUint8 {
 		return nil,
-			errors.New("using 16 bit registers allows a max nBits value of 16")
+			errors.New("using 8 bit registers allows a max nBits value of 8")
 	}
-	return &Sketch16{
+	return &Sketch8{
 		w:            w,
 		k:            k,
 		conservative: conservative,
@@ -67,41 +78,30 @@ func NewSketch16(w uint, k uint, conservative bool, exp float64,
 }
 
 /*
-NewSketch16ForEpsilonDelta ...
+NewDefaultSketch8 returns a new Count-Min-Log sketch with 8-bit registers and default settings
 */
-func NewSketch16ForEpsilonDelta(epsilon, delta float64) (*Sketch16, error) {
-	var (
-		width = uint(math.Ceil(math.E / epsilon))
-		depth = uint(math.Ceil(math.Log(1 / delta)))
-	)
-	return NewSketch16(width, depth, true, 1.00026, true, true, 16)
+func NewDefaultSketch8() (*Sketch8, error) {
+	return NewSketch8(1000000, 7, true, 1.5, true, true, 8)
 }
 
 /*
-NewDefaultSketch16 returns a new Count-Min-Log sketch with 16-bit registers and default settings
+NewForCapacity8 returns a new Count-Min-Log sketch with 8-bit registers optimized for a given max capacity and expected error rate
 */
-func NewDefaultSketch16() (*Sketch16, error) {
-	return NewSketch16(1000000, 7, true, 1.00026, true, true, 16)
-}
-
-/*
-NewForCapacity16 returns a new Count-Min-Log sketch with 16-bit registers optimized for a given max capacity and expected error rate
-*/
-func NewForCapacity16(capacity uint64, e float64) (*Sketch16, error) {
+func NewForCapacity8(capacity uint64, e float64) (*Sketch8, error) {
 	// e = 2n/w    ==>    w = 2n/e
 	if !(e >= 0.001 && e < 1.0) {
 		return nil, errors.New("e needs to be >= 0.001 and < 1.0")
 	}
 	w := float64(2*capacity) / e
-	return NewSketch16(uint(w), 1, true, 1.00026, true, true, 16)
+	return NewSketch8(uint(w), 7, true, 1.5, true, true, 8)
 }
 
-func (sk *Sketch16) randomLog(c uint16) bool {
-	pIncrease := 1.0 / (fullValue16(c+1, sk.getExp(c+1)) - fullValue16(c, sk.getExp(c)))
+func (sk *Sketch8) randomLog(c uint8) bool {
+	pIncrease := 1.0 / (fullValue8(c+1, sk.getExp(c+1)) - fullValue8(c, sk.getExp(c)))
 	return randFloat() < pIncrease
 }
 
-func (sk *Sketch16) getExp(c uint16) float64 {
+func (sk *Sketch8) getExp(c uint8) float64 {
 	if sk.progressive == true {
 		return 1.0 + ((sk.exp - 1.0) * (float64(c) - 1.0) / sk.cMax)
 	}
@@ -109,28 +109,12 @@ func (sk *Sketch16) getExp(c uint16) float64 {
 }
 
 /*
-GetFillRate ...
-*/
-func (sk *Sketch16) GetFillRate() float64 {
-	occs := 0.0
-	size := sk.w * sk.k
-	for _, row := range sk.store {
-		for _, col := range row {
-			if col > 0 {
-				occs++
-			}
-		}
-	}
-	return 100 * occs / float64(size)
-}
-
-/*
 Reset the Sketch to a fresh state (all counters set to 0)
 */
-func (sk *Sketch16) Reset() {
-	sk.store = make([][]uint16, sk.k, sk.k)
-	for i := 0; i < len(sk.store); i++ {
-		sk.store[i] = make([]uint16, sk.w, sk.w)
+func (sk *Sketch8) Reset() {
+	sk.store = make([][]uint8, sk.k, sk.k)
+	for i := uint(0); i < sk.k; i++ {
+		sk.store[i] = make([]uint8, sk.w, sk.w)
 	}
 	sk.totalCount = 0
 }
@@ -138,22 +122,21 @@ func (sk *Sketch16) Reset() {
 /*
 IncreaseCount increases the count of `s` by one, return true if added and the current count of `s`
 */
-func (sk *Sketch16) IncreaseCount(s []byte) (bool, float64) {
+func (sk *Sketch8) IncreaseCount(s []byte) (bool, float64) {
 	sk.totalCount++
-	v := make([]uint16, sk.k, sk.k)
-	vmin := uint16(math.MaxUint16)
-	vmax := uint16(0)
+	v := make([]uint8, sk.k, sk.k)
+	vmin := uint8(math.MaxUint8)
+	vmax := uint8(0)
 	for i := range v {
 		v[i] = sk.store[i][hash(s, uint(i), sk.w)]
 		if v[i] < vmin {
 			vmin = v[i]
-		}
-		if v[i] > vmax {
+		} else if v[i] > vmax {
 			vmax = v[i]
 		}
 	}
 
-	var c uint16
+	var c uint8
 	if sk.maxSample {
 		c = vmax
 	} else {
@@ -172,16 +155,16 @@ func (sk *Sketch16) IncreaseCount(s []byte) (bool, float64) {
 				sk.store[i][hash(s, i, sk.w)] = nc + 1
 			}
 		}
-		return increase, fullValue16(vmin+1, sk.getExp(vmin+1))
+		return increase, fullValue8(vmin+1, sk.getExp(vmin+1))
 	}
-	return false, fullValue16(vmin, sk.getExp(vmin))
+	return false, fullValue8(vmin, sk.getExp(vmin))
 }
 
 /*
 Frequency returns the count of `s`
 */
-func (sk *Sketch16) Frequency(s []byte) float64 {
-	clmin := uint16(math.MaxUint16)
+func (sk *Sketch8) Frequency(s []byte) float64 {
+	clmin := uint8(math.MaxUint8)
 	for i := uint(0); i < sk.k; i++ {
 		cl := sk.store[i][hash(s, i, sk.w)]
 		if cl < clmin {
@@ -189,13 +172,13 @@ func (sk *Sketch16) Frequency(s []byte) float64 {
 		}
 	}
 	c := clmin
-	return fullValue16(c, sk.getExp(c))
+	return fullValue8(c, sk.getExp(c))
 }
 
 /*
 Probability returns the error probability of `s`
 */
-func (sk *Sketch16) Probability(s []byte) float64 {
+func (sk *Sketch8) Probability(s []byte) float64 {
 	v := sk.Frequency(s)
 	if v > 0 {
 		return v / float64(sk.totalCount)
@@ -204,16 +187,9 @@ func (sk *Sketch16) Probability(s []byte) float64 {
 }
 
 /*
-TotalCount returns total count of samples
-*/
-func (sk *Sketch16) TotalCount() uint {
-	return sk.totalCount
-}
-
-/*
 Marshall returns a serialized byte array representing the structure
 */
-func (sk *Sketch16) Marshall() ([]byte, error) {
+func (sk *Sketch8) Marshall() ([]byte, error) {
 	buf := new(bytes.Buffer)
 
 	maxSample := uint8(0)
@@ -256,14 +232,11 @@ func (sk *Sketch16) Marshall() ([]byte, error) {
 		return nil, err
 	}
 
-	bytes := make([]byte, sk.k*sk.w*2, sk.k*sk.w*2)
+	bytes := make([]byte, sk.k*sk.w, sk.k*sk.w)
 	for i := range sk.store {
 		for j, value := range sk.store[i] {
-			d := make([]byte, 2)
-			pos := uint(i)*sk.w*2 + uint(j)*2
-			binary.LittleEndian.PutUint16(d, value)
-			bytes[pos] = d[0]
-			bytes[pos+1] = d[1]
+			pos := uint(i)*sk.w + uint(j)
+			bytes[pos] = value
 		}
 	}
 	data := append(buf.Bytes(), bytes...)
@@ -271,9 +244,9 @@ func (sk *Sketch16) Marshall() ([]byte, error) {
 }
 
 /*
-Unmarshall16 returns a Sketch16 from an serialized byte array
+Unmarshall8 returns a Sketch8 from an serialized byte array
 */
-func Unmarshall16(b []byte) (*Sketch16, error) {
+func Unmarshall8(b []byte) (*Sketch8, error) {
 	imaxSample := uint8(0)
 	iprogressive := uint8(0)
 	iconservative := uint8(0)
@@ -335,19 +308,18 @@ func Unmarshall16(b []byte) (*Sketch16, error) {
 		return nil, err
 	}
 
-	store := make([][]uint16, k, k)
+	store := make([][]uint8, k, k)
 	for i := range store {
-		store[i] = make([]uint16, w, w)
+		store[i] = make([]uint8, w, w)
 		for j := range store[i] {
-			pos := 51 + uint(i)*uint(w)*2 + uint(j)*2
-			value := binary.LittleEndian.Uint16(b[pos : pos+2])
-			store[i][j] = value
+			pos := 51 + uint(i)*uint(w) + uint(j)
+			store[i][j] = b[pos]
 		}
 	}
 
-	sketch16 := &Sketch16{maxSample: maxSample, progressive: progressive, conservative: conservative,
+	sketch8 := &Sketch8{maxSample: maxSample, progressive: progressive, conservative: conservative,
 		w: uint(w), k: uint(k), nBits: uint(nBits), totalCount: uint(totalCount),
 		exp: exp, cMax: cMax, store: store}
 
-	return sketch16, nil
+	return sketch8, nil
 }
