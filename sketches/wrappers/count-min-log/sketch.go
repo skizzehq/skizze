@@ -3,6 +3,7 @@ package cml
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/seiflotfy/skizze/sketches/abstract"
@@ -64,9 +65,18 @@ func NewSketch(info *abstract.Info) (*Sketch, error) {
 NewSketchFromData ...
 */
 func NewSketchFromData(info *abstract.Info) (*Sketch, error) {
+	manager = storage.GetManager()
 	sketch16, _ := cml.NewSketch16ForEpsilonDelta(info.ID,
 		info.Properties["epsilon"], info.Properties["delta"])
-	// FIXME: create Sketch from new data
+	raw, err := manager.LoadData(info.ID, 0, 0)
+	if err != nil {
+		return nil, err
+	}
+	store, err := sketch16.Deserialize(raw)
+	if err != nil {
+		return nil, err
+	}
+	sketch16.SetRegisters(store)
 	return &Sketch{info, sketch16, sync.RWMutex{}}, nil
 }
 
@@ -148,7 +158,12 @@ func (d *Sketch) Clear() (bool, error) {
 Save ...
 */
 func (d *Sketch) Save() error {
-	err := d.impl.Save()
+	fmt.Println("====saving")
+	data, err := d.impl.Serialize()
+	if err != nil {
+		return err
+	}
+	err = manager.SaveData(d.Info.ID, data, 0)
 	if err != nil {
 		return err
 	}
@@ -158,7 +173,10 @@ func (d *Sketch) Save() error {
 	if err != nil {
 		return err
 	}
-	return storage.GetManager().SaveInfo(d.Info.ID, infoData)
+	fmt.Println("====almost done")
+	err = storage.GetManager().SaveInfo(d.Info.ID, infoData)
+	fmt.Println("====error done", err)
+	return err
 }
 
 /*

@@ -42,7 +42,6 @@ type Sketch16 struct {
 	nBits        uint
 
 	store      [][]uint16 //*registers
-	registers  *registers
 	totalCount uint
 	cMax       float64
 	id         string
@@ -81,15 +80,16 @@ func NewSketch16(id string, w uint, k uint, conservative bool, exp float64,
 		totalCount:   0.0,
 		cMax:         cMax,
 		id:           id,
-		registers:    newRegisters(id, k, w),
+		//registers:    newRegisters(id, k, w),
 	}
-	store, _ := sketch.registers.load()
-	if len(store) == 0 {
-		store = make([][]uint16, k, k)
-		for i := range store {
-			store[i] = make([]uint16, w, w)
-		}
+	//store, _ := sketch.registers.load()
+
+	//if len(store) == 0 {
+	store := make([][]uint16, k, k)
+	for i := range store {
+		store[i] = make([]uint16, w, w)
 	}
+	//}
 	sketch.store = store
 	return sketch, nil
 }
@@ -127,9 +127,9 @@ func (sk *Sketch16) Reset() error {
 	for i := range sk.store {
 		sk.store[i] = make([]uint16, sk.w, sk.w)
 	}
-	err := sk.registers.save(sk.store)
+	//err := sk.registers.save(sk.store)
 	sk.totalCount = 0
-	return err
+	return nil
 }
 
 func (sk *Sketch16) getV(s []byte) ([]uint16, uint16, uint16, error) {
@@ -227,11 +227,4 @@ Count returns the total count
 */
 func (sk *Sketch16) Count() uint {
 	return sk.totalCount
-}
-
-/*
-Save ...
-*/
-func (sk *Sketch16) Save() error {
-	return sk.registers.save(sk.store)
 }
