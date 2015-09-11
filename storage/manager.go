@@ -25,8 +25,8 @@ var manager *ManagerStruct
 
 func newManager() *ManagerStruct {
 	conf = config.GetConfig()
-	dataPath = conf.GetDataDir()
-	cacheSize := int(conf.GetCacheSize())
+	dataPath = conf.DataDir
+	cacheSize := int(conf.CacheSize)
 	if cacheSize == 0 {
 		cacheSize = 250 // default cache size
 	}
