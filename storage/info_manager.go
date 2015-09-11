@@ -103,7 +103,7 @@ func getInfoDB() (*bolt.DB, error) {
 		return db, nil
 	}
 	var err error
-	infoDir := conf.GetInfoDir()
+	infoDir := conf.InfoDir
 	err = os.MkdirAll(infoDir, 0777)
 	if err != nil {
 		return nil, err
