@@ -1,8 +1,6 @@
 package storage
 
 import (
-	"bytes"
-	"encoding/binary"
 	"os"
 	"path/filepath"
 )
@@ -27,11 +25,7 @@ func (m *ManagerStruct) SaveData(ID string, data []byte, offset int64) error {
 	if err != nil {
 		return err
 	}
-	buf := new(bytes.Buffer)
-	if err = binary.Write(buf, binary.BigEndian, data); err != nil {
-		return err
-	}
-	_, err = f.WriteAt(buf.Bytes(), offset)
+	_, err = f.WriteAt(data, offset)
 	return err
 }
 
