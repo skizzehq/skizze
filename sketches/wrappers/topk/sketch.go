@@ -3,9 +3,7 @@ package topk
 import (
 	"bytes"
 	"encoding/gob"
-	"encoding/json"
 	"errors"
-	"sync"
 
 	"github.com/seiflotfy/skizze/sketches/abstract"
 	"github.com/seiflotfy/skizze/sketches/wrappers/topk/go-topk"
@@ -24,7 +22,6 @@ Sketch is the toplevel sketch to control the HLL implementation
 type Sketch struct {
 	*abstract.Info
 	impl *topk.Stream
-	lock sync.RWMutex
 }
 
 /*
@@ -45,55 +42,20 @@ func NewSketch(info *abstract.Info) (*Sketch, error) {
 	if info.Properties["capacity"] == 0 {
 		info.Properties["capacity"] = defaultCapacity
 	}
-	d := Sketch{info, topk.New(int(info.Properties["capacity"])), sync.RWMutex{}}
-	err = d.Save()
-	if err != nil {
-		logger.Error.Println("an error has occurred while saving sketch: " + err.Error())
-	}
+	d := Sketch{info, topk.New(int(info.Properties["capacity"]))}
+
 	return &d, nil
-}
-
-/*
-NewSketchFromData ...
-*/
-func NewSketchFromData(info *abstract.Info) (*Sketch, error) {
-	manager = storage.GetManager()
-	data, err := manager.LoadData(info.ID, 0, 0)
-	if err != nil {
-		logger.Error.Println("an error has occurred while creating sketch from data: " + err.Error())
-		return nil, err
-	}
-	var network bytes.Buffer // Stand-in for a network connection
-	_, err = network.Write(data)
-	if err != nil {
-		logger.Error.Println("an error has occurred while loading sketch from data: " + err.Error())
-		return nil, err
-	}
-	dec := gob.NewDecoder(&network) // Will read from network.
-
-	var counter topk.Stream
-	err = dec.Decode(&counter)
-	if err != nil {
-		return nil, err
-	}
-	return &Sketch{info, &counter, sync.RWMutex{}}, nil
 }
 
 /*
 Add ...
 */
 func (d *Sketch) Add(value []byte) (bool, error) {
-	d.lock.Lock()
-	defer d.lock.Unlock()
 	str := string(value)
 	err := d.impl.Insert(str, 1)
 	if err != nil {
 		logger.Error.Println("an error has occurred while populating sketch: " + err.Error())
 		return false, err
-	}
-	err = d.Save()
-	if err != nil {
-		logger.Error.Println("an error has occurred while saving sketch: " + err.Error())
 	}
 	return true, nil
 }
@@ -102,8 +64,7 @@ func (d *Sketch) Add(value []byte) (bool, error) {
 AddMultiple ...
 */
 func (d *Sketch) AddMultiple(values [][]byte) (bool, error) {
-	d.lock.Lock()
-	defer d.lock.Unlock()
+
 	for _, value := range values {
 		str := string(value)
 		err := d.impl.Insert(str, 1)
@@ -111,10 +72,6 @@ func (d *Sketch) AddMultiple(values [][]byte) (bool, error) {
 			logger.Error.Println("an error has occurred while populating sketch: " + err.Error())
 			return false, err
 		}
-	}
-	err := d.Save()
-	if err != nil {
-		logger.Error.Println("an error has occurred while saving sketch: " + err.Error())
 	}
 	return true, nil
 }
@@ -150,22 +107,6 @@ func (d *Sketch) Clear() (bool, error) {
 }
 
 /*
-Save ...
-*/
-func (d *Sketch) Save() error {
-	var network bytes.Buffer        // Stand-in for a network connection
-	enc := gob.NewEncoder(&network) // Will write to network.
-	// Encode (send) the value.
-	err := enc.Encode(d.impl)
-	err = manager.SaveData(d.Info.ID, network.Bytes(), 0)
-	if err != nil {
-		return err
-	}
-	info, _ := json.Marshal(d.Info)
-	return manager.SaveInfo(d.Info.ID, info)
-}
-
-/*
 GetType ...
 */
 func (d *Sketch) GetType() string {
@@ -183,12 +124,44 @@ func (d *Sketch) GetID() string {
 GetFrequency ...
 */
 func (d *Sketch) GetFrequency(values [][]byte) interface{} {
-	d.lock.RLock()
-	defer d.lock.RUnlock()
 	keys := d.impl.Keys()
 	result := make([]ResultElement, len(keys), len(keys))
 	for i, k := range keys {
 		result[i] = ResultElement(k)
 	}
 	return result
+}
+
+/*
+Marshal ...
+*/
+func (d *Sketch) Marshal() ([]byte, error) {
+	var network bytes.Buffer        // Stand-in for a network connection
+	enc := gob.NewEncoder(&network) // Will write to network.
+	// Encode (send) the value.
+	err := enc.Encode(d.impl)
+	if err != nil {
+		return nil, err
+	}
+	return network.Bytes(), nil
+}
+
+/*
+Unmarshal ...
+*/
+func Unmarshal(info *abstract.Info, data []byte) (*Sketch, error) {
+	var network bytes.Buffer // Stand-in for a network connection
+	_, err := network.Write(data)
+	if err != nil {
+		logger.Error.Println("an error has occurred while loading sketch from data: " + err.Error())
+		return nil, err
+	}
+	dec := gob.NewDecoder(&network) // Will read from network.
+
+	var counter topk.Stream
+	err = dec.Decode(&counter)
+	if err != nil {
+		return nil, err
+	}
+	return &Sketch{info, &counter}, nil
 }
