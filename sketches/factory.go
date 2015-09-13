@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
+	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/sketches/abstract"
 	"github.com/seiflotfy/skizze/sketches/wrappers/count-min-log"
 	"github.com/seiflotfy/skizze/sketches/wrappers/hllpp"
@@ -20,6 +22,7 @@ type SketchProxy struct {
 	*abstract.Info
 	sketch abstract.Sketch
 	lock   sync.RWMutex
+	ops    uint
 	dirty  bool
 }
 
@@ -29,7 +32,9 @@ Add ...
 func (sp *SketchProxy) Add(values [][]byte) (bool, error) {
 	sp.lock.Lock()
 	defer sp.lock.Unlock()
-	defer sp.Save()
+	sp.ops++
+	sp.dirty = true
+	defer sp.save(false)
 	return sp.sketch.AddMultiple(values)
 }
 
@@ -39,7 +44,9 @@ Remove ...
 func (sp *SketchProxy) Remove(values [][]byte) (bool, error) {
 	sp.lock.Lock()
 	defer sp.lock.Unlock()
-	defer sp.Save()
+	sp.dirty = true
+	sp.ops++
+	defer sp.save(false)
 	return sp.sketch.RemoveMultiple(values)
 }
 
@@ -59,23 +66,41 @@ func (sp *SketchProxy) Count(values []string) interface{} {
 	return sp.sketch.GetCount()
 }
 
+func (sp *SketchProxy) autosave() {
+	for {
+		time.Sleep(time.Duration(config.GetConfig().SaveThresholdSeconds) * time.Second)
+		if sp.dirty {
+			sp.save(true)
+			sp.dirty = false
+		}
+	}
+}
+
 /*
-Save ...
+save ...
 */
-func (sp *SketchProxy) Save() {
-	manager := storage.GetManager()
-	serialized, err := sp.sketch.Marshal()
-	if err != nil {
-		logger.Error.Println(err)
+func (sp *SketchProxy) save(force bool) {
+	if !sp.dirty {
+		return
 	}
-	err = manager.SaveData(sp.Info.ID, serialized, 0)
-	if err != nil {
-		logger.Error.Println(err)
-	}
-	info, _ := json.Marshal(sp.Info)
-	err = manager.SaveInfo(sp.Info.ID, info)
-	if err != nil {
-		logger.Error.Println(err)
+
+	if sp.ops%config.GetConfig().SaveThresholdOps == 0 || force {
+		sp.ops++
+		sp.dirty = false
+		manager := storage.GetManager()
+		serialized, err := sp.sketch.Marshal()
+		if err != nil {
+			logger.Error.Println(err)
+		}
+		err = manager.SaveData(sp.Info.ID, serialized, 0)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+		info, _ := json.Marshal(sp.Info)
+		err = manager.SaveInfo(sp.Info.ID, info)
+		if err != nil {
+			logger.Error.Println(err)
+		}
 	}
 }
 
@@ -102,14 +127,14 @@ func createSketch(info *abstract.Info) (*SketchProxy, error) {
 		return nil, errors.New("Error creating new sketch")
 	}
 
-	sp := SketchProxy{info, sketch, sync.RWMutex{}, false}
+	sp := SketchProxy{info, sketch, sync.RWMutex{}, 0, true}
 	err = storage.GetManager().Create(info.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	sp.Save()
-
+	sp.save(true)
+	go sp.autosave()
 	return &sp, nil
 }
 
@@ -131,10 +156,12 @@ func loadSketch(info *abstract.Info) (*SketchProxy, error) {
 	default:
 		logger.Info.Println("Invalid sketch type", info.Type)
 	}
-	sp := SketchProxy{info, sketch, sync.RWMutex{}, false}
+	sp := SketchProxy{info, sketch, sync.RWMutex{}, 0, false}
 
 	if err != nil {
 		return nil, fmt.Errorf("Error loading data for sketch: %s", info.ID)
 	}
+
+	go sp.autosave()
 	return &sp, nil
 }

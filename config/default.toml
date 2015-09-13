@@ -15,3 +15,7 @@ slice_cache_size = 1
 
 # the port number for the server
 port = 3596
+
+# Treshold for saving a sketch to disk
+save_threshold_seconds = 5
+save_threshold_ops = 100

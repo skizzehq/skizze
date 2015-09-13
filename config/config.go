@@ -16,12 +16,14 @@ import (
 Config stores all configuration parameters for Go
 */
 type Config struct {
-	InfoDir        string `toml:"info_dir"`
-	DataDir        string `toml:"data_dir"`
-	SliceSize      uint   `toml:"slice_size"`
-	CacheSize      uint   `toml:"cache_size"`
-	SliceCacheSize uint   `toml:"slice_cache_size"`
-	Port           uint   `toml:"port"`
+	InfoDir              string `toml:"info_dir"`
+	DataDir              string `toml:"data_dir"`
+	SliceSize            uint   `toml:"slice_size"`
+	CacheSize            uint   `toml:"cache_size"`
+	SliceCacheSize       uint   `toml:"slice_cache_size"`
+	Port                 uint   `toml:"port"`
+	SaveThresholdSeconds uint   `toml:"save_threhhold_seconds"`
+	SaveThresholdOps     uint   `toml:"save_threshold_ops"`
 }
 
 var config *Config
@@ -121,6 +123,18 @@ func GetConfig() *Config {
 			port = config.Port
 		}
 
+		saveThresholdSecondsInt, err := strconv.Atoi(strings.TrimSpace(os.Getenv("SKZ_SAVE_TRESHOLD_SECS")))
+		saveThresholdSeconds := uint(saveThresholdSecondsInt)
+		if err != nil {
+			saveThresholdSeconds = config.SaveThresholdSeconds
+		}
+
+		saveThresholdOpsInt, err := strconv.Atoi(strings.TrimSpace(os.Getenv("SKZ_SAVE_TRESHOLD_OPS")))
+		saveThresholdOps := uint(saveThresholdOpsInt)
+		if err != nil {
+			saveThresholdOps = config.SaveThresholdOps
+		}
+
 		config = &Config{
 			infoDir,
 			dataDir,
@@ -128,6 +142,8 @@ func GetConfig() *Config {
 			config.CacheSize,
 			config.SliceCacheSize,
 			port,
+			saveThresholdSeconds,
+			saveThresholdOps,
 		}
 	}
 	return config
