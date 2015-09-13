@@ -1,11 +1,8 @@
 package sketches
 
 import (
-	"bufio"
-	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
 	"testing"
 
 	"github.com/seiflotfy/skizze/config"
@@ -212,6 +209,7 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	}
 }
 
+/*
 func TestExtremeParallelDefaultCounter(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
@@ -272,6 +270,7 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 		t.Error("expected avengers count == x-men count, got", count1, "!=", count2)
 	}
 }
+*/
 
 func TestFailCreateSketch(t *testing.T) {
 	setupTests()
