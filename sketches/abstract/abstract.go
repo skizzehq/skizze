@@ -10,9 +10,8 @@ type Sketch interface {
 	RemoveMultiple([][]byte) (bool, error)
 	GetCount() uint
 	Clear() (bool, error)
-	GetType() string
-	GetID() string
 	GetFrequency([][]byte) interface{}
+	Marshal() ([]byte, error)
 }
 
 /*

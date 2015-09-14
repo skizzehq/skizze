@@ -1,18 +1,14 @@
 package hllpp
 
 import (
-	"encoding/json"
 	"errors"
-	"sync"
 
 	"github.com/seiflotfy/skizze/sketches/abstract"
 	"github.com/seiflotfy/skizze/sketches/wrappers/hllpp/hllpp"
-	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
 
 var logger = utils.GetLogger()
-var manager *storage.ManagerStruct
 
 /*
 Sketch is the toplevel sketch to control the HLL implementation
@@ -20,50 +16,21 @@ Sketch is the toplevel sketch to control the HLL implementation
 type Sketch struct {
 	*abstract.Info
 	impl *hllpp.HLLPP
-	lock sync.RWMutex
 }
 
 /*
 NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
-	manager = storage.GetManager()
-	err := manager.Create(info.ID)
-	if err != nil {
-		return nil, err
-	}
-	d := Sketch{info, hllpp.New(), sync.RWMutex{}}
-	err = d.Save()
-	if err != nil {
-		logger.Error.Println("an error has occurred while saving sketch: " + err.Error())
-	}
+	d := Sketch{info, hllpp.New()}
 	return &d, nil
-}
-
-/*
-NewSketchFromData ...
-*/
-func NewSketchFromData(info *abstract.Info) (*Sketch, error) {
-	manager = storage.GetManager()
-	data, err := manager.LoadData(info.ID, 0, 0)
-	counter, err := hllpp.Unmarshal(data)
-	if err != nil {
-		return nil, err
-	}
-	return &Sketch{info, counter, sync.RWMutex{}}, nil
 }
 
 /*
 Add ...
 */
 func (d *Sketch) Add(value []byte) (bool, error) {
-	d.lock.Lock()
-	defer d.lock.Unlock()
 	d.impl.Add(value)
-	err := d.Save()
-	if err != nil {
-		return false, err
-	}
 	return true, nil
 }
 
@@ -71,14 +38,8 @@ func (d *Sketch) Add(value []byte) (bool, error) {
 AddMultiple ...
 */
 func (d *Sketch) AddMultiple(values [][]byte) (bool, error) {
-	d.lock.Lock()
-	defer d.lock.Unlock()
 	for _, value := range values {
 		d.impl.Add(value)
-	}
-	err := d.Save()
-	if err != nil {
-		return false, err
 	}
 	return true, nil
 }
@@ -103,8 +64,6 @@ func (d *Sketch) RemoveMultiple(values [][]byte) (bool, error) {
 GetCount ...
 */
 func (d *Sketch) GetCount() uint {
-	d.lock.RLock()
-	defer d.lock.RUnlock()
 	return uint(d.impl.Count())
 }
 
@@ -116,35 +75,26 @@ func (d *Sketch) Clear() (bool, error) {
 }
 
 /*
-Save ...
-*/
-func (d *Sketch) Save() error {
-	serialized := d.impl.Marshal()
-	err := manager.SaveData(d.Info.ID, serialized, 0)
-	if err != nil {
-		return err
-	}
-	info, _ := json.Marshal(d.Info)
-	return manager.SaveInfo(d.Info.ID, info)
-}
-
-/*
-GetType ...
-*/
-func (d *Sketch) GetType() string {
-	return d.Type
-}
-
-/*
-GetID ...
-*/
-func (d *Sketch) GetID() string {
-	return d.ID
-}
-
-/*
 GetFrequency ...
 */
 func (d *Sketch) GetFrequency(values [][]byte) interface{} {
 	return nil
+}
+
+/*
+Marshal ...
+*/
+func (d *Sketch) Marshal() ([]byte, error) {
+	return d.impl.Marshal(), nil
+}
+
+/*
+Unmarshal ...
+*/
+func Unmarshal(info *abstract.Info, data []byte) (*Sketch, error) {
+	counter, err := hllpp.Unmarshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return &Sketch{info, counter}, nil
 }

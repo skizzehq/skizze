@@ -7,9 +7,6 @@ import (
 
 	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/sketches/abstract"
-	"github.com/seiflotfy/skizze/sketches/wrappers/count-min-log"
-	"github.com/seiflotfy/skizze/sketches/wrappers/hllpp"
-	"github.com/seiflotfy/skizze/sketches/wrappers/topk"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
@@ -18,7 +15,7 @@ import (
 ManagerStruct is responsible for manipulating the sketches and syncing to disk
 */
 type ManagerStruct struct {
-	sketches map[string]abstract.Sketch
+	sketches map[string]*SketchProxy
 	info     map[string]*abstract.Info
 }
 
@@ -53,20 +50,8 @@ func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, props m
 		Type:       sketchType,
 		Properties: props,
 		State:      make(map[string]uint64)}
-	var sketch abstract.Sketch
-	var err error
 
-	switch sketchType {
-	case abstract.HLLPP:
-		sketch, err = hllpp.NewSketch(info)
-	case abstract.TopK:
-		sketch, err = topk.NewSketch(info)
-	case abstract.CML:
-		sketch, err = cml.NewSketch(info)
-	default:
-		return errors.New("Invalid sketch type: " + sketchType)
-	}
-
+	sketch, err := createSketch(info)
 	if err != nil {
 		errTxt := fmt.Sprint("Could not load sketch ", info, ". Err:", err)
 		return errors.New(errTxt)
@@ -103,8 +88,8 @@ func (m *ManagerStruct) GetSketches() ([]string, error) {
 	sketches := make([]string, len(m.sketches), len(m.sketches))
 	i := 0
 	for _, v := range m.sketches {
-		typ := v.GetType()
-		id := v.GetID()
+		typ := v.Type
+		id := v.ID
 		sketches[i] = fmt.Sprintf("%s/%s", typ, id[:len(id)-len(typ)-1])
 		i++
 	}
@@ -122,14 +107,14 @@ func (m *ManagerStruct) AddToSketch(sketchID string, sketchType string, values [
 		errStr := fmt.Sprintf("No such sketch %s of type %s found", sketchID, sketchType)
 		return errors.New(errStr)
 	}
-	var sketch abstract.Sketch
-	sketch = val.(abstract.Sketch)
+	var sketch *SketchProxy
+	sketch = val
 
 	bytes := make([][]byte, len(values), len(values))
 	for i, value := range values {
 		bytes[i] = []byte(value)
 	}
-	_, err := sketch.AddMultiple(bytes)
+	_, err := sketch.Add(bytes)
 	return err
 }
 
@@ -141,14 +126,14 @@ func (m *ManagerStruct) DeleteFromSketch(sketchID string, sketchType string, val
 	if ok == false {
 		return errors.New("No such sketch: " + sketchID)
 	}
-	var sketch abstract.Sketch
-	sketch = val.(abstract.Sketch)
+	var sketch *SketchProxy
+	sketch = val
 
 	bytes := make([][]byte, len(values), len(values))
 	for i, value := range values {
 		bytes[i] = []byte(value)
 	}
-	ok, err := sketch.RemoveMultiple(bytes)
+	ok, err := sketch.Remove(bytes)
 	return err
 }
 
@@ -162,20 +147,9 @@ func (m *ManagerStruct) GetCountForSketch(sketchID string, sketchType string, va
 		errStr := fmt.Sprintf("No such sketch %s of type %s found", sketchID, sketchType)
 		return 0, errors.New(errStr)
 	}
-	var sketch abstract.Sketch
-	sketch = val.(abstract.Sketch)
-
-	if sketch.GetType() == abstract.CML {
-		bvalues := make([][]byte, len(values), len(values))
-		for i, value := range values {
-			bvalues[i] = []byte(value)
-		}
-		return sketch.GetFrequency(bvalues), nil
-	} else if sketch.GetType() == abstract.TopK {
-		return sketch.GetFrequency(nil), nil
-	}
-
-	count := sketch.GetCount()
+	var sketch *SketchProxy
+	sketch = val
+	count := sketch.Count(values)
 	return count, nil
 }
 
@@ -194,7 +168,7 @@ func GetManager() (*ManagerStruct, error) {
 }
 
 func newManager() (*ManagerStruct, error) {
-	sketches := make(map[string]abstract.Sketch)
+	sketches := make(map[string]*SketchProxy)
 	m := &ManagerStruct{sketches, make(map[string]*abstract.Info)}
 	err := m.loadInfo()
 	if err != nil {
@@ -236,18 +210,7 @@ func (m *ManagerStruct) loadInfo() error {
 
 func (m *ManagerStruct) loadSketches() error {
 	for _, info := range m.info {
-		var sketch abstract.Sketch
-		var err error
-		switch info.Type {
-		case abstract.HLLPP:
-			sketch, err = hllpp.NewSketchFromData(info)
-		case abstract.TopK:
-			sketch, err = topk.NewSketchFromData(info)
-		case abstract.CML:
-			sketch, err = cml.NewSketchFromData(info)
-		default:
-			logger.Info.Println("Invalid sketch type", info.Type)
-		}
+		sketch, err := loadSketch(info)
 		if err != nil {
 			errTxt := fmt.Sprint("Could not load sketch ", info, ". Err: ", err)
 			return errors.New(errTxt)

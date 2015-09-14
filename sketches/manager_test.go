@@ -29,6 +29,7 @@ func exists(path string) (bool, error) {
 func setupTests() {
 	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_manager_data")
 	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_manager_info")
+	os.Setenv("SKZ_SAVE_TRESHOLD_OPS", "1")
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)
@@ -82,7 +83,6 @@ func TestDuplicateSketches(t *testing.T) {
 		t.Error("Expected errors while creating sketch duplicate sketch, got", err)
 	}
 }
-
 func TestDefaultCounter(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
