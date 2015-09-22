@@ -1,6 +1,17 @@
 package abstract
 
 /*
+HLLPP	=> HLLPP
+CML		=> Count-min-log sketch
+TopK	=> Top-K
+*/
+const (
+	HLLPP = "hllpp"
+	CML   = "cml"
+	TopK  = "topk"
+)
+
+/*
 Sketch ...
 */
 type Sketch interface {
@@ -23,15 +34,3 @@ type Info struct {
 	State      map[string]uint64  `json:"state"`
 	Properties map[string]float64 `json:"properties"`
 }
-
-/*
-Default		=> HLLPP
-Purgable	=> CuckooFilter
-Frequency	=> Count-min sketch
-Expirable	=> Sliding HLL
-*/
-const (
-	HLLPP = "hllpp"
-	CML   = "cml"
-	TopK  = "topk"
-)
