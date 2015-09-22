@@ -25,3 +25,22 @@ Skizze is communicated with via a RESTful API. All methods apply on all differen
 | PURGE  | /$type/$id | {"values": [string, ...]} | Updates a sketch by purging values from it |
 | DELETE | /$type/$id | N/A                          | Deletes a sketch. |
 
+### Examples
+**Listing all available sketches**:
+```
+curl -XGET http://localhost:3596
+```
+Returns:
+```
+{"result":["cml/testhllpp"],"error":null}
+```
+
+**Creating a new sketch of type Count-Min-Log with the id "sketch_1" and a capacity of 200.**:
+```
+curl -XPOST http://localhost:3596/cml/sketch_1 -d '{"capacity": 200}'
+```
+Returns:
+An empty sketch
+```
+{"result":0,"error":null}
+```
