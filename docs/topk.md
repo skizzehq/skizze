@@ -15,7 +15,7 @@ curl -XPUT http://localhost:3596/topk/sketch_3 -d '{"values": ["dc", "batman"]}'
 ```
 curl -XGET http://localhost:3596/topk/sketch_3
 ```
-returns the current count for these values:
+returns the current top k values:
 ```
 {  
   "result":[  
