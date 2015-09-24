@@ -2,21 +2,21 @@
 Top-K Sketch (topk) stores the k most popular elements of a data stream.
 
 **Creating** a new empty sketch of type "topk" with the id "sketch_3" and a capacity of 10:
-```
+```{r, engine='bash', count_lines}
 curl -XPOST http://localhost:3596/topk/sketch_3 -d '{"capacity": 10}'
 ```
 <br>
 **Adding** values to the sketch with id "sketch_3": 
-```
+```{r, engine='bash', count_lines}
 curl -XPUT http://localhost:3596/topk/sketch_3 -d '{"values": ["dc", "batman"]}'
 ```
 <br>
 **Getting** the top k items in "sketch_3" (body of request will be ignored):
-```
+```{r, engine='bash', count_lines}
 curl -XGET http://localhost:3596/topk/sketch_3
 ```
 returns the current top k values:
-```
+```json
 {  
   "result":[  
     {  
@@ -35,6 +35,6 @@ returns the current top k values:
 ```
 <br>
 **Deleting** the sketch of type "topk" with id "sketch_3":
-```
+```{r, engine='bash', count_lines}
 curl -XDELETE http://localhost:3596/topk/sketch_3
 ```
