@@ -29,13 +29,13 @@ Skizze is communicated with via a RESTful API. All methods apply on all differen
 
 
 **Creating** a new empty sketch of type HyperLogLog++ (hllpp) with the id "sketch_1":
-```
+```{r, engine='bash', count_lines}
 curl -XPOST http://localhost:3596/hllpp/sketch_1
 ```
 
 
 **Adding** values to the sketch with id "sketch_1":
-```
+```{r, engine='bash', count_lines}
 curl -XPUT http://localhost:3596/hllpp/sketch_1 -d '{
   "values": ["image", "rick grimes"]
 }'
@@ -43,20 +43,20 @@ curl -XPUT http://localhost:3596/hllpp/sketch_1 -d '{
 
 
 **Retrieving** the cardinality of "sketch_1":
-```
+```{r, engine='bash', count_lines}
 curl -XGET http://localhost:3596/hllpp/sketch_1
 ```
 returns 
-```
+```json
 {"result":2, "error":null}
 ```
 
 **Listing** all available sketches:
-```
+```{r, engine='bash', count_lines}
 curl -XGET http://localhost:3596
 ```
 returns
-```
+```json
 {  
   "result":[  
     "hllpp/sketch_1"
@@ -66,7 +66,7 @@ returns
 ```
 
 **Deleting** the sketch of type "hllpp" with id "sketch_1":
-```
+```{r, engine='bash', count_lines}
 curl -XDELETE http://localhost:3596/hllpp/sketch_1
 ```
 ---
