@@ -1,6 +1,19 @@
 package abstract
 
 /*
+HLLPP	=> HLLPP
+CML		=> Count-min-log sketch
+TopK	=> Top-K
+*/
+const (
+	HLLPP     = "hllpp"
+	CML       = "cml"
+	TopK      = "topk"
+	RealCount = "realcount"
+
+)
+
+/*
 Sketch ...
 */
 type Sketch interface {
@@ -23,17 +36,3 @@ type Info struct {
 	State      map[string]uint64  `json:"state"`
 	Properties map[string]float64 `json:"properties"`
 }
-
-/*
-Default		=> HLLPP
-Purgable	=> CuckooFilter
-Frequency	=> Count-min sketch
-Expirable	=> Sliding HLL
-RealCount   => Simple real map counter using channels
-*/
-const (
-	HLLPP     = "hllpp"
-	CML       = "cml"
-	TopK      = "topk"
-	RealCount = "realcount"
-)

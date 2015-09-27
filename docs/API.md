@@ -25,3 +25,56 @@ Skizze is communicated with via a RESTful API. All methods apply on all differen
 | PURGE  | /$type/$id | {"values": [string, ...]} | Updates a sketch by purging values from it |
 | DELETE | /$type/$id | N/A                          | Deletes a sketch. |
 
+### Example requests:
+
+
+**Creating** a new empty sketch of type HyperLogLog++ (hllpp) with the id "sketch_1":
+```{r, engine='bash', count_lines}
+curl -XPOST http://localhost:3596/hllpp/sketch_1
+```
+
+
+**Adding** values to the sketch with id "sketch_1":
+```{r, engine='bash', count_lines}
+curl -XPUT http://localhost:3596/hllpp/sketch_1 -d '{
+  "values": ["image", "rick grimes"]
+}'
+```
+
+
+**Retrieving** the cardinality of "sketch_1":
+```{r, engine='bash', count_lines}
+curl -XGET http://localhost:3596/hllpp/sketch_1
+```
+returns
+```json
+{
+  "result":2,
+  "error":null
+}
+```
+
+**Listing** all available sketches:
+```{r, engine='bash', count_lines}
+curl -XGET http://localhost:3596
+```
+returns
+```json
+{
+  "result":[
+    "hllpp/sketch_1"
+  ],
+  "error":null
+}
+```
+
+**Deleting** the sketch of type "hllpp" with id "sketch_1":
+```{r, engine='bash', count_lines}
+curl -XDELETE http://localhost:3596/hllpp/sketch_1
+```
+---
+For the API of each sketch type (implementation) look at the following type specific examples:
+* [HyperLogLog++ (hllpp)](hllpp.md) (cardinality)
+* [Count-Min-Log (cml)](cml.md) (frequency)
+* [Top-K (topk)](topk.md) (ranking)
+
