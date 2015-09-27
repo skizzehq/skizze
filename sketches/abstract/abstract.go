@@ -29,9 +29,11 @@ Default		=> HLLPP
 Purgable	=> CuckooFilter
 Frequency	=> Count-min sketch
 Expirable	=> Sliding HLL
+RealCount   => Simple real map counter using channels
 */
 const (
-	HLLPP = "hllpp"
-	CML   = "cml"
-	TopK  = "topk"
+	HLLPP     = "hllpp"
+	CML       = "cml"
+	TopK      = "topk"
+	RealCount = "realcount"
 )
