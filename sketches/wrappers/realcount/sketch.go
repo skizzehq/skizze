@@ -1,8 +1,8 @@
 package realcount
 
 import (
-    "bytes"
-    "encoding/gob"
+	"bytes"
+	"encoding/gob"
 
 	"github.com/seiflotfy/skizze/sketches/abstract"
 	"github.com/seiflotfy/skizze/utils"
@@ -10,6 +10,9 @@ import (
 
 var logger = utils.GetLogger()
 
+/*
+RC ...
+*/
 type RC struct {
 	hash map[string]int
 }
@@ -20,29 +23,44 @@ func makeRC() (rc *RC) {
 	}
 }
 
+/*
+Reset ...
+*/
 func (rc *RC) Reset() {
-    rc.hash = make(map[string]int)
+	rc.hash = make(map[string]int)
 }
 
+/*
+IncreaseCount ...
+*/
 func (rc *RC) IncreaseCount(name string) {
 	rc.hash[name]++
 }
 
+/*
+DecreaseCount ...
+*/
 func (rc *RC) DecreaseCount(name string) {
-    rc.hash[name]--
+	rc.hash[name]--
 }
 
+/*
+Marshal ...
+*/
 func (rc *RC) Marshal() ([]byte, error) {
-    var network bytes.Buffer        // Stand-in for a network connection
-    enc := gob.NewEncoder(&network) // Will write to network.
-    // Encode (send) the value.
-    err := enc.Encode(rc)
-    if err != nil {
-        return nil, err
-    }
-    return network.Bytes(), nil
+	var network bytes.Buffer        // Stand-in for a network connection
+	enc := gob.NewEncoder(&network) // Will write to network.
+	// Encode (send) the value.
+	err := enc.Encode(rc)
+	if err != nil {
+		return nil, err
+	}
+	return network.Bytes(), nil
 }
 
+/*
+Sketch ...
+*/
 type Sketch struct {
 	*abstract.Info
 	impl *RC
@@ -72,7 +90,7 @@ AddMultiple ...
 func (d *Sketch) AddMultiple(values [][]byte) (bool, error) {
 	for _, value := range values {
 		name := string(value)
-        d.impl.IncreaseCount(name)
+		d.impl.IncreaseCount(name)
 	}
 	return true, nil
 }
@@ -82,8 +100,8 @@ Remove ...
 */
 func (d *Sketch) Remove(value []byte) (bool, error) {
 	name := string(value)
-    d.impl.DecreaseCount(name)
-    return true, nil
+	d.impl.DecreaseCount(name)
+	return true, nil
 }
 
 /*
@@ -91,10 +109,10 @@ RemoveMultiple ...
 */
 func (d *Sketch) RemoveMultiple(values [][]byte) (bool, error) {
 	for _, value := range values {
-        name := string(value)
-        d.impl.DecreaseCount(name)
-    }
-    return true, nil
+		name := string(value)
+		d.impl.DecreaseCount(name)
+	}
+	return true, nil
 }
 
 /*
@@ -112,19 +130,18 @@ func (d *Sketch) Clear() (bool, error) {
 	return true, nil
 }
 
-
 /*
-GetFrequency, which is basically our hash
+GetFrequency which is basically our hash
 */
 func (d *Sketch) GetFrequency(values [][]byte) interface{} {
-    return d.impl.hash
+	return d.impl.hash
 }
 
 /*
 Marshal ...
 */
 func (d *Sketch) Marshal() ([]byte, error) {
-    return d.impl.Marshal()
+	return d.impl.Marshal()
 }
 
 /*
@@ -132,17 +149,17 @@ Unmarshal ...
 */
 func Unmarshal(info *abstract.Info, data []byte) (*Sketch, error) {
 	var network bytes.Buffer // Stand-in for a network connection
-    _, err := network.Write(data)
-    if err != nil {
-        logger.Error.Println("an error has occurred while loading sketch from data: " + err.Error())
-        return nil, err
-    }
-    dec := gob.NewDecoder(&network) // Will read from network.
+	_, err := network.Write(data)
+	if err != nil {
+		logger.Error.Println("an error has occurred while loading sketch from data: " + err.Error())
+		return nil, err
+	}
+	dec := gob.NewDecoder(&network) // Will read from network.
 
-    var counter RC
-    err = dec.Decode(&counter)
-    if err != nil {
-        return nil, err
-    }
-    return &Sketch{info, &counter}, nil
+	var counter RC
+	err = dec.Decode(&counter)
+	if err != nil {
+		return nil, err
+	}
+	return &Sketch{info, &counter}, nil
 }

@@ -75,7 +75,7 @@ func TestDecrease(t *testing.T) {
 		t.Error("expected avengers to have no error, got", err)
 	}
 
-	add_values := [][]byte{
+	addValues := [][]byte{
 		[]byte("sabertooth"),
 		[]byte("thunderbolt"),
 		[]byte("havoc"),
@@ -84,16 +84,16 @@ func TestDecrease(t *testing.T) {
 		[]byte("cyclops"),
 		[]byte("havoc")}
 
-	sketch.AddMultiple(add_values)
+	sketch.AddMultiple(addValues)
 
-	remove_values := [][]byte{
+	removeValues := [][]byte{
 		[]byte("sabertooth"),
 		[]byte("thunderbolt"),
 		[]byte("havoc"),
 		[]byte("cyclops"),
 		[]byte("havoc")}
 
-	sketch.RemoveMultiple(remove_values)
+	sketch.RemoveMultiple(removeValues)
 
 	res := sketch.GetFrequency([][]byte{[]byte("cyclops")}).(map[string]int)
 	if res["cyclops"] != 2 {
