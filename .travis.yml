@@ -12,6 +12,7 @@ install:
  - go get github.com/facebookgo/httpdown
  - go get github.com/facebookgo/grace/gracehttp
  - go get github.com/dgryski/go-farm
+ - go get github.com/lazybeaver/xorshift
 
 script:
  - go test -v ./...

@@ -1,13 +1,14 @@
 package cml
 
 import (
-	"math/rand"
-
 	"github.com/dgryski/go-farm"
+	"github.com/lazybeaver/xorshift"
 )
 
+var rnd = xorshift.NewXorShift64Star(42)
+
 func randFloat() float64 {
-	return rand.Float64()
+	return float64(rnd.Next()%10e5) / 10e5
 }
 
 func hash(s []byte, i, w uint) uint {

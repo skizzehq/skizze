@@ -18,7 +18,7 @@ Sketch is the toplevel Sketch to control the count-min-log implementation
 */
 type Sketch struct {
 	*abstract.Info
-	impl *cml.Sketch16
+	impl *cml.Sketch
 }
 
 /*
@@ -41,8 +41,8 @@ func NewSketch(info *abstract.Info) (*Sketch, error) {
 		info.Properties["delta"] = delta
 	}
 
-	sketch16, err := cml.NewSketch16ForEpsilonDelta(epsilon, delta)
-	d := Sketch{info, sketch16}
+	sketch, err := cml.NewSketchForEpsilonDelta(epsilon, delta)
+	d := Sketch{info, sketch}
 	if err != nil {
 		logger.Error.Printf("an error has occurred while saving Sketch: %s", err.Error())
 	}
@@ -102,7 +102,7 @@ func (d *Sketch) Clear() (bool, error) {
 Marshal ...
 */
 func (d *Sketch) Marshal() ([]byte, error) {
-	return d.impl.Marshall()
+	return d.impl.Marshal()
 }
 
 /*
@@ -121,9 +121,9 @@ func (d *Sketch) GetFrequency(values [][]byte) interface{} {
 Unmarshal ...
 */
 func Unmarshal(info *abstract.Info, data []byte) (*Sketch, error) {
-	sketch16, err := cml.Unmarshall16(data)
+	sketch, err := cml.Unmarshal(data)
 	if err != nil {
 		return nil, err
 	}
-	return &Sketch{info, sketch16}, nil
+	return &Sketch{info, sketch}, nil
 }
