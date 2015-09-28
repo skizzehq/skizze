@@ -12,6 +12,7 @@ import (
 	"github.com/seiflotfy/skizze/sketches/wrappers/count-min-log"
 	"github.com/seiflotfy/skizze/sketches/wrappers/hllpp"
 	"github.com/seiflotfy/skizze/sketches/wrappers/topk"
+	"github.com/seiflotfy/skizze/sketches/wrappers/realcount"
 	"github.com/seiflotfy/skizze/storage"
 )
 
@@ -120,6 +121,8 @@ func createSketch(info *abstract.Info) (*SketchProxy, error) {
 		sketch, err = topk.NewSketch(info)
 	case abstract.CML:
 		sketch, err = cml.NewSketch(info)
+	case abstract.RealCount:
+		sketch, err = realcount.NewSketch(info)
 	default:
 		return nil, errors.New("Invalid sketch type: " + info.Type)
 	}
@@ -153,6 +156,8 @@ func loadSketch(info *abstract.Info) (*SketchProxy, error) {
 		sketch, err = topk.Unmarshal(info, data)
 	case abstract.CML:
 		sketch, err = cml.Unmarshal(info, data)
+	case abstract.RealCount:
+		sketch, err = realcount.Unmarshal(info, data)
 	default:
 		logger.Info.Println("Invalid sketch type", info.Type)
 	}

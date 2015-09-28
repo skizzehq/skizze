@@ -6,9 +6,11 @@ CML		=> Count-min-log sketch
 TopK	=> Top-K
 */
 const (
-	HLLPP = "hllpp"
-	CML   = "cml"
-	TopK  = "topk"
+	HLLPP     = "hllpp"
+	CML       = "cml"
+	TopK      = "topk"
+	RealCount = "realcount"
+
 )
 
 /*
