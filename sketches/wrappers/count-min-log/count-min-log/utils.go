@@ -2,10 +2,10 @@ package cml
 
 import (
 	"github.com/dgryski/go-farm"
-	"github.com/lazybeaver/xorshift"
+	"github.com/dgryski/go-pcgr"
 )
 
-var rnd = xorshift.NewXorShift64Star(42)
+var rnd = pcgr.Rand{0x0ddc0ffeebadf00d, 0xcafebabe}
 
 func randFloat() float64 {
 	return float64(rnd.Next()%10e5) / 10e5

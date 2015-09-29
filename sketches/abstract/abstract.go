@@ -10,7 +10,6 @@ const (
 	CML       = "cml"
 	TopK      = "topk"
 	RealCount = "realcount"
-
 )
 
 /*
