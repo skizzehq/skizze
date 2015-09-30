@@ -15,8 +15,8 @@ install:
  - go get github.com/lazybeaver/xorshift
  - go get github.com/dgryski/go-pcgr
 
-before_script:
-  - go vet ./...
+# before_script:
+#   - go vet ./...
 
 script:
  - go test -v ./...
