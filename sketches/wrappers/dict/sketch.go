@@ -17,7 +17,7 @@ type Dict struct {
 	hash map[string]int
 }
 
-func makeRC() (rc *Dict) {
+func makeDict() (dict *Dict) {
 	return &Dict{
 		hash: make(map[string]int),
 	}
@@ -26,32 +26,32 @@ func makeRC() (rc *Dict) {
 /*
 Reset ...
 */
-func (rc *Dict) Reset() {
-	rc.hash = make(map[string]int)
+func (dict *Dict) Reset() {
+	dict.hash = make(map[string]int)
 }
 
 /*
 IncreaseCount ...
 */
-func (rc *Dict) IncreaseCount(name string) {
-	rc.hash[name]++
+func (dict *Dict) IncreaseCount(name string) {
+	dict.hash[name]++
 }
 
 /*
 DecreaseCount ...
 */
-func (rc *Dict) DecreaseCount(name string) {
-	rc.hash[name]--
+func (dict *Dict) DecreaseCount(name string) {
+	dict.hash[name]--
 }
 
 /*
 Marshal ...
 */
-func (rc *Dict) Marshal() ([]byte, error) {
+func (dict *Dict) Marshal() ([]byte, error) {
 	var network bytes.Buffer        // Stand-in for a network connection
 	enc := gob.NewEncoder(&network) // Will write to network.
 	// Encode (send) the value.
-	err := enc.Encode(rc)
+	err := enc.Encode(dict)
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +70,8 @@ type Sketch struct {
 NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
-	var rc = makeRC()
-	d := Sketch{info, rc}
+	var dict = makeDict()
+	d := Sketch{info, dict}
 	return &d, nil
 }
 

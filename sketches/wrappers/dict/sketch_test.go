@@ -36,7 +36,7 @@ func TestAddMultiple(t *testing.T) {
 
 	sketch, err := NewSketch(&abstract.Info{
 		ID:         "avengers",
-		Type:       abstract.RealCount,
+		Type:       abstract.Dict,
 		Properties: make(map[string]float64),
 		State:      make(map[string]uint64)})
 
@@ -67,7 +67,7 @@ func TestDecrease(t *testing.T) {
 
 	sketch, err := NewSketch(&abstract.Info{
 		ID:         "avengers",
-		Type:       abstract.RealCount,
+		Type:       abstract.Dict,
 		Properties: make(map[string]float64),
 		State:      make(map[string]uint64)})
 
