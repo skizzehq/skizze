@@ -11,8 +11,8 @@ import (
 	"github.com/seiflotfy/skizze/sketches/abstract"
 	"github.com/seiflotfy/skizze/sketches/wrappers/count-min-log"
 	"github.com/seiflotfy/skizze/sketches/wrappers/hllpp"
-	"github.com/seiflotfy/skizze/sketches/wrappers/topk"
 	"github.com/seiflotfy/skizze/sketches/wrappers/realcount"
+	"github.com/seiflotfy/skizze/sketches/wrappers/topk"
 	"github.com/seiflotfy/skizze/storage"
 )
 
@@ -34,6 +34,7 @@ func (sp *SketchProxy) Add(values [][]byte) (bool, error) {
 	sp.lock.Lock()
 	defer sp.lock.Unlock()
 	sp.ops++
+	sp.Properties["adds"]++
 	sp.dirty = true
 	defer sp.save(false)
 	return sp.sketch.AddMultiple(values)
@@ -45,8 +46,9 @@ Remove ...
 func (sp *SketchProxy) Remove(values [][]byte) (bool, error) {
 	sp.lock.Lock()
 	defer sp.lock.Unlock()
-	sp.dirty = true
+	sp.Properties["remove"]++
 	sp.ops++
+	sp.dirty = true
 	defer sp.save(false)
 	return sp.sketch.RemoveMultiple(values)
 }

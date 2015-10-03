@@ -1,4 +1,4 @@
-package realcount
+package dict
 
 import (
 	"os"

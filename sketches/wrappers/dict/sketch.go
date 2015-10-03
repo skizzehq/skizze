@@ -1,4 +1,4 @@
-package realcount
+package dict
 
 import (
 	"bytes"
@@ -11,14 +11,14 @@ import (
 var logger = utils.GetLogger()
 
 /*
-RC ...
+Dict ...
 */
-type RC struct {
+type Dict struct {
 	hash map[string]int
 }
 
-func makeRC() (rc *RC) {
-	return &RC{
+func makeRC() (rc *Dict) {
+	return &Dict{
 		hash: make(map[string]int),
 	}
 }
@@ -26,28 +26,28 @@ func makeRC() (rc *RC) {
 /*
 Reset ...
 */
-func (rc *RC) Reset() {
+func (rc *Dict) Reset() {
 	rc.hash = make(map[string]int)
 }
 
 /*
 IncreaseCount ...
 */
-func (rc *RC) IncreaseCount(name string) {
+func (rc *Dict) IncreaseCount(name string) {
 	rc.hash[name]++
 }
 
 /*
 DecreaseCount ...
 */
-func (rc *RC) DecreaseCount(name string) {
+func (rc *Dict) DecreaseCount(name string) {
 	rc.hash[name]--
 }
 
 /*
 Marshal ...
 */
-func (rc *RC) Marshal() ([]byte, error) {
+func (rc *Dict) Marshal() ([]byte, error) {
 	var network bytes.Buffer        // Stand-in for a network connection
 	enc := gob.NewEncoder(&network) // Will write to network.
 	// Encode (send) the value.
@@ -63,7 +63,7 @@ Sketch ...
 */
 type Sketch struct {
 	*abstract.Info
-	impl *RC
+	impl *Dict
 }
 
 /*
@@ -156,7 +156,7 @@ func Unmarshal(info *abstract.Info, data []byte) (*Sketch, error) {
 	}
 	dec := gob.NewDecoder(&network) // Will read from network.
 
-	var counter RC
+	var counter Dict
 	err = dec.Decode(&counter)
 	if err != nil {
 		return nil, err
