@@ -38,6 +38,7 @@ type sketchesResult struct {
 
 type sketchResult struct {
 	Result interface{} `json:"result"`
+	Info   interface{} `json:"info"`
 	Error  error       `json:"error"`
 }
 
@@ -95,27 +96,27 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 		// Get a count for a specific sketch
 		count, err := sketchesManager.GetCountForSketch(data.id, data.typ, data.Values)
 		logger.Info.Printf("[%v]: Getting state for sketch: %v of type %s", method, data.id, data.typ)
-		res = sketchResult{count, err}
+		res = sketchResult{count["result"], count["info"], err}
 	case method == "POST":
 		// Create a new sketch counter
 		err = sketchesManager.CreateSketch(data.id, data.typ, data.Properties)
 		logger.Info.Printf("[%v]: Creating new sketch: %v of type %s", method, data.id, data.typ)
-		res = sketchResult{0, err}
+		res = sketchResult{nil, nil, err}
 	case method == "PUT":
 		// Add values to counter
 		err = sketchesManager.AddToSketch(data.id, data.typ, data.Values)
 		logger.Info.Printf("[%v]: Adding values to sketch: %v of type %s", method, data.id, data.typ)
-		res = sketchResult{nil, err}
+		res = sketchResult{nil, nil, err}
 	case method == "PURGE":
 		// Purges values from counter
 		err = sketchesManager.DeleteFromSketch(data.id, data.typ, data.Values)
 		logger.Info.Printf("[%v]: Purging values from sketch: %v of type %s", method, data.id, data.typ)
-		res = sketchResult{nil, err}
+		res = sketchResult{nil, nil, err}
 	case method == "DELETE":
 		// Delete Counter
 		err := sketchesManager.DeleteSketch(data.id, data.typ)
 		logger.Info.Printf("[%v]: Deleting sketch: %v of type %s", method, data.id, data.typ)
-		res = sketchResult{nil, err}
+		res = sketchResult{nil, nil, err}
 	default:
 		logger.Error.Printf("[%v]: Invalid Method: %v", method, http.StatusBadRequest)
 		http.Error(w, fmt.Sprintf("Invalid Method: %s", method), http.StatusBadRequest)

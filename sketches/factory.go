@@ -56,17 +56,22 @@ func (sp *SketchProxy) Remove(values [][]byte) (bool, error) {
 /*
 Count ...
 */
-func (sp *SketchProxy) Count(values []string) interface{} {
+func (sp *SketchProxy) Count(values []string) map[string]interface{} {
+	result := make(map[string]interface{})
+	result["info"] = sp.Info.Properties
 	if sp.Type == abstract.CML {
 		bvalues := make([][]byte, len(values), len(values))
 		for i, value := range values {
 			bvalues[i] = []byte(value)
 		}
-		return sp.sketch.GetFrequency(bvalues)
+		result["result"] = sp.sketch.GetFrequency(bvalues)
+		return result
 	} else if sp.Type == abstract.TopK {
-		return sp.sketch.GetFrequency(nil)
+		result["result"] = sp.sketch.GetFrequency(nil)
+		return result
 	}
-	return sp.sketch.GetCount()
+	result["result"] = sp.sketch.GetCount()
+	return result
 }
 
 func (sp *SketchProxy) autosave() {

@@ -140,12 +140,12 @@ func (m *ManagerStruct) DeleteFromSketch(sketchID string, sketchType string, val
 /*
 GetCountForSketch ...
 */
-func (m *ManagerStruct) GetCountForSketch(sketchID string, sketchType string, values []string) (interface{}, error) {
+func (m *ManagerStruct) GetCountForSketch(sketchID string, sketchType string, values []string) (map[string]interface{}, error) {
 	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
 	var val, ok = m.sketches[id]
 	if ok == false {
 		errStr := fmt.Sprintf("No such sketch %s of type %s found", sketchID, sketchType)
-		return 0, errors.New(errStr)
+		return nil, errors.New(errStr)
 	}
 	var sketch *SketchProxy
 	sketch = val
