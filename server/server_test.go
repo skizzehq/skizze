@@ -15,16 +15,6 @@ import (
 	"github.com/seiflotfy/skizze/utils"
 )
 
-type testSketchsResult struct {
-	Result []string `json:"result"`
-	Error  error    `json:"error"`
-}
-
-type testSketchResult struct {
-	Result interface{} `json:"result"`
-	Error  error       `json:"error"`
-}
-
 func setupTests() {
 	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_data")
 	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_info")
@@ -57,16 +47,16 @@ func httpRequest(s *Server, t *testing.T, method string, sketch string, body str
 	return respw
 }
 
-func unmarshalSketchsResult(resp *httptest.ResponseRecorder) testSketchsResult {
+func unmarshalSketchsResult(resp *httptest.ResponseRecorder) sketchesResult {
 	body, _ := ioutil.ReadAll(resp.Body)
-	var r testSketchsResult
+	var r sketchesResult
 	json.Unmarshal(body, &r)
 	return r
 }
 
-func unmarshalSketchResult(resp *httptest.ResponseRecorder) testSketchResult {
+func unmarshalSketchResult(resp *httptest.ResponseRecorder) sketchResult {
 	body, _ := ioutil.ReadAll(resp.Body)
-	var r testSketchResult
+	var r sketchResult
 	json.Unmarshal(body, &r)
 	return r
 }
@@ -140,6 +130,7 @@ func TestHLL(t *testing.T) {
 
 	resp = httpRequest(s, t, "GET", "hllpp/marvel", `{}`)
 	result2 := unmarshalSketchResult(resp)
+
 	if result2.Result.(float64) != 3 {
 		t.Fatalf("after add resultCount != 1. Got %f.0", result2.Result.(float64))
 	}

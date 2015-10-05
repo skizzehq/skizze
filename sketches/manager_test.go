@@ -2,7 +2,6 @@ package sketches
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -83,6 +82,7 @@ func TestDuplicateSketches(t *testing.T) {
 		t.Error("Expected errors while creating sketch duplicate sketch, got", err)
 	}
 }
+
 func TestDefaultCounter(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
@@ -120,14 +120,14 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected no errors while adding to sketch, got", err)
 	}
 
-	var count interface{}
-	count, err = manager.GetCountForSketch("marvel", "hllpp", nil)
+	var res map[string]interface{}
+	res, err = manager.GetCountForSketch("marvel", "hllpp", nil)
 	if len(sketches) != 1 {
 		t.Error("Expected 1 sketches, got", len(sketches))
 	}
 
-	if count.(uint) != 2 {
-		t.Error("Expected count == 2, got", count.(uint))
+	if res["result"].(uint) != 2 {
+		t.Error("Expected count == 2, got", res["count"].(uint))
 	}
 
 	err = manager.DeleteSketch("marvel", "hllpp")
@@ -195,8 +195,8 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
-	if res.(uint) != 4 {
-		t.Error("expected avengers to have count 4, got", res.(uint))
+	if res["result"].(uint) != 4 {
+		t.Error("expected avengers to have count 4, got", res["result"].(uint))
 	}
 
 	m2, err := newManager()
@@ -207,8 +207,9 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
-	if res.(uint) != 4 {
-		t.Error("expected avengers to have count 4, got", res.(uint))
+
+	if res["result"].(uint) != 4 {
+		t.Error("expected avengers to have count 4, got", res["result"].(uint))
 	}
 }
 
@@ -228,10 +229,9 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 	m1.CreateSketch("avengers", "hllpp", props)
 	m1.CreateSketch("x-men", "hllpp", props)
 
-	fd, err := os.Open("/usr/share/dict/web2")
+	fd, err := os.Open("/usr/share/dict/words")
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		t.Error(err)
 	}
 	scanner := bufio.NewScanner(fd)
 
@@ -241,7 +241,7 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 		s := []byte(scanner.Text())
 		values = append(values, string(s))
 		i++
-		if i == 10000 {
+		if i == 1000 {
 			break
 		}
 	}
@@ -268,8 +268,8 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 	m1.AddToSketch("x-men", "hllpp", values)
 	count1, err := m1.GetCountForSketch("avengers", "hllpp", nil)
 	count2, err := m1.GetCountForSketch("x-men", "hllpp", nil)
-	if count1 != count2 {
-		t.Error("expected avengers count == x-men count, got", count1, "!=", count2)
+	if count1["result"].(uint) != count2["result"].(uint) {
+		t.Error("expected avengers count == x-men count, got", count1["result"].(uint), "!=", count2["result"].(uint))
 	}
 }
 
@@ -365,7 +365,7 @@ func TestTopKCounter(t *testing.T) {
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
-	top := res.([]topk.ResultElement)
+	top := res["result"].([]topk.ResultElement)
 	if len(top) != 3 {
 		t.Error("expected avengers to have 3 elements, got", len(top))
 	}
@@ -378,7 +378,7 @@ func TestTopKCounter(t *testing.T) {
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
-	top = res.([]topk.ResultElement)
+	top = res["result"].([]topk.ResultElement)
 	if len(top) != 3 {
 		t.Error("expected avengers to have 3 elements, got", len(top))
 	}
@@ -425,12 +425,12 @@ func TestCMLCounter(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	var res interface{}
+	var res map[string]interface{}
 	res, err = m2.GetCountForSketch("avengers", "cml", []string{"cyclops"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
-	counts := res.(map[string]uint)
+	counts := res["result"].(map[string]uint)
 	if v, ok := counts["cyclops"]; !ok {
 		t.Error("expected to find 'cyclops' in avengers, got", ok)
 	} else if v != 3 {
@@ -441,7 +441,7 @@ func TestCMLCounter(t *testing.T) {
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
-	counts = res.(map[string]uint)
+	counts = res["result"].(map[string]uint)
 	if v, ok := counts["havoc"]; !ok {
 		t.Error("expected to find 'havoc' in avengers, got", ok)
 	} else if v != 2 {
