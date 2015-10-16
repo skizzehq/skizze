@@ -14,6 +14,7 @@ install:
  - go get github.com/dgryski/go-farm
  - go get github.com/lazybeaver/xorshift
  - go get github.com/dgryski/go-pcgr
+ - go get github.com/willf/bitset
 
 # before_script:
 #   - go vet ./...
