@@ -1,15 +1,18 @@
 package abstract
 
 /*
-HLLPP	=> HLLPP
+HLLPP	=> HyperLogLogPlusPlus
 CML		=> Count-min-log sketch
 TopK	=> Top-K
+Dict  => dictionary
+Bloom => Bloom Filter
 */
 const (
 	HLLPP = "hllpp"
 	CML   = "cml"
 	TopK  = "topk"
 	Dict  = "dict"
+	Bloom = "bloom"
 )
 
 /*

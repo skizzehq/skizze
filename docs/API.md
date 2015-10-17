@@ -12,6 +12,7 @@ Skizze is communicated with via a RESTful API. All methods apply on all differen
 | hllpp | cardinality | HyperLogLog++        | query unique items from all added values | capacity up to billions, does not support purging added values |
 | cml   | frequency   | Count-Min-Log Sketch | query frequency of unique values added   | N/A |
 | topk  | rank + frequncy | Top-k Sketch | query the top k values added to the sketch | N/A |
+| bloom | cardinality | Bloom Filter | query unique items from all added values | N/A |
 
 ### RESTful API
 
@@ -77,4 +78,4 @@ For the API of each sketch type (implementation) look at the following type spec
 * [HyperLogLog++ (hllpp)](hllpp.md) (cardinality)
 * [Count-Min-Log (cml)](cml.md) (frequency)
 * [Top-K (topk)](topk.md) (ranking)
-
+* [Bloom Filter (bloom)](bloom.md) (cardinality)

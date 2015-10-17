@@ -13,6 +13,7 @@ import (
 	"github.com/seiflotfy/skizze/sketches/wrappers/dict"
 	"github.com/seiflotfy/skizze/sketches/wrappers/hllpp"
 	"github.com/seiflotfy/skizze/sketches/wrappers/topk"
+	"github.com/seiflotfy/skizze/sketches/wrappers/bloom"
 	"github.com/seiflotfy/skizze/storage"
 )
 
@@ -130,6 +131,8 @@ func createSketch(info *abstract.Info) (*SketchProxy, error) {
 		sketch, err = cml.NewSketch(info)
 	case abstract.Dict:
 		sketch, err = dict.NewSketch(info)
+	case abstract.Bloom:
+		sketch, err = bloom.NewSketch(info)
 	default:
 		return nil, errors.New("Invalid sketch type: " + info.Type)
 	}
@@ -165,6 +168,8 @@ func loadSketch(info *abstract.Info) (*SketchProxy, error) {
 		sketch, err = cml.Unmarshal(info, data)
 	case abstract.Dict:
 		sketch, err = dict.Unmarshal(info, data)
+	case abstract.Bloom:
+		sketch, err = bloom.Unmarshal(info, data)
 	default:
 		logger.Info.Println("Invalid sketch type", info.Type)
 	}
