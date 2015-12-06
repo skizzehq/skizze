@@ -72,7 +72,7 @@ func (m *ManagerStruct) DeleteSketch(sketchID string, sketchType string) error {
 	}
 	delete(m.sketches, id)
 	delete(m.info, id)
-	manager := storage.GetManager()
+	manager := storage.Manager()
 	err := manager.DeleteInfo(id)
 	if err != nil {
 		return err
@@ -184,7 +184,7 @@ func newManager() (*ManagerStruct, error) {
 func (m *ManagerStruct) dumpInfo(info *abstract.Info) {
 	// FIXME: Should we panic here?
 	m.info[info.ID] = info
-	manager := storage.GetManager()
+	manager := storage.Manager()
 	infoData, err := json.Marshal(info)
 	utils.PanicOnError(err)
 	err = manager.SaveInfo(info.ID, infoData)
@@ -192,7 +192,7 @@ func (m *ManagerStruct) dumpInfo(info *abstract.Info) {
 }
 
 func (m *ManagerStruct) loadInfo() error {
-	manager := storage.GetManager()
+	manager := storage.Manager()
 	infos, err := manager.LoadAllInfo()
 	if err != nil {
 		return err

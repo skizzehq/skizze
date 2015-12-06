@@ -27,10 +27,10 @@ func setupTests() {
 }
 
 func tearDownTests() {
-	os.RemoveAll(config.GetConfig().GetDataDir())
-	os.RemoveAll(config.GetConfig().GetInfoDir())
-	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
-	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
+	os.RemoveAll(config.GetConfig().DataDir)
+	os.RemoveAll(config.GetConfig().InfoDir)
+	os.Mkdir(config.GetConfig().DataDir, 0777)
+	os.Mkdir(config.GetConfig().InfoDir, 0777)
 	storage.CloseInfoDB()
 	sketchesManager.Destroy()
 }

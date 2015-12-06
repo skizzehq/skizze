@@ -96,7 +96,7 @@ func (sp *SketchProxy) save(force bool) {
 	if sp.ops%config.GetConfig().SaveThresholdOps == 0 || force {
 		sp.ops++
 		sp.dirty = false
-		manager := storage.GetManager()
+		manager := storage.Manager()
 		serialized, err := sp.sketch.Marshal()
 		if err != nil {
 			logger.Error.Println(err)
@@ -116,7 +116,7 @@ func (sp *SketchProxy) save(force bool) {
 func createSketch(info *abstract.Info) (*SketchProxy, error) {
 	var sketch abstract.Sketch
 	var err error
-	manager := storage.GetManager()
+	manager := storage.Manager()
 	err = manager.Create(info.ID)
 	if err != nil {
 		return nil, errors.New("Error creating new sketch")
@@ -141,7 +141,7 @@ func createSketch(info *abstract.Info) (*SketchProxy, error) {
 	}
 
 	sp := SketchProxy{info, sketch, sync.RWMutex{}, 0, true}
-	err = storage.GetManager().Create(info.ID)
+	err = storage.Manager().Create(info.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func createSketch(info *abstract.Info) (*SketchProxy, error) {
 func loadSketch(info *abstract.Info) (*SketchProxy, error) {
 	var sketch abstract.Sketch
 
-	data, err := storage.GetManager().LoadData(info.ID, 0, 0)
+	data, err := storage.Manager().LoadData(info.ID, 0, 0)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading data for sketch: %s", info.ID)
 	}
