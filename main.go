@@ -26,7 +26,7 @@ func main() {
 
 	logger.Info.Println("Starting counts...")
 	conf := config.GetConfig()
-	logger.Info.Println("Using data dir: ", conf.GetDataDir())
+	logger.Info.Println("Using data dir: ", conf.DataDir)
 	server, err := server.New()
 	utils.PanicOnError(err)
 	server.Run()

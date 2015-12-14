@@ -33,48 +33,6 @@ MaxKeySize
 */
 const MaxKeySize int = 32768 // max key size BoltDB in bytes
 
-/*
-GetInfoDir returns the top level info
-*/
-func (c *Config) GetInfoDir() string {
-	return c.InfoDir
-}
-
-/*
-GetDataDir returns the top level info
-*/
-func (c *Config) GetDataDir() string {
-	return c.DataDir
-}
-
-/*
-GetSliceSize returns the top level info
-*/
-func (c *Config) GetSliceSize() uint {
-	return c.SliceSize
-}
-
-/*
-GetCacheSize returns the top level info
-*/
-func (c *Config) GetCacheSize() uint {
-	return c.CacheSize
-}
-
-/*
-GetSliceCacheSize returns the top level info
-*/
-func (c *Config) GetSliceCacheSize() uint {
-	return c.SliceCacheSize
-}
-
-/*
-GetPort returns the port the server runs on
-*/
-func (c *Config) GetPort() uint {
-	return c.Port
-}
-
 func parseConfigTOML() *Config {
 	configPath := os.Getenv("SKZ_CONFIG")
 	if configPath == "" {
@@ -94,7 +52,7 @@ func parseConfigTOML() *Config {
 }
 
 /*
-GetConfig returns a singleton Configuration
+Config returns a singleton Configuration
 */
 func GetConfig() *Config {
 	if config == nil {

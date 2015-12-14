@@ -24,10 +24,10 @@ func setupTests() {
 }
 
 func tearDownTests() {
-	os.RemoveAll(config.GetConfig().GetDataDir())
-	os.RemoveAll(config.GetConfig().GetInfoDir())
-	os.Mkdir(config.GetConfig().GetDataDir(), 0777)
-	os.Mkdir(config.GetConfig().GetInfoDir(), 0777)
+	os.RemoveAll(config.GetConfig().DataDir)
+	os.RemoveAll(config.GetConfig().InfoDir)
+	os.Mkdir(config.GetConfig().DataDir, 0777)
+	os.Mkdir(config.GetConfig().InfoDir, 0777)
 }
 
 func TestNoCounters(t *testing.T) {
@@ -138,7 +138,7 @@ func TestSaveAndDeleteData(t *testing.T) {
 	m := newManager()
 	m.Create("phoenix")
 	m.SaveData("phoenix", []byte("phoenix"), 0)
-	path := filepath.Join(config.GetConfig().GetDataDir(), "phoenix")
+	path := filepath.Join(config.GetConfig().DataDir, "phoenix")
 	if _, err := os.Stat(path); err != nil {
 		t.Error("Expected data in,", path, "got", err)
 	}

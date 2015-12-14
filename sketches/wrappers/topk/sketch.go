@@ -33,7 +33,7 @@ type ResultElement topk.Element
 NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
-	manager = storage.GetManager()
+	manager = storage.Manager()
 	err := manager.Create(info.ID)
 	if err != nil {
 		logger.Error.Println("an error has occurred while creating sketch: " + err.Error())
