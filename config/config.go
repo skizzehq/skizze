@@ -12,9 +12,7 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-/*
-Config stores all configuration parameters for Go
-*/
+// Config stores all configuration parameters for Go
 type Config struct {
 	InfoDir              string `toml:"info_dir"`
 	DataDir              string `toml:"data_dir"`
@@ -22,15 +20,13 @@ type Config struct {
 	CacheSize            uint   `toml:"cache_size"`
 	SliceCacheSize       uint   `toml:"slice_cache_size"`
 	Port                 uint   `toml:"port"`
-	SaveThresholdSeconds uint   `toml:"save_threhhold_seconds"`
+	SaveThresholdSeconds uint   `toml:"save_threshold_seconds"`
 	SaveThresholdOps     uint   `toml:"save_threshold_ops"`
 }
 
 var config *Config
 
-/*
-MaxKeySize
-*/
+// MaxKeySize ...
 const MaxKeySize int = 32768 // max key size BoltDB in bytes
 
 func parseConfigTOML() *Config {
@@ -51,9 +47,7 @@ func parseConfigTOML() *Config {
 	return config
 }
 
-/*
-Config returns a singleton Configuration
-*/
+// GetConfig returns a singleton Configuration
 func GetConfig() *Config {
 	if config == nil {
 		config = parseConfigTOML()
