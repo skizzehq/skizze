@@ -10,9 +10,9 @@ Skizze is communicated with via a RESTful API. All methods apply on all differen
 | type  | purpose     | Sketch               | Description                              | Notes |
 | ---   | ---         | ---                  | ---                                      | ---   |
 | hllpp | cardinality | HyperLogLog++        | query unique items from all added values | capacity up to billions, does not support purging added values |
-| cml   | frequency   | Count-Min-Log Sketch | query frequency of unique values added   | N/A |
+| cml   | frequency   | Count-Min-Log Sketch | query frequency of unique values added | N/A |
 | topk  | rank + frequncy | Top-k Sketch | query the top k values added to the sketch | N/A |
-| bloom | membership | Bloom Filter | query unique items from all added values | N/A |
+| bloom | membership | Bloom Filter | query sketch membership of a value | N/A |
 | dictionary | frequency | Dictionary | query frequency of unique values added | infinte capacity (lots of memory), 100% accurate |
 
 ### RESTful API
