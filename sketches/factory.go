@@ -9,11 +9,11 @@ import (
 
 	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/sketches/abstract"
+	"github.com/seiflotfy/skizze/sketches/wrappers/bloom"
 	"github.com/seiflotfy/skizze/sketches/wrappers/count-min-log"
 	"github.com/seiflotfy/skizze/sketches/wrappers/dict"
 	"github.com/seiflotfy/skizze/sketches/wrappers/hllpp"
 	"github.com/seiflotfy/skizze/sketches/wrappers/topk"
-	"github.com/seiflotfy/skizze/sketches/wrappers/bloom"
 	"github.com/seiflotfy/skizze/storage"
 )
 
@@ -69,6 +69,13 @@ func (sp *SketchProxy) Count(values []string) map[string]interface{} {
 		return result
 	} else if sp.Type == abstract.TopK {
 		result["result"] = sp.sketch.GetFrequency(nil)
+		return result
+	} else if sp.Type == abstract.Bloom {
+		bvalues := make([][]byte, len(values), len(values))
+		for i, value := range values {
+			bvalues[i] = []byte(value)
+		}
+		result["result"] = sp.sketch.GetFrequency(bvalues)
 		return result
 	}
 	result["result"] = sp.sketch.GetCount()

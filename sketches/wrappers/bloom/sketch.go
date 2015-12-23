@@ -15,7 +15,7 @@ Sketch is the toplevel Sketch to control the count-min-log implementation
 */
 type Sketch struct {
 	*abstract.Info
-	impl *bloom.BloomFilter
+	impl *bloom.Filter
 }
 
 /*
@@ -88,14 +88,18 @@ func (d *Sketch) Marshal() ([]byte, error) {
 GetFrequency ...
 */
 func (d *Sketch) GetFrequency(values [][]byte) interface{} {
-	return nil
+	res := make(map[string]bool)
+	for _, value := range values {
+		res[string(value)] = d.impl.Test(value)
+	}
+	return res
 }
 
 /*
 Unmarshal ...
 */
 func Unmarshal(info *abstract.Info, data []byte) (*Sketch, error) {
-	sketch := &bloom.BloomFilter{};
+	sketch := &bloom.Filter{}
 	err := sketch.GobDecode(data)
 
 	if err != nil {

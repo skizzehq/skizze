@@ -59,18 +59,18 @@ import (
 	"github.com/willf/bitset"
 )
 
-// A BloomFilter is a representation of a set of _n_ items, where the main
+// A Filter is a representation of a set of _n_ items, where the main
 // requirement is to make membership queries; _i.e._, whether an item is a
 // member of a set.
-type BloomFilter struct {
+type Filter struct {
 	m uint
 	k uint
 	b *bitset.BitSet
 }
 
 // New creates a new Bloom filter with _m_ bits and _k_ hashing functions
-func New(m uint, k uint) *BloomFilter {
-	return &BloomFilter{m, k, bitset.New(m)}
+func New(m uint, k uint) *Filter {
+	return &Filter{m, k, bitset.New(m)}
 }
 
 func fnv64Hash(index uint, data []byte) uint64 {
@@ -94,7 +94,7 @@ func baseHashes(data []byte) []uint64 {
 }
 
 // location returns the ith hashed location using the four base hash values
-func (f *BloomFilter) location(h []uint64, i uint) (location uint) {
+func (f *Filter) location(h []uint64, i uint) (location uint) {
 	ii := uint64(i)
 	location = uint((h[ii%2] + ii*h[2+(((ii+(ii%2))%4)/2)]) % uint64(f.m))
 	return
@@ -111,23 +111,23 @@ func EstimateParameters(n uint, p float64) (m uint, k uint) {
 
 // NewWithEstimates creates a new Bloom filter for about n items with fp
 // false positive rate
-func NewWithEstimates(n uint, fp float64) *BloomFilter {
+func NewWithEstimates(n uint, fp float64) *Filter {
 	m, k := EstimateParameters(n, fp)
 	return New(m, k)
 }
 
 // Cap returns the capacity, _m_, of a Bloom filter
-func (f *BloomFilter) Cap() uint {
+func (f *Filter) Cap() uint {
 	return f.m
 }
 
-// K returns the number of hash functions used in the BloomFilter
-func (f *BloomFilter) K() uint {
+// K returns the number of hash functions used in the Filter
+func (f *Filter) K() uint {
 	return f.k
 }
 
 // Add data to the Bloom Filter. Returns the filter (allows chaining)
-func (f *BloomFilter) Add(data []byte) *BloomFilter {
+func (f *Filter) Add(data []byte) *Filter {
 	h := baseHashes(data)
 	for i := uint(0); i < f.k; i++ {
 		f.b.Set(f.location(h, i))
@@ -136,14 +136,14 @@ func (f *BloomFilter) Add(data []byte) *BloomFilter {
 }
 
 // AddString to the Bloom Filter. Returns the filter (allows chaining)
-func (f *BloomFilter) AddString(data string) *BloomFilter {
+func (f *Filter) AddString(data string) *Filter {
 	return f.Add([]byte(data))
 }
 
-// Test returns true if the data is in the BloomFilter, false otherwise.
+// Test returns true if the data is in the Filter, false otherwise.
 // If true, the result might be a false positive. If false, the data
 // is definitely not in the set.
-func (f *BloomFilter) Test(data []byte) bool {
+func (f *Filter) Test(data []byte) bool {
 	h := baseHashes(data)
 	for i := uint(0); i < f.k; i++ {
 		if !f.b.Test(f.location(h, i)) {
@@ -153,16 +153,16 @@ func (f *BloomFilter) Test(data []byte) bool {
 	return true
 }
 
-// TestString returns true if the string is in the BloomFilter, false otherwise.
+// TestString returns true if the string is in the Filter, false otherwise.
 // If true, the result might be a false positive. If false, the data
 // is definitely not in the set.
-func (f *BloomFilter) TestString(data string) bool {
+func (f *Filter) TestString(data string) bool {
 	return f.Test([]byte(data))
 }
 
 // TestAndAdd is the equivalent to calling Test(data) then Add(data).
 // Returns the result of Test.
-func (f *BloomFilter) TestAndAdd(data []byte) bool {
+func (f *Filter) TestAndAdd(data []byte) bool {
 	present := true
 	h := baseHashes(data)
 	for i := uint(0); i < f.k; i++ {
@@ -177,21 +177,21 @@ func (f *BloomFilter) TestAndAdd(data []byte) bool {
 
 // TestAndAddString is the equivalent to calling Test(string) then Add(string).
 // Returns the result of Test.
-func (f *BloomFilter) TestAndAddString(data string) bool {
+func (f *Filter) TestAndAddString(data string) bool {
 	return f.TestAndAdd([]byte(data))
 }
 
 // ClearAll clears all the data in a Bloom filter, removing all keys
-func (f *BloomFilter) ClearAll() *BloomFilter {
+func (f *Filter) ClearAll() *Filter {
 	f.b.ClearAll()
 	return f
 }
 
-// EstimateFalsePositiveRate returns, for a BloomFilter with a estimate of m bits
+// EstimateFalsePositiveRate returns, for a Filter with a estimate of m bits
 // and k hash functions, what the false positive rate will be
 // while storing n entries; runs 100,000 tests. This is an empirical
-// test using integers as keys. As a side-effect, it clears the BloomFilter.
-func (f *BloomFilter) EstimateFalsePositiveRate(n uint) (fpRate float64) {
+// test using integers as keys. As a side-effect, it clears the Filter.
+func (f *Filter) EstimateFalsePositiveRate(n uint) (fpRate float64) {
 	rounds := uint32(100000)
 	f.ClearAll()
 	n1 := make([]byte, 4)
@@ -213,21 +213,21 @@ func (f *BloomFilter) EstimateFalsePositiveRate(n uint) (fpRate float64) {
 	return
 }
 
-// bloomFilterJSON is an unexported type for marshaling/unmarshaling BloomFilter struct.
-type bloomFilterJSON struct {
+// FilterJSON is an unexported type for marshaling/unmarshaling Filter struct.
+type FilterJSON struct {
 	M uint           `json:"m"`
 	K uint           `json:"k"`
 	B *bitset.BitSet `json:"b"`
 }
 
 // MarshalJSON implements json.Marshaler interface.
-func (f *BloomFilter) MarshalJSON() ([]byte, error) {
-	return json.Marshal(bloomFilterJSON{f.m, f.k, f.b})
+func (f *Filter) MarshalJSON() ([]byte, error) {
+	return json.Marshal(FilterJSON{f.m, f.k, f.b})
 }
 
 // UnmarshalJSON implements json.Unmarshaler interface.
-func (f *BloomFilter) UnmarshalJSON(data []byte) error {
-	var j bloomFilterJSON
+func (f *Filter) UnmarshalJSON(data []byte) error {
+	var j FilterJSON
 	err := json.Unmarshal(data, &j)
 	if err != nil {
 		return err
@@ -238,9 +238,9 @@ func (f *BloomFilter) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// WriteTo writes a binary representation of the BloomFilter to an i/o stream.
+// WriteTo writes a binary representation of the Filter to an i/o stream.
 // It returns the number of bytes written.
-func (f *BloomFilter) WriteTo(stream io.Writer) (int64, error) {
+func (f *Filter) WriteTo(stream io.Writer) (int64, error) {
 	err := binary.Write(stream, binary.BigEndian, uint64(f.m))
 	if err != nil {
 		return 0, err
@@ -253,10 +253,10 @@ func (f *BloomFilter) WriteTo(stream io.Writer) (int64, error) {
 	return numBytes + int64(2*binary.Size(uint64(0))), err
 }
 
-// ReadFrom reads a binary representation of the BloomFilter (such as might
+// ReadFrom reads a binary representation of the Filter (such as might
 // have been written by WriteTo()) from an i/o stream. It returns the number
 // of bytes read.
-func (f *BloomFilter) ReadFrom(stream io.Reader) (int64, error) {
+func (f *Filter) ReadFrom(stream io.Reader) (int64, error) {
 	var m, k uint64
 	err := binary.Read(stream, binary.BigEndian, &m)
 	if err != nil {
@@ -278,7 +278,7 @@ func (f *BloomFilter) ReadFrom(stream io.Reader) (int64, error) {
 }
 
 // GobEncode implements gob.GobEncoder interface.
-func (f *BloomFilter) GobEncode() ([]byte, error) {
+func (f *Filter) GobEncode() ([]byte, error) {
 	var buf bytes.Buffer
 	_, err := f.WriteTo(&buf)
 	if err != nil {
@@ -289,7 +289,7 @@ func (f *BloomFilter) GobEncode() ([]byte, error) {
 }
 
 // GobDecode implements gob.GobDecoder interface.
-func (f *BloomFilter) GobDecode(data []byte) error {
+func (f *Filter) GobDecode(data []byte) error {
 	buf := bytes.NewBuffer(data)
 	_, err := f.ReadFrom(buf)
 

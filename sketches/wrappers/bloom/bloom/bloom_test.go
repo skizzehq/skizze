@@ -172,7 +172,7 @@ func TestMarshalUnmarshalJSON(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	var g BloomFilter
+	var g Filter
 	err = json.Unmarshal(data, &g)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -231,7 +231,7 @@ func TestReadWriteBinary(t *testing.T) {
 		t.Errorf("incorrect write length %d != %d", bytesWritten, buf.Len())
 	}
 
-	var g BloomFilter
+	var g Filter
 	bytesRead, err := g.ReadFrom(&buf)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -264,7 +264,7 @@ func TestEncodeDecodeGob(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	var g BloomFilter
+	var g Filter
 	err = gob.NewDecoder(&buf).Decode(&g)
 	if err != nil {
 		t.Fatal(err.Error())
