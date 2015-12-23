@@ -10,6 +10,8 @@ import (
 
 var logger = utils.GetLogger()
 
+const defaultCapacity = 1000000
+
 /*
 Sketch is the toplevel Sketch to control the count-min-log implementation
 */
@@ -22,8 +24,10 @@ type Sketch struct {
 NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
-	// standard size
-	sketch := bloom.New(1000000, 4)
+	if info.Properties["capacity"] == 0 {
+		info.Properties["capacity"] = defaultCapacity
+	}
+	sketch := bloom.New(uint(info.Properties["capacity"]), 4)
 	d := Sketch{info, sketch}
 	return &d, nil
 }
