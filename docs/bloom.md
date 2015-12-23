@@ -18,6 +18,22 @@ curl -XPUT http://localhost:3596/bloom/sketch_1 -d '{
 }'
 ```
 
+**Getting** the membership for the values "rick grimes" and "hulk" in "sketch_2":
+```{r, engine='bash', count_lines}
+curl -XGET http://localhost:3596/cml/sketch_2 -d '{
+  "values": ["rick grimes", "hulk"]
+}'
+```
+returns the current count for each of these values:
+```json
+{
+  "result":{
+    "hulk": false,
+    "rick grimes": true
+  },
+  "error":null
+}
+```
 
 
 **Deleting** the sketch of type "bloom" with id "sketch_1":
