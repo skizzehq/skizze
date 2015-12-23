@@ -14,12 +14,12 @@ var logger = utils.GetLogger()
 Dict ...
 */
 type Dict struct {
-	hash map[string]int
+	hash map[string]uint
 }
 
 func makeDict() (dict *Dict) {
 	return &Dict{
-		hash: make(map[string]int),
+		hash: make(map[string]uint),
 	}
 }
 
@@ -27,7 +27,7 @@ func makeDict() (dict *Dict) {
 Reset ...
 */
 func (dict *Dict) Reset() {
-	dict.hash = make(map[string]int)
+	dict.hash = make(map[string]uint)
 }
 
 /*
@@ -134,7 +134,15 @@ func (d *Sketch) Clear() (bool, error) {
 GetFrequency which is basically our hash
 */
 func (d *Sketch) GetFrequency(values [][]byte) interface{} {
-	return d.impl.hash
+	if len(values) == 0 {
+		return d.impl.hash
+	}
+	res := make(map[string]uint)
+	for _, value := range values {
+		count, _ := d.impl.hash[string(value)]
+		res[string(value)] = uint(count)
+	}
+	return res
 }
 
 /*

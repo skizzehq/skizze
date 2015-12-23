@@ -55,7 +55,7 @@ func TestAddMultiple(t *testing.T) {
 
 	sketch.AddMultiple(values)
 
-	res := sketch.GetFrequency([][]byte{[]byte("cyclops")}).(map[string]int)
+	res := sketch.GetFrequency([][]byte{[]byte("cyclops")}).(map[string]uint)
 	if res["cyclops"] != 3 {
 		t.Error("expected 'cyclops' count == 3, got", res["cyclops"])
 	}
@@ -95,7 +95,7 @@ func TestDecrease(t *testing.T) {
 
 	sketch.RemoveMultiple(removeValues)
 
-	res := sketch.GetFrequency([][]byte{[]byte("cyclops")}).(map[string]int)
+	res := sketch.GetFrequency([][]byte{[]byte("cyclops")}).(map[string]uint)
 	if res["cyclops"] != 2 {
 		t.Error("expected 'cyclops' count == 2, got", res["cyclops"])
 	}
