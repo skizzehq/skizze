@@ -86,6 +86,9 @@ func GetConfig() *Config {
 		if err != nil {
 			saveThresholdOps = config.SaveThresholdOps
 		}
+		if saveThresholdSeconds < 3 {
+			saveThresholdSeconds = 3
+		}
 
 		config = &Config{
 			infoDir,
