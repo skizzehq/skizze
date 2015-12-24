@@ -88,11 +88,11 @@ func NewDefaultSketch() (*Sketch, error) {
 NewForCapacity16 returns a new Count-Min-Log sketch with 16-bit registers optimized for a given max capacity and expected error rate
 */
 func NewForCapacity16(capacity uint64, e float64) (*Sketch, error) {
-	// e = 2n/w    ==>    w = 2n/e
 	if !(e >= 0.001 && e < 1.0) {
 		return nil, errors.New("e needs to be >= 0.001 and < 1.0")
 	}
-	w := float64(2*capacity) / e
+	w := float64(capacity) / (e * 100)
+
 	return NewSketch(uint(w), 1, true, 1.00026, true, true, 16)
 }
 

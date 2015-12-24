@@ -10,8 +10,7 @@ import (
 
 var logger = utils.GetLogger()
 
-const defaultEpsilon = 0.000003397855
-const defaultDelta = 0.99
+const defaultCapacity = 1000000.0
 
 /*
 Sketch is the toplevel Sketch to control the count-min-log implementation
@@ -25,23 +24,10 @@ type Sketch struct {
 NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
-	epsilon := 0.0
-	if eps, ok := info.Properties["epsilon"]; ok {
-		epsilon = eps
-	} else {
-		epsilon = defaultEpsilon
-		info.Properties["epsilon"] = epsilon
+	if info.Properties["capacity"] == 0 {
+		info.Properties["capacity"] = defaultCapacity
 	}
-
-	delta := 0.0
-	if d, ok := info.Properties["delta"]; ok {
-		delta = d
-	} else {
-		delta = defaultDelta
-		info.Properties["delta"] = delta
-	}
-
-	sketch, err := cml.NewSketchForEpsilonDelta(epsilon, delta)
+	sketch, err := cml.NewForCapacity16(uint64(info.Properties["capacity"]), 0.01)
 	d := Sketch{info, sketch}
 	if err != nil {
 		logger.Error.Printf("an error has occurred while saving Sketch: %s", err.Error())

@@ -7,12 +7,10 @@ import (
 
 	"github.com/seiflotfy/skizze/sketches/abstract"
 	"github.com/seiflotfy/skizze/sketches/wrappers/topk/go-topk"
-	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
 
 var logger = utils.GetLogger()
-var manager *storage.ManagerStruct
 
 const defaultCapacity = 100.0
 
@@ -33,12 +31,6 @@ type ResultElement topk.Element
 NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
-	manager = storage.Manager()
-	err := manager.Create(info.ID)
-	if err != nil {
-		logger.Error.Println("an error has occurred while creating sketch: " + err.Error())
-		return nil, err
-	}
 	if info.Properties["capacity"] == 0 {
 		info.Properties["capacity"] = defaultCapacity
 	}
