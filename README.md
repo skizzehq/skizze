@@ -22,6 +22,61 @@ Skizze is a (fire and forget) service that provides a probabilistic data structu
 * How many elements belong to the specified range (range query, in SQL it looks like `SELECT count(v) WHERE v >= c1 AND v < c2)?`
 * Does the data set contain a particular element (membership query)?
 
+## How to build and install
+
+```
+go build && go install
+skizze
+```
+
+## Example usage:
+
+**Creating** a new empty sketch of type HyperLogLog++ (hllpp) with the id "sketch_1":
+```{r, engine='bash', count_lines}
+curl -XPOST http://localhost:3596/hllpp/sketch_1
+```
+
+
+**Adding** values to the sketch with id "sketch_1":
+```{r, engine='bash', count_lines}
+curl -XPUT http://localhost:3596/hllpp/sketch_1 -d '{
+  "values": ["image", "rick grimes"]
+}'
+```
+
+
+**Retrieving** the cardinality of "sketch_1":
+```{r, engine='bash', count_lines}
+curl -XGET http://localhost:3596/hllpp/sketch_1
+```
+returns
+```json
+{
+  "result":2,
+  "error":null
+}
+```
+
+**Listing** all available sketches:
+```{r, engine='bash', count_lines}
+curl -XGET http://localhost:3596
+```
+returns
+```json
+{
+  "result":[
+    "hllpp/sketch_1"
+  ],
+  "error":null
+}
+```
+
+**Deleting** the sketch of type "hllpp" with id "sketch_1":
+```{r, engine='bash', count_lines}
+curl -XDELETE http://localhost:3596/hllpp/sketch_1
+```
+
+
 ## API
 
 See [API](docs/API.md)
