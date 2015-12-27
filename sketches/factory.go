@@ -35,7 +35,7 @@ func (sp *SketchProxy) Add(values [][]byte) (bool, error) {
 	sp.lock.Lock()
 	defer sp.lock.Unlock()
 	sp.ops++
-	sp.Properties["adds"]++
+	sp.State.Additions++
 	sp.dirty = true
 	defer sp.save(false)
 	return sp.sketch.AddMultiple(values)
@@ -47,7 +47,7 @@ Remove ...
 func (sp *SketchProxy) Remove(values [][]byte) (bool, error) {
 	sp.lock.Lock()
 	defer sp.lock.Unlock()
-	sp.Properties["remove"]++
+	sp.State.Deletions++
 	sp.ops++
 	sp.dirty = true
 	defer sp.save(false)
@@ -99,6 +99,7 @@ func (sp *SketchProxy) save(force bool) {
 	if !sp.dirty {
 		return
 	}
+	id := fmt.Sprintf("%s.%s", sp.ID, sp.Type)
 
 	if sp.ops%config.GetConfig().SaveThresholdOps == 0 || force {
 		sp.ops++
@@ -108,7 +109,7 @@ func (sp *SketchProxy) save(force bool) {
 		if err != nil {
 			logger.Error.Println(err)
 		}
-		err = manager.SaveData(sp.Info.ID, serialized, 0)
+		err = manager.SaveData(id, serialized, 0)
 		if err != nil {
 			logger.Error.Println(err)
 		}
@@ -128,7 +129,17 @@ func createSketch(info *abstract.Info) (*SketchProxy, error) {
 	if err != nil {
 		return nil, errors.New("Error creating new sketch")
 	}
-
+	if info.Properties == nil {
+		info.Properties = &abstract.Properties{
+			Capacity: 0,
+		}
+	}
+	if info.State == nil {
+		info.State = &abstract.State{
+			Additions: 0,
+			Deletions: 0,
+		}
+	}
 	switch info.Type {
 	case abstract.HLLPP:
 		sketch, err = hllpp.NewSketch(info)
@@ -161,9 +172,10 @@ func createSketch(info *abstract.Info) (*SketchProxy, error) {
 func loadSketch(info *abstract.Info) (*SketchProxy, error) {
 	var sketch abstract.Sketch
 
-	data, err := storage.Manager().LoadData(info.ID, 0, 0)
+	id := fmt.Sprintf("%s.%s", info.ID, info.Type)
+	data, err := storage.Manager().LoadData(id, 0, 0)
 	if err != nil {
-		return nil, fmt.Errorf("Error loading data for sketch: %s", info.ID)
+		return nil, fmt.Errorf("Error loading data for sketch: %s", id)
 	}
 
 	switch info.Type {
@@ -183,7 +195,7 @@ func loadSketch(info *abstract.Info) (*SketchProxy, error) {
 	sp := SketchProxy{info, sketch, sync.RWMutex{}, 0, false}
 
 	if err != nil {
-		return nil, fmt.Errorf("Error loading data for sketch: %s", info.ID)
+		return nil, fmt.Errorf("Error loading data for sketch: %s", id)
 	}
 
 	go sp.autosave()

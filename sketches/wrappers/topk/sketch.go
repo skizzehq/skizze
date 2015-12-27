@@ -31,10 +31,10 @@ type ResultElement topk.Element
 NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
-	if info.Properties["capacity"] == 0 {
-		info.Properties["capacity"] = defaultCapacity
+	if info.Properties.Capacity == 0 {
+		info.Properties.Capacity = defaultCapacity
 	}
-	d := Sketch{info, topk.New(int(info.Properties["capacity"]))}
+	d := Sketch{info, topk.New(int(info.Properties.Capacity))}
 
 	return &d, nil
 }

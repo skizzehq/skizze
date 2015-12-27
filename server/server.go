@@ -12,15 +12,17 @@ import (
 	"github.com/facebookgo/grace/gracehttp"
 	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/sketches"
+	"github.com/seiflotfy/skizze/sketches/abstract"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
 
 type requestData struct {
-	id         string
-	typ        string
-	Properties map[string]float64 `json:"properties"`
-	Values     []string           `json:"values"`
+	id       string
+	typ      string
+	Capacity uint     `json:"capacity"`
+	Values   []string `json:"values"`
+	info     *abstract.Info
 }
 
 var logger = utils.GetLogger()
@@ -55,7 +57,7 @@ func New() (*Server, error) {
 	return &server, nil
 }
 
-func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data requestData) {
+func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data *requestData) {
 	var err error
 	var sketches []string
 	var js []byte
@@ -86,7 +88,7 @@ func (srv *Server) handleTopRequest(w http.ResponseWriter, method string, data r
 
 }
 
-func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, data requestData) {
+func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, data *requestData) {
 	var res sketchResult
 	var err error
 
@@ -99,7 +101,7 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 		res = sketchResult{count["result"], count["info"], err}
 	case method == "POST":
 		// Create a new sketch counter
-		err = sketchesManager.CreateSketch(data.id, data.typ, data.Properties)
+		err = sketchesManager.CreateSketch(data.info)
 		logger.Info.Printf("[%v]: Creating new sketch: %v of type %s", method, data.id, data.typ)
 		res = sketchResult{nil, nil, err}
 	case method == "PUT":
@@ -139,32 +141,48 @@ func (srv *Server) handleSketchRequest(w http.ResponseWriter, method string, dat
 	}
 }
 
-func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	method := r.Method
-	paths := strings.Split(r.URL.Path[1:], "/")
+func parseRequestData(paths []string, r *http.Request) (*requestData, error) {
 	body, _ := ioutil.ReadAll(r.Body)
-	var data requestData
 
-	if len(body) > 0 {
-		err := json.Unmarshal(body, &data)
-		if err != nil {
-			logger.Error.Printf("An error has ocurred: %v", err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-	} else {
-		data = requestData{}
+	if len(paths) < 2 || len(body) == 0 {
+		return &requestData{}, nil
 	}
 
-	if data.Properties == nil {
-		data.Properties = make(map[string]float64)
+	d := &requestData{}
+	if err := json.Unmarshal(body, &d); err != nil {
+		logger.Error.Printf("An error has ocurred: %v", err.Error())
+		return nil, err
+	}
+
+	d.typ = strings.TrimSpace(string(paths[0]))
+	d.id = strings.TrimSpace(strings.Join(paths[1:], "/"))
+	d.info = &abstract.Info{
+		ID:   d.id,
+		Type: d.typ,
+	}
+
+	return d, nil
+}
+
+func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	method := r.Method
+	paths := strings.Split(strings.TrimSpace(r.URL.Path[1:]), "/")
+
+	data, err := parseRequestData(paths, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	if len(paths) == 1 {
+		if data.info == nil {
+			data.info = &abstract.Info{
+				Properties: &abstract.Properties{},
+				State:      &abstract.State{},
+			}
+		}
 		srv.handleTopRequest(w, method, data)
 	} else if len(paths) == 2 {
-		data.typ = strings.TrimSpace(string(paths[0]))
-		data.id = strings.TrimSpace(strings.Join(paths[1:], "/"))
 		srv.handleSketchRequest(w, method, data)
 	}
 }

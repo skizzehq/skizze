@@ -24,10 +24,10 @@ type Sketch struct {
 NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
-	if info.Properties["capacity"] == 0 {
-		info.Properties["capacity"] = defaultCapacity
+	if info.Properties.Capacity == 0 {
+		info.Properties.Capacity = defaultCapacity
 	}
-	sketch := bloom.New(uint(info.Properties["capacity"]), 4)
+	sketch := bloom.New(uint(info.Properties.Capacity), 4)
 	d := Sketch{info, sketch}
 	return &d, nil
 }

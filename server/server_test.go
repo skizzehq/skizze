@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -87,7 +88,7 @@ func TestPost(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "hllpp/marvel", `{
-		"properties": {"capacity": 100000}
+		"capacity": 100000
 	}`)
 
 	if resp.Code != 200 {
@@ -96,6 +97,7 @@ func TestPost(t *testing.T) {
 	}
 
 	resp = httpRequest(s, t, "GET", "", `{}`)
+	fmt.Println(resp)
 	result := unmarshalSketchsResult(resp)
 	if len(result.Result) != 1 {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
@@ -110,7 +112,7 @@ func TestHLL(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "hllpp/marvel", `{
-		"properties": {"capacity": 100000}
+		"capacity": 100000
 	}`)
 
 	if resp.Code != 200 {
@@ -209,5 +211,4 @@ func TestTopK(t *testing.T) {
 	if v, ok := res[0]["Key"]; ok && v.(string) != "magneto" {
 		t.Fatalf("Expected \"magneto\" in first position, got, %s", v.(string))
 	}
-
 }

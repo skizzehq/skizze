@@ -30,11 +30,26 @@ type Sketch interface {
 }
 
 /*
+Properties ...
+*/
+type Properties struct {
+	Capacity uint `json:"capacity"`
+}
+
+/*
+State ...
+*/
+type State struct {
+	Additions uint `json:"adds"`
+	Deletions uint `json:"deletions"`
+}
+
+/*
 Info ...
 */
 type Info struct {
-	ID         string             `json:"id"`
-	Type       string             `json:"type"`
-	State      map[string]uint64  `json:"state"`
-	Properties map[string]float64 `json:"properties"`
+	ID         string      `json:"id"`
+	Type       string      `json:"type"`
+	State      *State      `json:"state"`
+	Properties *Properties `json:"properties"`
 }
