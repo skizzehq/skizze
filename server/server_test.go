@@ -16,22 +16,22 @@ import (
 )
 
 func setupTests() {
-	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_data")
-	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_info")
+	utils.PanicOnError(os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_data"))
+	utils.PanicOnError(os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_info"))
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)
 	configPath := filepath.Join(path, "config/default.toml")
-	os.Setenv("SKZ_CONFIG", configPath)
+	utils.PanicOnError(os.Setenv("SKZ_CONFIG", configPath))
 	tearDownTests()
 }
 
 func tearDownTests() {
-	os.RemoveAll(config.GetConfig().DataDir)
-	os.RemoveAll(config.GetConfig().InfoDir)
-	os.Mkdir(config.GetConfig().DataDir, 0777)
-	os.Mkdir(config.GetConfig().InfoDir, 0777)
-	storage.CloseInfoDB()
+	utils.PanicOnError(os.RemoveAll(config.GetConfig().DataDir))
+	utils.PanicOnError(os.RemoveAll(config.GetConfig().InfoDir))
+	utils.PanicOnError(os.Mkdir(config.GetConfig().DataDir, 0777))
+	utils.PanicOnError(os.Mkdir(config.GetConfig().InfoDir, 0777))
+	utils.PanicOnError(storage.CloseInfoDB())
 	sketchesManager.Destroy()
 }
 
@@ -50,14 +50,14 @@ func httpRequest(s *Server, t *testing.T, method string, sketch string, body str
 func unmarshalSketchsResult(resp *httptest.ResponseRecorder) sketchesResult {
 	body, _ := ioutil.ReadAll(resp.Body)
 	var r sketchesResult
-	json.Unmarshal(body, &r)
+	utils.PanicOnError(json.Unmarshal(body, &r))
 	return r
 }
 
 func unmarshalSketchResult(resp *httptest.ResponseRecorder) sketchResult {
 	body, _ := ioutil.ReadAll(resp.Body)
 	var r sketchResult
-	json.Unmarshal(body, &r)
+	utils.PanicOnError(json.Unmarshal(body, &r))
 	return r
 }
 

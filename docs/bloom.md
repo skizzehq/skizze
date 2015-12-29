@@ -7,6 +7,9 @@ A Bloom filter is a representation of a set of n items, where the main requireme
 curl -XPOST http://localhost:3596/bloom/sketch_1
 ```
 
+* optional arguments:
+  * capacity: the max capacity of values (does not apply to hllpp), default is 1000000.
+
 
 **Adding** values to the sketch with id "sketch_1":
 ```{r, engine='bash', count_lines}

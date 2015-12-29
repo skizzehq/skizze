@@ -4,9 +4,7 @@ A dictionray is 100% accurate counting data structure that serves as a frequency
 
 **Creating** a new empty sketch of type Dictionary (dict) with the id "sketch_2" and a capacity of 1000000:
 ```{r, engine='bash', count_lines}
-curl -XPOST http://localhost:3596/dict/sketch_2 -d '{
-  "capacity": 1000000
-}'
+curl -XPOST http://localhost:3596/dict/sketch_2
 ```
 
 **Adding** values to the sketch with id "sketch_2":

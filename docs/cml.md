@@ -9,6 +9,10 @@ curl -XPOST http://localhost:3596/cml/sketch_2 -d '{
 }'
 ```
 
+* optional arguments:
+	* capacity: the max capacity of values (does not apply to hllpp), default is 1000000.
+
+
 **Adding** values to the sketch with id "sketch_2":
 ```{r, engine='bash', count_lines}
 curl -XPUT http://localhost:3596/cml/sketch_2 -d '{

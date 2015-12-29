@@ -146,7 +146,12 @@ func parseRequestData(paths []string, r *http.Request) (*requestData, error) {
 	body, _ := ioutil.ReadAll(r.Body)
 
 	if len(paths) < 2 || len(body) == 0 {
-		return &requestData{}, nil
+		info := abstract.NewEmptyInfo()
+		info.ID = strings.TrimSpace(strings.Join(paths[1:], "/"))
+		info.Type = strings.TrimSpace(string(paths[0]))
+		return &requestData{
+			info: info,
+		}, nil
 	}
 
 	d := &requestData{}
@@ -179,12 +184,6 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(paths) == 1 {
-		if data.info == nil {
-			data.info = &abstract.Info{
-				Properties: &abstract.Properties{},
-				State:      &abstract.State{},
-			}
-		}
 		srv.handleTopRequest(w, method, data)
 	} else if len(paths) == 2 {
 		srv.handleSketchRequest(w, method, data)
