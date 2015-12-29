@@ -18,11 +18,12 @@ import (
 )
 
 type requestData struct {
-	id       string
-	typ      string
-	Capacity uint     `json:"capacity"`
-	Values   []string `json:"values"`
-	info     *abstract.Info
+	id          string
+	typ         string
+	Capacity    uint     `json:"capacity"`
+	ErrorOffset float64  `json:"errorOffset"`
+	Values      []string `json:"values"`
+	info        *abstract.Info
 }
 
 var logger = utils.GetLogger()

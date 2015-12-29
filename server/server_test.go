@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -97,7 +96,6 @@ func TestPost(t *testing.T) {
 	}
 
 	resp = httpRequest(s, t, "GET", "", `{}`)
-	fmt.Println(resp)
 	result := unmarshalSketchsResult(resp)
 	if len(result.Result) != 1 {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))

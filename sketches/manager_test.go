@@ -211,7 +211,6 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	fmt.Println(m2.info)
 	if _, exists = m2.info["x-force.hllpp"]; !exists {
 		t.Error("expected x-force to be in loaded by manager")
 	}
