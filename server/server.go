@@ -154,13 +154,16 @@ func parseRequestData(paths []string, r *http.Request) (*requestData, error) {
 		logger.Error.Printf("An error has ocurred: %v", err.Error())
 		return nil, err
 	}
-
 	d.typ = strings.TrimSpace(string(paths[0]))
 	d.id = strings.TrimSpace(strings.Join(paths[1:], "/"))
 	d.info = &abstract.Info{
 		ID:   d.id,
 		Type: d.typ,
 	}
+	d.info = abstract.NewEmptyInfo()
+	d.info.ID = d.id
+	d.info.Type = d.typ
+	d.info.Properties.Capacity = d.Capacity
 
 	return d, nil
 }

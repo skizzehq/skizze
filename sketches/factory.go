@@ -126,6 +126,7 @@ func createSketch(info *abstract.Info) (*SketchProxy, error) {
 	var err error
 	manager := storage.Manager()
 	err = manager.Create(info.ID)
+
 	if err != nil {
 		return nil, errors.New("Error creating new sketch")
 	}

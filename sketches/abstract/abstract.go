@@ -53,3 +53,30 @@ type Info struct {
 	State      *State      `json:"state"`
 	Properties *Properties `json:"properties"`
 }
+
+/*
+NewEmptyPropeties ...
+*/
+func NewEmptyPropeties() *Properties {
+	return &Properties{}
+}
+
+/*
+NewEmptyState ...
+*/
+func NewEmptyState() *State {
+	return &State{
+		Additions: 0,
+		Deletions: 0,
+	}
+}
+
+/*
+NewEmptyInfo ...
+*/
+func NewEmptyInfo() *Info {
+	return &Info{
+		Properties: NewEmptyPropeties(),
+		State:      NewEmptyState(),
+	}
+}

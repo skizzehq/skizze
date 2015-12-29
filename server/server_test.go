@@ -144,7 +144,7 @@ func TestCML(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "cml/x-force", `{
-		"properties": {"epsilon": 0.05, "delta": 0.99}
+		"epsilon": 0.05, "delta": 0.99
 	}`)
 
 	if resp.Code != 200 {
@@ -178,9 +178,7 @@ func TestTopK(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "topk/x-force", `{
-		"properties": {
-			"capacity": 100
-		}
+			"capacity": 3
 	}`)
 
 	if resp.Code != 200 {
@@ -195,10 +193,10 @@ func TestTopK(t *testing.T) {
 	}
 
 	resp = httpRequest(s, t, "PUT", "topk/x-force", `{
-			"values": ["magneto", "wasp", "beast", "magneto"]
+			"values": ["magneto", "wasp", "beast", "magneto", "pyro"]
 		}`)
 
-	resp = httpRequest(s, t, "GET", "topk/x-force", `{"values": ["magneto"]}`)
+	resp = httpRequest(s, t, "GET", "topk/x-force", `{"values":[]}`)
 
 	result2 := unmarshalSketchResult(resp).Result.([]interface{})
 	res := make([]map[string]interface{}, len(result2))
