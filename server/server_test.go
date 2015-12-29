@@ -102,6 +102,27 @@ func TestPost(t *testing.T) {
 	}
 }
 
+func TestPostEmptyBody(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+	s, err := New()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	resp := httpRequest(s, t, "POST", "hllpp/marvel", `{}`)
+
+	if resp.Code != 200 {
+		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
+		return
+	}
+
+	resp = httpRequest(s, t, "GET", "", `{}`)
+	result := unmarshalSketchsResult(resp)
+	if len(result.Result) != 1 {
+		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
+	}
+}
+
 func TestHLL(t *testing.T) {
 	setupTests()
 	defer tearDownTests()
