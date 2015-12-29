@@ -35,6 +35,9 @@ Skizze is communicated with via a RESTful API. All methods apply on all differen
 curl -XPOST http://localhost:3596/hllpp/sketch_1
 ```
 
+* optional arguments:
+	* capacity: the max capacity of values (does not apply to hllpp), default is 1000000.
+
 
 **Adding** values to the sketch with id "sketch_1":
 ```{r, engine='bash', count_lines}
@@ -42,6 +45,9 @@ curl -XPUT http://localhost:3596/hllpp/sketch_1 -d '{
   "values": ["image", "rick grimes"]
 }'
 ```
+
+* required arugments:
+	* values: an array of values to be inserted into the sketch
 
 
 **Retrieving** the cardinality of "sketch_1":

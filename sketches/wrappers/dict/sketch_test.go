@@ -37,8 +37,9 @@ func TestAddMultiple(t *testing.T) {
 	sketch, err := NewSketch(&abstract.Info{
 		ID:         "avengers",
 		Type:       abstract.Dict,
-		Properties: make(map[string]float64),
-		State:      make(map[string]uint64)})
+		Properties: &abstract.Properties{},
+		State:      &abstract.State{},
+	})
 
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
@@ -68,8 +69,9 @@ func TestDecrease(t *testing.T) {
 	sketch, err := NewSketch(&abstract.Info{
 		ID:         "avengers",
 		Type:       abstract.Dict,
-		Properties: make(map[string]float64),
-		State:      make(map[string]uint64)})
+		Properties: &abstract.Properties{},
+		State:      &abstract.State{},
+	})
 
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)

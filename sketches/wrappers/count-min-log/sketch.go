@@ -24,10 +24,10 @@ type Sketch struct {
 NewSketch ...
 */
 func NewSketch(info *abstract.Info) (*Sketch, error) {
-	if info.Properties["capacity"] == 0 {
-		info.Properties["capacity"] = defaultCapacity
+	if info.Properties.Capacity == 0 {
+		info.Properties.Capacity = defaultCapacity
 	}
-	sketch, err := cml.NewForCapacity16(uint64(info.Properties["capacity"]), 0.01)
+	sketch, err := cml.NewForCapacity16(uint64(info.Properties.Capacity), 0.01)
 	d := Sketch{info, sketch}
 	if err != nil {
 		logger.Error.Printf("an error has occurred while saving Sketch: %s", err.Error())

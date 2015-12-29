@@ -16,22 +16,22 @@ import (
 )
 
 func setupTests() {
-	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_data")
-	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_info")
+	utils.PanicOnError(os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_data"))
+	utils.PanicOnError(os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_info"))
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)
 	configPath := filepath.Join(path, "config/default.toml")
-	os.Setenv("SKZ_CONFIG", configPath)
+	utils.PanicOnError(os.Setenv("SKZ_CONFIG", configPath))
 	tearDownTests()
 }
 
 func tearDownTests() {
-	os.RemoveAll(config.GetConfig().DataDir)
-	os.RemoveAll(config.GetConfig().InfoDir)
-	os.Mkdir(config.GetConfig().DataDir, 0777)
-	os.Mkdir(config.GetConfig().InfoDir, 0777)
-	storage.CloseInfoDB()
+	utils.PanicOnError(os.RemoveAll(config.GetConfig().DataDir))
+	utils.PanicOnError(os.RemoveAll(config.GetConfig().InfoDir))
+	utils.PanicOnError(os.Mkdir(config.GetConfig().DataDir, 0777))
+	utils.PanicOnError(os.Mkdir(config.GetConfig().InfoDir, 0777))
+	utils.PanicOnError(storage.CloseInfoDB())
 	sketchesManager.Destroy()
 }
 
@@ -50,14 +50,14 @@ func httpRequest(s *Server, t *testing.T, method string, sketch string, body str
 func unmarshalSketchsResult(resp *httptest.ResponseRecorder) sketchesResult {
 	body, _ := ioutil.ReadAll(resp.Body)
 	var r sketchesResult
-	json.Unmarshal(body, &r)
+	utils.PanicOnError(json.Unmarshal(body, &r))
 	return r
 }
 
 func unmarshalSketchResult(resp *httptest.ResponseRecorder) sketchResult {
 	body, _ := ioutil.ReadAll(resp.Body)
 	var r sketchResult
-	json.Unmarshal(body, &r)
+	utils.PanicOnError(json.Unmarshal(body, &r))
 	return r
 }
 
@@ -87,8 +87,29 @@ func TestPost(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "hllpp/marvel", `{
-		"properties": {"capacity": 100000}
+		"capacity": 100000
 	}`)
+
+	if resp.Code != 200 {
+		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
+		return
+	}
+
+	resp = httpRequest(s, t, "GET", "", `{}`)
+	result := unmarshalSketchsResult(resp)
+	if len(result.Result) != 1 {
+		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
+	}
+}
+
+func TestPostEmptyBody(t *testing.T) {
+	setupTests()
+	defer tearDownTests()
+	s, err := New()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	resp := httpRequest(s, t, "POST", "hllpp/marvel", `{}`)
 
 	if resp.Code != 200 {
 		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
@@ -110,7 +131,7 @@ func TestHLL(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "hllpp/marvel", `{
-		"properties": {"capacity": 100000}
+		"capacity": 100000
 	}`)
 
 	if resp.Code != 200 {
@@ -144,7 +165,7 @@ func TestCML(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "cml/x-force", `{
-		"properties": {"epsilon": 0.05, "delta": 0.99}
+		"epsilon": 0.05, "delta": 0.99
 	}`)
 
 	if resp.Code != 200 {
@@ -178,9 +199,7 @@ func TestTopK(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 	resp := httpRequest(s, t, "POST", "topk/x-force", `{
-		"properties": {
-			"capacity": 100
-		}
+			"capacity": 3
 	}`)
 
 	if resp.Code != 200 {
@@ -195,10 +214,10 @@ func TestTopK(t *testing.T) {
 	}
 
 	resp = httpRequest(s, t, "PUT", "topk/x-force", `{
-			"values": ["magneto", "wasp", "beast", "magneto"]
+			"values": ["magneto", "wasp", "beast", "magneto", "pyro"]
 		}`)
 
-	resp = httpRequest(s, t, "GET", "topk/x-force", `{"values": ["magneto"]}`)
+	resp = httpRequest(s, t, "GET", "topk/x-force", `{"values":[]}`)
 
 	result2 := unmarshalSketchResult(resp).Result.([]interface{})
 	res := make([]map[string]interface{}, len(result2))
@@ -209,5 +228,4 @@ func TestTopK(t *testing.T) {
 	if v, ok := res[0]["Key"]; ok && v.(string) != "magneto" {
 		t.Fatalf("Expected \"magneto\" in first position, got, %s", v.(string))
 	}
-
 }

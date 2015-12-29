@@ -2,6 +2,7 @@ package sketches
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -26,23 +27,44 @@ func exists(path string) (bool, error) {
 }
 
 func setupTests() {
-	os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_manager_data")
-	os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_manager_info")
-	os.Setenv("SKZ_SAVE_TRESHOLD_OPS", "1")
+	if err := os.Setenv("SKZ_DATA_DIR", "/tmp/skizze_manager_data"); err != nil {
+		panic(fmt.Sprintf("Could not set SKZ_DATA_DIR=/tmp/skizze_manager_data"))
+	}
+	if err := os.Setenv("SKZ_INFO_DIR", "/tmp/skizze_manager_info"); err != nil {
+		panic(fmt.Sprintf("Could not set SKZ_INFO_DIR=/tmp/skizze_manager_info"))
+	}
+
+	if err := os.Setenv("SKZ_SAVE_TRESHOLD_OPS", "1"); err != nil {
+		panic(fmt.Sprintf("Could not set SKZ_SAVE_TRESHOLD_OPS=1"))
+	}
+
 	path, err := os.Getwd()
 	utils.PanicOnError(err)
 	path = filepath.Dir(path)
 	configPath := filepath.Join(path, "config/default.toml")
-	os.Setenv("SKZ_CONFIG", configPath)
+
+	if err := os.Setenv("SKZ_CONFIG", configPath); err != nil {
+		panic(fmt.Sprintf("Could not set SKZ_CONFIG=%s", configPath))
+	}
 	tearDownTests()
 }
 
 func tearDownTests() {
-	storage.CloseInfoDB()
-	os.RemoveAll(config.GetConfig().DataDir)
-	os.RemoveAll(config.GetConfig().InfoDir)
-	os.Mkdir(config.GetConfig().DataDir, 0777)
-	os.Mkdir(config.GetConfig().InfoDir, 0777)
+	if err := storage.CloseInfoDB(); err != nil {
+		panic("Could not close info db")
+	}
+	if err := os.RemoveAll(config.GetConfig().DataDir); err != nil {
+		panic(fmt.Sprintf("Could not remove data dir %s", config.GetConfig().DataDir))
+	}
+	if err := os.RemoveAll(config.GetConfig().InfoDir); err != nil {
+		panic(fmt.Sprintf("Could not remove info dir %s", config.GetConfig().InfoDir))
+	}
+	if err := os.Mkdir(config.GetConfig().DataDir, 0777); err != nil {
+		//panic(fmt.Sprintf("Could not remove info dir %s", config.GetConfig().InfoDir))
+	}
+	if err := os.Mkdir(config.GetConfig().InfoDir, 0777); err != nil {
+		//panic(fmt.Sprintf("Could not remove info dir %s", config.GetConfig().InfoDir))
+	}
 	manager.Destroy()
 }
 
@@ -71,13 +93,20 @@ func TestDuplicateSketches(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	props := map[string]float64{"capacity": 10000000.0}
+	info := &abstract.Info{
+		ID:   "marvel",
+		Type: "hllpp",
+		Properties: &abstract.Properties{
+			Capacity: 1000000,
+		},
+		State: &abstract.State{},
+	}
 
-	err = manager.CreateSketch("marvel", "hllpp", props)
+	err = manager.CreateSketch(info)
 	if err != nil {
 		t.Error("Expected no errors while creating sketch, got", err)
 	}
-	err = manager.CreateSketch("marvel", "hllpp", props)
+	err = manager.CreateSketch(info)
 	if err == nil {
 		t.Error("Expected errors while creating sketch duplicate sketch, got", err)
 	}
@@ -101,8 +130,16 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected 0 sketches, got", len(sketches))
 	}
 
-	props := map[string]float64{"capacity": 10000000.0}
-	err = manager.CreateSketch("marvel", "hllpp", props)
+	info := &abstract.Info{
+		ID:   "marvel",
+		Type: "hllpp",
+		Properties: &abstract.Properties{
+			Capacity: 1000000,
+		},
+		State: &abstract.State{},
+	}
+
+	err = manager.CreateSketch(info)
 	if err != nil {
 		t.Error("Expected no errors while creating sketch, got", err)
 	}
@@ -115,13 +152,13 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected 1 sketches, got", len(sketches))
 	}
 
-	err = manager.AddToSketch("marvel", "hllpp", []string{"hulk", "thor"})
+	err = manager.AddToSketch(info.ID, info.Type, []string{"hulk", "thor"})
 	if err != nil {
 		t.Error("Expected no errors while adding to sketch, got", err)
 	}
 
 	var res map[string]interface{}
-	res, err = manager.GetCountForSketch("marvel", "hllpp", nil)
+	res, err = manager.GetCountForSketch(info.ID, info.Type, nil)
 	if len(sketches) != 1 {
 		t.Error("Expected 1 sketches, got", len(sketches))
 	}
@@ -130,7 +167,7 @@ func TestDefaultCounter(t *testing.T) {
 		t.Error("Expected count == 2, got", res["count"].(uint))
 	}
 
-	err = manager.DeleteSketch("marvel", "hllpp")
+	err = manager.DeleteSketch(info.ID, info.Type)
 	if err != nil {
 		t.Error("Expected no errors while deleting sketch, got", err)
 	}
@@ -157,8 +194,15 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 		t.Error("expected x-force to not be initially loaded by manager")
 	}
 
-	props := map[string]float64{"capacity": 10000000.0}
-	err = m1.CreateSketch("x-force", "hllpp", props)
+	info := &abstract.Info{
+		ID:   "x-force",
+		Type: "hllpp",
+		Properties: &abstract.Properties{
+			Capacity: 1000000,
+		},
+		State: &abstract.State{},
+	}
+	err = m1.CreateSketch(info)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,13 +229,25 @@ func TestDumpLoadDefaultData(t *testing.T) {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
 
-	props := map[string]float64{"capacity": 10000000.0}
-	m1.CreateSketch("avengers", "hllpp", props)
+	info := &abstract.Info{
+		ID:   "avengers",
+		Type: "hllpp",
+		Properties: &abstract.Properties{
+			Capacity: 1000000,
+		},
+		State: &abstract.State{},
+	}
 
-	m1.AddToSketch("avengers", "hllpp", []string{"sabertooth",
-		"thunderbolt", "havoc", "cyclops"})
+	if err = m1.CreateSketch(info); err != nil {
+		t.Fatal(err)
+	}
 
-	res, err := m1.GetCountForSketch("avengers", "hllpp", nil)
+	if err = m1.AddToSketch(info.ID, info.Type, []string{"sabertooth",
+		"thunderbolt", "havoc", "cyclops"}); err != nil {
+		t.Fatal(err)
+	}
+
+	res, err := m1.GetCountForSketch(info.ID, info.Type, nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -225,9 +281,30 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
 
-	props := map[string]float64{"capacity": 10000000.0}
-	m1.CreateSketch("avengers", "hllpp", props)
-	m1.CreateSketch("x-men", "hllpp", props)
+	info1 := &abstract.Info{
+		ID:   "avengers",
+		Type: "hllpp",
+		Properties: &abstract.Properties{
+			Capacity: 1000000,
+		},
+		State: &abstract.State{},
+	}
+
+	info2 := &abstract.Info{
+		ID:   "x-men",
+		Type: "hllpp",
+		Properties: &abstract.Properties{
+			Capacity: 1000000,
+		},
+		State: &abstract.State{},
+	}
+
+	if err = m1.CreateSketch(info1); err != nil {
+		t.Fatal(err)
+	}
+	if err := m1.CreateSketch(info2); err != nil {
+		t.Fatal(err)
+	}
 
 	fd, err := os.Open("/usr/share/dict/words")
 	if err != nil {
@@ -253,7 +330,9 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 
 	var pFunc = func(value string) {
 		defer wg.Done()
-		m1.AddToSketch("avengers", "hllpp", []string{value})
+		if err := m1.AddToSketch(info1.ID, info1.Type, []string{value}); err != nil {
+			t.Fatal(err)
+		}
 		resChan <- nil
 	}
 	for _, value := range values {
@@ -265,9 +344,11 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 	}
 
 	// add all values in one bulk
-	m1.AddToSketch("x-men", "hllpp", values)
-	count1, err := m1.GetCountForSketch("avengers", "hllpp", nil)
-	count2, err := m1.GetCountForSketch("x-men", "hllpp", nil)
+	if err := m1.AddToSketch(info2.ID, info2.Type, values); err != nil {
+		t.Fatal(err)
+	}
+	count1, err := m1.GetCountForSketch(info1.ID, info1.Type, nil)
+	count2, err := m1.GetCountForSketch(info2.ID, info2.Type, nil)
 	if count1["result"].(uint) != count2["result"].(uint) {
 		t.Error("expected avengers count == x-men count, got", count1["result"].(uint), "!=", count2["result"].(uint))
 	}
@@ -283,8 +364,16 @@ func TestFailCreateSketch(t *testing.T) {
 	}
 
 	// test for unknown sketchType
-	props := map[string]float64{"capacity": 10000000.0}
-	err = m1.CreateSketch("marvel", "wrong", props)
+
+	info := &abstract.Info{
+		ID:   "marvel",
+		Type: "wrong",
+		Properties: &abstract.Properties{
+			Capacity: 1000000,
+		},
+		State: &abstract.State{},
+	}
+	err = m1.CreateSketch(info)
 	if err == nil {
 		t.Error("Expected errors while creating sketch, got", err)
 	}
@@ -293,9 +382,9 @@ func TestFailCreateSketch(t *testing.T) {
 	for i := 0; i < config.MaxKeySize+1; i++ {
 		buffer[i] = byte(49) // ascii 1
 	}
-	sketchID := string(buffer)
+	info.ID = string(buffer)
 	// test for too long sketchID
-	err = m1.CreateSketch(sketchID, "hllpp", props)
+	err = m1.CreateSketch(info)
 	if err == nil {
 		t.Error("Expected errors while creating sketch, got", err)
 	}
@@ -355,16 +444,26 @@ func TestTopKCounter(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	props := map[string]float64{"capacity": 3.0}
-	m1.CreateSketch("avengers", "topk", props)
+	info := &abstract.Info{
+		ID:   "avengers",
+		Type: "topk",
+		Properties: &abstract.Properties{
+			Capacity: 3,
+		},
+		State: &abstract.State{},
+	}
+	if err := m1.CreateSketch(info); err != nil {
+		t.Fatal(err)
+	}
 
-	err = m1.AddToSketch("avengers", "topk", []string{"sabertooth",
+	err = m1.AddToSketch(info.ID, info.Type, []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
 
 	res, err := m1.GetCountForSketch("avengers", "topk", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
+
 	top := res["result"].([]topk.ResultElement)
 	if len(top) != 3 {
 		t.Error("expected avengers to have 3 elements, got", len(top))
@@ -409,13 +508,23 @@ func TestCMLCounter(t *testing.T) {
 	if _, exists = m1.info["avengers"]; exists {
 		t.Error("expected avengers to not be initially loaded by manager")
 	}
-	props := map[string]float64{"epsilon": 0.5}
-	m1.CreateSketch("avengers", abstract.CML, props)
+	info := &abstract.Info{
+		ID:   "avengers",
+		Type: "cml",
+		Properties: &abstract.Properties{
+			Capacity: 1000000,
+		},
+		State: &abstract.State{},
+	}
+	if err := m1.CreateSketch(info); err != nil {
+		t.Fatal(err)
+	}
 
-	m1.AddToSketch("avengers", "cml", []string{"sabertooth",
-		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
+	if err := m1.AddToSketch(info.ID, info.Type, []string{"sabertooth", "thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"}); err != nil {
+		t.Fatal(err)
+	}
 
-	_, err = m1.GetCountForSketch("avengers", "cml", []string{"cyclops"})
+	_, err = m1.GetCountForSketch(info.ID, info.Type, []string{"cyclops"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -426,7 +535,7 @@ func TestCMLCounter(t *testing.T) {
 	}
 
 	var res map[string]interface{}
-	res, err = m2.GetCountForSketch("avengers", "cml", []string{"cyclops"})
+	res, err = m2.GetCountForSketch(info.ID, info.Type, []string{"cyclops"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -437,7 +546,7 @@ func TestCMLCounter(t *testing.T) {
 		t.Error("expected 'cyclops' count == 3, got", v)
 	}
 
-	res, err = m2.GetCountForSketch("avengers", "cml", []string{"havoc"})
+	res, err = m2.GetCountForSketch(info.ID, info.Type, []string{"havoc"})
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}

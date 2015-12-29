@@ -25,12 +25,12 @@ var logger = utils.GetLogger()
 /*
 CreateSketch ...
 */
-func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, props map[string]float64) error {
-	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
+func (m *ManagerStruct) CreateSketch(info *abstract.Info) error {
+	id := fmt.Sprintf("%s.%s", info.ID, info.Type)
 
 	// Check if sketch with ID already exists
-	if info, ok := m.info[id]; ok {
-		errStr := fmt.Sprintf("Sketch %s of type %s already exists", sketchID, info.Type)
+	if _, ok := m.sketches[id]; ok {
+		errStr := fmt.Sprintf("Sketch %s of type %s already exists", info.ID, info.Type)
 		return errors.New(errStr)
 	}
 
@@ -41,22 +41,19 @@ func (m *ManagerStruct) CreateSketch(sketchID string, sketchType string, props m
 	}
 
 	// Make sure sketchType is set
-	if sketchType == "" {
+	if len(info.Type) == 0 {
 		logger.Error.Println("SketchType is mandatory and must be set!")
 		return errors.New("No sketch type was given!")
 	}
-
-	info := &abstract.Info{ID: id,
-		Type:       sketchType,
-		Properties: props,
-		State:      make(map[string]uint64)}
 
 	sketch, err := createSketch(info)
 	if err != nil {
 		errTxt := fmt.Sprint("Could not load sketch ", info, ". Err:", err)
 		return errors.New(errTxt)
 	}
+
 	m.sketches[id] = sketch
+
 	m.dumpInfo(info)
 	return nil
 }
@@ -183,11 +180,13 @@ func newManager() (*ManagerStruct, error) {
 
 func (m *ManagerStruct) dumpInfo(info *abstract.Info) {
 	// FIXME: Should we panic here?
-	m.info[info.ID] = info
+	id := fmt.Sprintf("%s.%s", info.ID, info.Type)
+
+	m.info[id] = info
 	manager := storage.Manager()
 	infoData, err := json.Marshal(info)
 	utils.PanicOnError(err)
-	err = manager.SaveInfo(info.ID, infoData)
+	err = manager.SaveInfo(id, infoData)
 	utils.PanicOnError(err)
 }
 
@@ -203,7 +202,8 @@ func (m *ManagerStruct) loadInfo() error {
 		if err != nil {
 			return err
 		}
-		m.info[infoStruct.ID] = &infoStruct
+		id := fmt.Sprintf("%s.%s", infoStruct.ID, infoStruct.Type)
+		m.info[id] = &infoStruct
 	}
 	return nil
 }
@@ -215,7 +215,8 @@ func (m *ManagerStruct) loadSketches() error {
 			errTxt := fmt.Sprint("Could not load sketch ", info, ". Err: ", err)
 			return errors.New(errTxt)
 		}
-		m.sketches[info.ID] = sketch
+		id := fmt.Sprintf("%s.%s", info.ID, info.Type)
+		m.sketches[id] = sketch
 	}
 	return nil
 }
