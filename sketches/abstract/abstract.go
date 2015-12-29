@@ -8,11 +8,11 @@ Dict  => dictionary
 Bloom => Bloom Filter
 */
 const (
-	HLLPP = "hllpp"
-	CML   = "cml"
-	TopK  = "topk"
+	HLLPP = "card"
+	CML   = "freq"
+	TopK  = "rank"
 	Dict  = "dict"
-	Bloom = "bloom"
+	Bloom = "memb"
 )
 
 /*
