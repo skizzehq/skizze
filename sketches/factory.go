@@ -124,23 +124,11 @@ func (sp *SketchProxy) save(force bool) {
 func createSketch(info *abstract.Info) (*SketchProxy, error) {
 	var sketch abstract.Sketch
 	var err error
-	manager := storage.Manager()
-	err = manager.Create(info.ID)
 
 	if err != nil {
 		return nil, errors.New("Error creating new sketch")
 	}
-	if info.Properties == nil {
-		info.Properties = &abstract.Properties{
-			Capacity: 0,
-		}
-	}
-	if info.State == nil {
-		info.State = &abstract.State{
-			Additions: 0,
-			Deletions: 0,
-		}
-	}
+
 	switch info.Type {
 	case abstract.HLLPP:
 		sketch, err = hllpp.NewSketch(info)
@@ -160,11 +148,6 @@ func createSketch(info *abstract.Info) (*SketchProxy, error) {
 	}
 
 	sp := SketchProxy{info, sketch, sync.RWMutex{}, 0, true}
-	err = storage.Manager().Create(info.ID)
-	if err != nil {
-		return nil, err
-	}
-
 	sp.save(true)
 	go sp.autosave()
 	return &sp, nil
