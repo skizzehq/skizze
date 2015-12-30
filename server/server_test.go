@@ -86,7 +86,7 @@ func TestPost(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	resp := httpRequest(s, t, "POST", "hllpp/marvel", `{
+	resp := httpRequest(s, t, "POST", "card/marvel", `{
 		"capacity": 100000
 	}`)
 
@@ -109,7 +109,7 @@ func TestPostEmptyBody(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	resp := httpRequest(s, t, "POST", "hllpp/marvel", `{}`)
+	resp := httpRequest(s, t, "POST", "card/marvel", `{}`)
 
 	if resp.Code != 200 {
 		t.Fatalf("Invalid Response Code %d - %s", resp.Code, resp.Body.String())
@@ -130,7 +130,7 @@ func TestHLL(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	resp := httpRequest(s, t, "POST", "hllpp/marvel", `{
+	resp := httpRequest(s, t, "POST", "card/marvel", `{
 		"capacity": 100000
 	}`)
 
@@ -145,11 +145,11 @@ func TestHLL(t *testing.T) {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
 	}
 
-	resp = httpRequest(s, t, "PUT", "hllpp/marvel", `{
+	resp = httpRequest(s, t, "PUT", "card/marvel", `{
 		"values": ["magneto", "wasp", "beast"]
 	}`)
 
-	resp = httpRequest(s, t, "GET", "hllpp/marvel", `{}`)
+	resp = httpRequest(s, t, "GET", "card/marvel", `{}`)
 	result2 := unmarshalSketchResult(resp)
 
 	if result2.Result.(float64) != 3 {
@@ -164,7 +164,7 @@ func TestCML(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	resp := httpRequest(s, t, "POST", "cml/x-force", `{
+	resp := httpRequest(s, t, "POST", "freq/x-force", `{
 		"epsilon": 0.05, "delta": 0.99
 	}`)
 
@@ -179,11 +179,11 @@ func TestCML(t *testing.T) {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
 	}
 
-	resp = httpRequest(s, t, "PUT", "cml/x-force", `{
+	resp = httpRequest(s, t, "PUT", "freq/x-force", `{
 		"values": ["magneto", "wasp", "beast", "magneto"]
 	}`)
 
-	resp = httpRequest(s, t, "GET", "cml/x-force", `{"values": ["magneto"]}`)
+	resp = httpRequest(s, t, "GET", "freq/x-force", `{"values": ["magneto"]}`)
 	result2 := unmarshalSketchResult(resp).Result.(map[string]interface{})
 
 	if v, ok := result2["magneto"]; ok && uint(v.(float64)) != 2 {
@@ -198,7 +198,7 @@ func TestTopK(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	resp := httpRequest(s, t, "POST", "topk/x-force", `{
+	resp := httpRequest(s, t, "POST", "rank/x-force", `{
 			"capacity": 3
 	}`)
 
@@ -213,11 +213,11 @@ func TestTopK(t *testing.T) {
 		t.Fatalf("after add resultCount != 1. Got %d", len(result.Result))
 	}
 
-	resp = httpRequest(s, t, "PUT", "topk/x-force", `{
+	resp = httpRequest(s, t, "PUT", "rank/x-force", `{
 			"values": ["magneto", "wasp", "beast", "magneto", "pyro"]
 		}`)
 
-	resp = httpRequest(s, t, "GET", "topk/x-force", `{"values":[]}`)
+	resp = httpRequest(s, t, "GET", "rank/x-force", `{"values":[]}`)
 
 	result2 := unmarshalSketchResult(resp).Result.([]interface{})
 	res := make([]map[string]interface{}, len(result2))

@@ -95,7 +95,7 @@ func TestDuplicateSketches(t *testing.T) {
 
 	info := &abstract.Info{
 		ID:   "marvel",
-		Type: "hllpp",
+		Type: "card",
 		Properties: &abstract.Properties{
 			Capacity: 1000000,
 		},
@@ -132,7 +132,7 @@ func TestDefaultCounter(t *testing.T) {
 
 	info := &abstract.Info{
 		ID:   "marvel",
-		Type: "hllpp",
+		Type: "card",
 		Properties: &abstract.Properties{
 			Capacity: 1000000,
 		},
@@ -190,13 +190,13 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	if _, exists = m1.info["x-force.hllpp"]; exists {
+	if _, exists = m1.info["x-force.card"]; exists {
 		t.Error("expected x-force to not be initially loaded by manager")
 	}
 
 	info := &abstract.Info{
 		ID:   "x-force",
-		Type: "hllpp",
+		Type: "card",
 		Properties: &abstract.Properties{
 			Capacity: 1000000,
 		},
@@ -211,7 +211,7 @@ func TestDumpLoadDefaultInfo(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	if _, exists = m2.info["x-force.hllpp"]; !exists {
+	if _, exists = m2.info["x-force.card"]; !exists {
 		t.Error("expected x-force to be in loaded by manager")
 	}
 }
@@ -231,7 +231,7 @@ func TestDumpLoadDefaultData(t *testing.T) {
 
 	info := &abstract.Info{
 		ID:   "avengers",
-		Type: "hllpp",
+		Type: "card",
 		Properties: &abstract.Properties{
 			Capacity: 1000000,
 		},
@@ -259,7 +259,7 @@ func TestDumpLoadDefaultData(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	res, err = m2.GetCountForSketch("avengers", "hllpp", nil)
+	res, err = m2.GetCountForSketch("avengers", "card", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -283,7 +283,7 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 
 	info1 := &abstract.Info{
 		ID:   "avengers",
-		Type: "hllpp",
+		Type: "card",
 		Properties: &abstract.Properties{
 			Capacity: 1000000,
 		},
@@ -292,7 +292,7 @@ func TestExtremeParallelDefaultCounter(t *testing.T) {
 
 	info2 := &abstract.Info{
 		ID:   "x-men",
-		Type: "hllpp",
+		Type: "card",
 		Properties: &abstract.Properties{
 			Capacity: 1000000,
 		},
@@ -398,7 +398,7 @@ func TestFailDeleteSketch(t *testing.T) {
 	if err != nil {
 		t.Log("Expected no errors, got", err)
 	}
-	err = m1.DeleteSketch("-1", "hllpp")
+	err = m1.DeleteSketch("-1", "card")
 	if err == nil {
 		t.Error("Expected error, got", err)
 	}
@@ -412,7 +412,7 @@ func TestFailDeleteFromSketch(t *testing.T) {
 	if err != nil {
 		t.Log("Expected no errors, got", err)
 	}
-	err = m1.DeleteFromSketch("-1", "hlpp", []string{})
+	err = m1.DeleteFromSketch("-1", "card", []string{})
 	if err == nil {
 		t.Error("Expected error, got", err)
 	}
@@ -426,7 +426,7 @@ func TestFailGetCountForSketch(t *testing.T) {
 	if err != nil {
 		t.Log("Expected no errors, got", err)
 	}
-	_, err = m1.GetCountForSketch("-1", "hllpp", nil)
+	_, err = m1.GetCountForSketch("-1", "card", nil)
 	if err == nil {
 		t.Error("Expected error, got", err)
 	}
@@ -446,7 +446,7 @@ func TestTopKCounter(t *testing.T) {
 	}
 	info := &abstract.Info{
 		ID:   "avengers",
-		Type: "topk",
+		Type: "rank",
 		Properties: &abstract.Properties{
 			Capacity: 3,
 		},
@@ -459,7 +459,7 @@ func TestTopKCounter(t *testing.T) {
 	err = m1.AddToSketch(info.ID, info.Type, []string{"sabertooth",
 		"thunderbolt", "havoc", "cyclops", "cyclops", "cyclops", "havoc"})
 
-	res, err := m1.GetCountForSketch("avengers", "topk", nil)
+	res, err := m1.GetCountForSketch("avengers", "rank", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -473,7 +473,7 @@ func TestTopKCounter(t *testing.T) {
 	if err != nil {
 		t.Error("Expected no errors, got", err)
 	}
-	res, err = m2.GetCountForSketch("avengers", "topk", nil)
+	res, err = m2.GetCountForSketch("avengers", "rank", nil)
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)
 	}
@@ -510,7 +510,7 @@ func TestCMLCounter(t *testing.T) {
 	}
 	info := &abstract.Info{
 		ID:   "avengers",
-		Type: "cml",
+		Type: "freq",
 		Properties: &abstract.Properties{
 			Capacity: 1000000,
 		},

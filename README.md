@@ -31,15 +31,15 @@ skizze
 
 ## Example usage:
 
-**Creating** a new empty sketch of type HyperLogLog++ (hllpp) with the id "sketch_1":
+**Creating** a new empty sketch of type HyperLogLog++ (card) with the id "sketch_1":
 ```{r, engine='bash', count_lines}
-curl -XPOST http://localhost:3596/hllpp/sketch_1
+curl -XPOST http://localhost:3596/card/sketch_1
 ```
 
 
 **Adding** values to the sketch with id "sketch_1":
 ```{r, engine='bash', count_lines}
-curl -XPUT http://localhost:3596/hllpp/sketch_1 -d '{
+curl -XPUT http://localhost:3596/card/sketch_1 -d '{
   "values": ["image", "rick grimes"]
 }'
 ```
@@ -47,7 +47,7 @@ curl -XPUT http://localhost:3596/hllpp/sketch_1 -d '{
 
 **Retrieving** the cardinality of "sketch_1":
 ```{r, engine='bash', count_lines}
-curl -XGET http://localhost:3596/hllpp/sketch_1
+curl -XGET http://localhost:3596/card/sketch_1
 ```
 returns
 ```json
@@ -65,15 +65,15 @@ returns
 ```json
 {
   "result":[
-    "hllpp/sketch_1"
+    "card/sketch_1"
   ],
   "error":null
 }
 ```
 
-**Deleting** the sketch of type "hllpp" with id "sketch_1":
+**Deleting** the sketch of type "card" with id "sketch_1":
 ```{r, engine='bash', count_lines}
-curl -XDELETE http://localhost:3596/hllpp/sketch_1
+curl -XDELETE http://localhost:3596/card/sketch_1
 ```
 
 
