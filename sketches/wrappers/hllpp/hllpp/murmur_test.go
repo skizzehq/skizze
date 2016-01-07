@@ -194,21 +194,24 @@ func BenchmarkMurmurMedium(b *testing.B) {
 	}
 }
 
-func BenchmarkMurmurLarge(b *testing.B) {
-	data := []byte(strings.Repeat("ergogram-artificer", 100))
-	for i := 0; i < b.N; i++ {
-		_ = murmurSum64(data)
-	}
-}
-
 func BenchmarkSHA1(b *testing.B) {
 	h := sha1.New()
 	data := []byte("zealotist")
 	var tmp []byte
 	for i := 0; i < b.N; i++ {
-		h.Write(data)
+		_, err := h.Write(data)
+		if err != nil {
+			return
+		}
 		tmp = h.Sum(tmp[0:0])
 		_ = binary.BigEndian.Uint64(tmp)
 		h.Reset()
+	}
+}
+
+func BenchmarkMurmurLarge(b *testing.B) {
+	data := []byte(strings.Repeat("ergogram-artificer", 100))
+	for i := 0; i < b.N; i++ {
+		_ = murmurSum64(data)
 	}
 }

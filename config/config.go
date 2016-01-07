@@ -21,7 +21,6 @@ type Config struct {
 	SliceCacheSize       uint   `toml:"slice_cache_size"`
 	Port                 uint   `toml:"port"`
 	SaveThresholdSeconds uint   `toml:"save_threshold_seconds"`
-	SaveThresholdOps     uint   `toml:"save_threshold_ops"`
 }
 
 var config *Config
@@ -81,11 +80,6 @@ func GetConfig() *Config {
 			saveThresholdSeconds = config.SaveThresholdSeconds
 		}
 
-		saveThresholdOpsInt, err := strconv.Atoi(strings.TrimSpace(os.Getenv("SKZ_SAVE_TRESHOLD_OPS")))
-		saveThresholdOps := uint(saveThresholdOpsInt)
-		if err != nil {
-			saveThresholdOps = config.SaveThresholdOps
-		}
 		if saveThresholdSeconds < 3 {
 			saveThresholdSeconds = 3
 		}
@@ -98,7 +92,6 @@ func GetConfig() *Config {
 			config.SliceCacheSize,
 			port,
 			saveThresholdSeconds,
-			saveThresholdOps,
 		}
 	}
 	return config

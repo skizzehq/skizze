@@ -1,100 +1,48 @@
 package hllpp
 
 import (
-	"errors"
-
-	"github.com/seiflotfy/skizze/sketches/abstract"
+	"github.com/seiflotfy/skizze/datamodel"
 	"github.com/seiflotfy/skizze/sketches/wrappers/hllpp/hllpp"
-	"github.com/seiflotfy/skizze/utils"
 )
 
-var logger = utils.GetLogger()
+//var logger = utils.GetLogger()
 
-/*
-Sketch is the toplevel sketch to control the HLL implementation
-*/
+// Sketch is the toplevel sketch to control the HLL implementation
 type Sketch struct {
-	*abstract.Info
+	*datamodel.Info
 	impl *hllpp.HLLPP
 }
 
-/*
-NewSketch ...
-*/
-func NewSketch(info *abstract.Info) (*Sketch, error) {
+// NewSketch ...
+func NewSketch(info *datamodel.Info) (*Sketch, error) {
 	d := Sketch{info, hllpp.New()}
 	return &d, nil
 }
 
-/*
-Add ...
-*/
-func (d *Sketch) Add(value []byte) (bool, error) {
-	d.impl.Add(value)
-	return true, nil
-}
-
-/*
-AddMultiple ...
-*/
-func (d *Sketch) AddMultiple(values [][]byte) (bool, error) {
+// Add ...
+func (d *Sketch) Add(values [][]byte) (bool, error) {
 	for _, value := range values {
 		d.impl.Add(value)
 	}
 	return true, nil
 }
 
-/*
-Remove ...
-*/
-func (d *Sketch) Remove(value []byte) (bool, error) {
-	logger.Error.Println("This Sketch type does not support deletion")
-	return false, errors.New("This Sketch type does not support deletion")
+// Get ...
+func (d *Sketch) Get(interface{}) (interface{}, error) {
+	return uint(d.impl.Count()), nil
 }
 
-/*
-RemoveMultiple ...
-*/
-func (d *Sketch) RemoveMultiple(values [][]byte) (bool, error) {
-	logger.Error.Println("This Sketch type does not support deletion")
-	return false, errors.New("This Sketch type does not support deletion")
+// Marshal ...
+func (d *Sketch) Marshal() []byte {
+	return d.impl.Marshal()
 }
 
-/*
-GetCount ...
-*/
-func (d *Sketch) GetCount() uint {
-	return uint(d.impl.Count())
-}
-
-/*
-Clear ...
-*/
-func (d *Sketch) Clear() (bool, error) {
-	return true, nil
-}
-
-/*
-GetFrequency ...
-*/
-func (d *Sketch) GetFrequency(values [][]byte) interface{} {
-	return nil
-}
-
-/*
-Marshal ...
-*/
-func (d *Sketch) Marshal() ([]byte, error) {
-	return d.impl.Marshal(), nil
-}
-
-/*
-Unmarshal ...
-*/
-func Unmarshal(info *abstract.Info, data []byte) (*Sketch, error) {
-	counter, err := hllpp.Unmarshal(data)
+// Unmarshal ...
+func (d *Sketch) Unmarshal(info *datamodel.Info, data []byte) error {
+	impl, err := hllpp.Unmarshal(data)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &Sketch{info, counter}, nil
+	d.impl = impl
+	return nil
 }

@@ -1,229 +1,204 @@
 package sketches
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
+	"sync"
+	"sync/atomic"
+	"time"
 
 	"github.com/seiflotfy/skizze/config"
-	"github.com/seiflotfy/skizze/sketches/abstract"
+	"github.com/seiflotfy/skizze/datamodel"
 	"github.com/seiflotfy/skizze/storage"
 	"github.com/seiflotfy/skizze/utils"
 )
 
-/*
-ManagerStruct is responsible for manipulating the sketches and syncing to disk
-*/
-type ManagerStruct struct {
+// Manager is responsible for manipulating the sketches and syncing to disk
+type Manager struct {
 	sketches map[string]*SketchProxy
-	info     map[string]*abstract.Info
+	info     map[string]*datamodel.Info
+	lock     sync.RWMutex
+	saving   uint64
+	ticker   *time.Ticker
+	storage  *storage.Manager
 }
 
-var manager *ManagerStruct
-var logger = utils.GetLogger()
-
-/*
-CreateSketch ...
-*/
-func (m *ManagerStruct) CreateSketch(info *abstract.Info) error {
-	id := fmt.Sprintf("%s.%s", info.ID, info.Type)
-
-	// Check if sketch with ID already exists
-	if _, ok := m.sketches[id]; ok {
-		errStr := fmt.Sprintf("Sketch %s of type %s already exists", info.ID, info.Type)
-		return errors.New(errStr)
+// CreateSketch ...
+func (m *Manager) CreateSketch(info *datamodel.Info) error {
+	if _, ok := m.info[info.ID()]; ok {
+		return fmt.Errorf(`Sketch of type "%s" with name "%s" already exists`,
+			info.Type, info.Name)
 	}
-
-	// Check that id length does not exceed MaxKeySize
-	if len([]byte(id)) > config.MaxKeySize {
-		errStr := fmt.Sprintf("Invalid length of sketch ID: %d. Max length allowed: %d", len(id), config.MaxKeySize)
-		return errors.New(errStr)
-	}
-
-	// Make sure sketchType is set
-	if len(info.Type) == 0 {
-		logger.Error.Println("SketchType is mandatory and must be set!")
-		return errors.New("No sketch type was given!")
-	}
-
 	sketch, err := createSketch(info)
-	if err != nil {
-		errTxt := fmt.Sprint("Could not load sketch ", info, ". Err:", err)
-		return errors.New(errTxt)
-	}
-
-	m.sketches[id] = sketch
-
-	m.dumpInfo(info)
-	return nil
-}
-
-/*
-DeleteSketch ...
-*/
-func (m *ManagerStruct) DeleteSketch(sketchID string, sketchType string) error {
-	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
-
-	if _, ok := m.sketches[id]; !ok {
-		return errors.New("No such sketch " + sketchID)
-	}
-	delete(m.sketches, id)
-	delete(m.info, id)
-	manager := storage.Manager()
-	err := manager.DeleteInfo(id)
 	if err != nil {
 		return err
 	}
-	return manager.DeleteData(id)
+	m.sketches[info.ID()] = sketch
+	m.info[info.ID()] = info
+	return nil
 }
 
-/*
-GetSketches ...
-*/
-func (m *ManagerStruct) GetSketches() ([]string, error) {
-	// TODO: Remove dummy data and implement proper result
-	sketches := make([]string, len(m.sketches), len(m.sketches))
-	i := 0
-	for _, v := range m.sketches {
-		typ := v.Type
-		id := v.ID
-		sketches[i] = fmt.Sprintf("%s/%s", typ, id[:len(id)-len(typ)-1])
-		i++
+// DeleteSketch ...
+func (m *Manager) DeleteSketch(info *datamodel.Info) error {
+	if _, ok := m.info[info.ID()]; !ok {
+		return fmt.Errorf(`Sketch of type "%s" with name "%s" does not exists`,
+			info.Type, info.Name)
 	}
-	return sketches, nil
+	delete(m.sketches, info.ID())
+	delete(m.info, info.ID())
+	return nil
 }
 
-/*
-AddToSketch ...
-*/
-func (m *ManagerStruct) AddToSketch(sketchID string, sketchType string, values []string) error {
-	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
-
-	var val, ok = m.sketches[id]
-	if ok == false {
-		errStr := fmt.Sprintf("No such sketch %s of type %s found", sketchID, sketchType)
-		return errors.New(errStr)
+// GetSketches return a list of sketch tuples [name, type]
+func (m *Manager) GetSketches() [][2]string {
+	sketches := [][2]string{}
+	for _, v := range m.info {
+		sketches = append(sketches, [2]string{v.Name, v.Type})
 	}
-	var sketch *SketchProxy
-	sketch = val
+	return sketches
+}
 
-	bytes := make([][]byte, len(values), len(values))
-	for i, value := range values {
-		bytes[i] = []byte(value)
+// AddToSketch ...
+func (m *Manager) AddToSketch(info *datamodel.Info, values []string) error {
+	count := m.saving
+	if count > 0 {
+		// FIXME: Add an AOF
+		fmt.Println("can't add", count)
 	}
-	_, err := sketch.Add(bytes)
+	byts := make([][]byte, len(values), len(values))
+	for i, v := range values {
+		byts[i] = []byte(v)
+	}
+	// FIXME: return if adding was successful or not
+	_, err := m.sketches[info.ID()].Add(byts)
 	return err
 }
 
-/*
-DeleteFromSketch ...
-*/
-func (m *ManagerStruct) DeleteFromSketch(sketchID string, sketchType string, values []string) error {
-	var val, ok = m.sketches[sketchID]
-	if ok == false {
-		return errors.New("No such sketch: " + sketchID)
-	}
-	var sketch *SketchProxy
-	sketch = val
-
-	bytes := make([][]byte, len(values), len(values))
-	for i, value := range values {
-		bytes[i] = []byte(value)
-	}
-	ok, err := sketch.Remove(bytes)
-	return err
+// GetFromSketch ...
+func (m *Manager) GetFromSketch(info *datamodel.Info, data interface{}) (interface{}, error) {
+	return m.sketches[info.ID()].Get(data)
 }
 
-/*
-GetCountForSketch ...
-*/
-func (m *ManagerStruct) GetCountForSketch(sketchID string, sketchType string, values []string) (map[string]interface{}, error) {
-	id := fmt.Sprintf("%s.%s", sketchID, sketchType)
-	var val, ok = m.sketches[id]
-	if ok == false {
-		errStr := fmt.Sprintf("No such sketch %s of type %s found", sketchID, sketchType)
-		return nil, errors.New(errStr)
+// Save ...
+func (m *Manager) Save(infos map[string]*datamodel.Info) error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	if len(infos) == 0 {
+		infos = m.info
 	}
-	var sketch *SketchProxy
-	sketch = val
-	count := sketch.Count(values)
-	return count, nil
+
+	// FIXME: Use chan instead
+	var wg sync.WaitGroup
+	running := 0
+	for k, v := range infos {
+		wg.Add(1)
+		running++
+		go func(ID string, info *datamodel.Info) {
+			atomic.AddUint64(&m.saving, 1)
+			if err := m.saveSketch(info); err != nil {
+				// TODO: log something here
+			}
+			time.Sleep(time.Second * 2)
+			wg.Done()
+		}(k, v)
+		// Just 4 at a time
+		if running%4 == 0 {
+			wg.Wait()
+		}
+	}
+	wg.Wait()
+	m.saving = 0
+	return nil
 }
 
-/*
-GetManager returns a singleton Manager
-*/
-func GetManager() (*ManagerStruct, error) {
+func (m *Manager) saveSketch(info *datamodel.Info) error {
+	sketch, ok := m.sketches[info.ID()]
+	if !ok {
+		return fmt.Errorf(`Sketch of type "%s" with name "%s" does not exists`,
+			info.Type, info.Name)
+	}
+
+	file, err := m.storage.GetFile(info.ID())
+	defer utils.CloseFile(file)
+
+	if err != nil {
+		return fmt.Errorf(`Could not get destination file for sketch of type "%s" and name "%s", %q`,
+			info.Type, info.Name, err)
+	}
+	if err := sketch.Save(file); err != nil {
+		return fmt.Errorf(`Could not save sketch "%s" with name "%s", %q`,
+			info.Type, info.Name, err)
+	}
+	return m.storage.SaveInfo(map[string]*datamodel.Info{info.ID(): info})
+}
+
+func (m *Manager) loadAll() error {
 	var err error
-	if manager == nil {
-		manager, err = newManager()
+	if m.info, err = m.storage.LoadAllInfo(); err != nil {
+		return err
 	}
-	if err != nil {
-		return nil, err
+
+	for _, v := range m.info {
+		if err := m.loadSketch(v); err != nil {
+			return err
+		}
 	}
-	return manager, nil
+	return nil
 }
 
-func newManager() (*ManagerStruct, error) {
-	sketches := make(map[string]*SketchProxy)
-	m := &ManagerStruct{sketches, make(map[string]*abstract.Info)}
-	err := m.loadInfo()
+func (m *Manager) loadSketch(info *datamodel.Info) error {
+	sketch, ok := m.sketches[info.ID()]
+	if ok {
+		return fmt.Errorf(`Sketch of type "%s" with name "%s" already loaded`,
+			info.Type, info.Name)
+	}
+
+	file, err := m.storage.GetFile(info.ID())
+	defer utils.CloseFile(file)
+
 	if err != nil {
+		return fmt.Errorf(`Could not get find file for sketch of type "%s" and name "%s", %q`,
+			info.Type, info.Name, err)
+	}
+	sketch, err = loadSketch(info, file)
+	if err != nil {
+		return fmt.Errorf(`Could not load sketch "%s" with name "%s", %q`,
+			info.Type, info.Name, err)
+	}
+	m.sketches[info.ID()] = sketch
+	return nil
+}
+
+func (m *Manager) autoSave() {
+	for _ = range m.ticker.C {
+		if m.Save(map[string]*datamodel.Info{}) != nil {
+			// FIXME: print out something
+		}
+	}
+}
+
+// NewManager ...
+func NewManager() (*Manager, error) {
+	m := &Manager{
+		make(map[string]*SketchProxy),
+		make(map[string]*datamodel.Info),
+		sync.RWMutex{},
+		0,
+		time.NewTicker(time.Second * time.Duration(config.GetConfig().SaveThresholdSeconds)),
+		storage.NewManager(),
+	}
+	if err := m.loadAll(); err != nil {
 		return nil, err
 	}
-	err = m.loadSketches()
-	if err != nil {
-		return nil, err
-	}
+	// Set up saving on intervals
+	go m.autoSave()
 	return m, nil
 }
 
-func (m *ManagerStruct) dumpInfo(info *abstract.Info) {
-	// FIXME: Should we panic here?
-	id := fmt.Sprintf("%s.%s", info.ID, info.Type)
-
-	m.info[id] = info
-	manager := storage.Manager()
-	infoData, err := json.Marshal(info)
-	utils.PanicOnError(err)
-	err = manager.SaveInfo(id, infoData)
-	utils.PanicOnError(err)
-}
-
-func (m *ManagerStruct) loadInfo() error {
-	manager := storage.Manager()
-	infos, err := manager.LoadAllInfo()
-	if err != nil {
-		return err
+// Destroy ...
+func (m *Manager) Destroy() {
+	if m.ticker != nil {
+		m.ticker.Stop()
 	}
-	for _, infoData := range infos {
-		var infoStruct abstract.Info
-		err := json.Unmarshal(infoData, &infoStruct)
-		if err != nil {
-			return err
-		}
-		id := fmt.Sprintf("%s.%s", infoStruct.ID, infoStruct.Type)
-		m.info[id] = &infoStruct
-	}
-	return nil
-}
-
-func (m *ManagerStruct) loadSketches() error {
-	for _, info := range m.info {
-		sketch, err := loadSketch(info)
-		if err != nil {
-			errTxt := fmt.Sprint("Could not load sketch ", info, ". Err: ", err)
-			return errors.New(errTxt)
-		}
-		id := fmt.Sprintf("%s.%s", info.ID, info.Type)
-		m.sketches[id] = sketch
-	}
-	return nil
-}
-
-/*
-Destroy ...
-*/
-func (m *ManagerStruct) Destroy() {
-	manager = nil
+	_ = m.storage.Close()
 }

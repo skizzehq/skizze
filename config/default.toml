@@ -17,5 +17,4 @@ slice_cache_size = 1
 port = 3596
 
 # Treshold for saving a sketch to disk
-save_threshold_seconds = 5
-save_threshold_ops = 100
+save_threshold_seconds = 3600
