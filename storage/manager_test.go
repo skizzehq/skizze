@@ -8,14 +8,6 @@ import (
 	"github.com/seiflotfy/skizze/utils"
 )
 
-func TestNewManager(t *testing.T) {
-	utils.SetupTests()
-	defer utils.TearDownTests()
-	if m := NewManager(); m == nil {
-		t.Error("Expected m != nil, got", m)
-	}
-}
-
 func TestSaveInfo(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()

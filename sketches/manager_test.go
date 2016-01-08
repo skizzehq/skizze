@@ -315,3 +315,75 @@ func TestFreqSaveLoad(t *testing.T) {
 		t.Error("Expected res = 1, got", res)
 	}
 }
+
+func TestRankSaveLoad(t *testing.T) {
+	config.Reset()
+	utils.SetupTests()
+	defer utils.TearDownTests()
+
+	m1, err := NewManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	info := datamodel.NewEmptyInfo()
+	info.Properties.Capacity = 10000
+	info.Name = "marvel"
+	info.Type = datamodel.TopK
+	if err := m1.CreateSketch(info); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if sketches := m1.GetSketches(); len(sketches) != 1 {
+		t.Error("Expected 1 sketch, got", len(sketches))
+	} else if sketches[0][0] != "marvel" || sketches[0][1] != "rank" {
+		t.Error("Expected [[marvel rank]], got", sketches)
+	}
+
+	if err := m1.AddToSketch(info, []string{"hulk", "hulk", "thor", "iron man", "hawk-eye"}); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if err := m1.Save(map[string]*datamodel.Info{info.ID(): info}); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if err := m1.AddToSketch(info, []string{"hulk", "black widow", "black widow", "black widow", "black widow"}); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if res, err := m1.GetFromSketch(info, nil); err != nil {
+		t.Error("Expected no errors, got", err)
+	} else if len(res.([]*datamodel.Element)) != 5 {
+		t.Error("Expected len(res) = 5, got", len(res.([]*datamodel.Element)))
+	} else if res.([]*datamodel.Element)[0].Key != "black widow" {
+		t.Error("Expected 'black widow', got", res.([]*datamodel.Element)[0].Key)
+	}
+
+	path := filepath.Join(config.GetConfig().DataDir, "marvel.rank")
+	if exists, err := utils.Exists(path); err != nil {
+		t.Error("Expected no errors, got", err)
+	} else if !exists {
+		t.Errorf("Expected file dump %s to exists, but apparently it doesn't", path)
+	}
+
+	m1.Destroy()
+
+	m1, err = NewManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if sketches := m1.GetSketches(); len(sketches) != 1 {
+		t.Error("Expected 1 sketch, got", len(sketches))
+	} else if sketches[0][0] != "marvel" || sketches[0][1] != "rank" {
+		t.Error("Expected [[marvel rank], got", sketches)
+	}
+
+	if res, err := m1.GetFromSketch(info, nil); err != nil {
+		t.Error("Expected no errors, got", err)
+	} else if len(res.([]*datamodel.Element)) != 4 {
+		t.Error("Expected len(res) = 4, got", len(res.([]*datamodel.Element)))
+	} else if res.([]*datamodel.Element)[0].Key != "hulk" {
+		t.Error("Expected 'hulk', got", res.([]*datamodel.Element)[0].Key)
+	}
+}

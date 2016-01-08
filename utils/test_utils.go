@@ -10,10 +10,10 @@ import (
 
 // SetupTests ...
 func SetupTests() {
-	rand.Seed(time.Now().Unix())
-	num := rand.Uint32()
-	dataDir := fmt.Sprintf("/tmp/skizze_storage_data_%d", num)
-	infoDir := fmt.Sprintf("/tmp/skizze_storage_info_%d", num)
+	rand.Seed(time.Now().UnixNano())
+	dataDir := fmt.Sprintf("/tmp/skizze_storage_data_%d_%d", rand.Uint32()%1000, rand.Uint32()%1000)
+	infoDir := fmt.Sprintf("/tmp/skizze_storage_info_%d_%d", rand.Uint32()%1000, rand.Uint32()%1000)
+
 	PanicOnError(os.Setenv("SKZ_DATA_DIR", dataDir))
 	PanicOnError(os.Setenv("SKZ_INFO_DIR", infoDir))
 
@@ -31,4 +31,5 @@ func SetupTests() {
 func TearDownTests() {
 	PanicOnError(os.RemoveAll(os.Getenv("SKZ_DATA_DIR")))
 	PanicOnError(os.RemoveAll(os.Getenv("SKZ_INFO_DIR")))
+	time.Sleep(time.Millisecond * 50)
 }

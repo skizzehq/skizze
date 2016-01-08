@@ -17,7 +17,14 @@ const (
 	Bloom = "memb"
 )
 
-//Sketch ...
+// Element ...
+type Element struct {
+	Key   string
+	Count int
+	Error int
+}
+
+// Sketch ...
 type Sketch interface {
 	Add([][]byte) (bool, error)
 	Marshal() ([]byte, error)
@@ -25,7 +32,7 @@ type Sketch interface {
 	Unmarshal(*Info, []byte) error
 }
 
-//Properties ...
+// Properties ...
 type Properties struct {
 	Capacity uint `json:"capacity"`
 }
@@ -53,12 +60,12 @@ func (info *Info) ID() string {
 	return info.id
 }
 
-//NewEmptyPropeties returns an empty property struct
-func NewEmptyPropeties() *Properties {
+// NewEmptyProperties returns an empty property struct
+func NewEmptyProperties() *Properties {
 	return &Properties{}
 }
 
-//NewEmptyState returns an empty state struct
+// NewEmptyState returns an empty state struct
 func NewEmptyState() *State {
 	return &State{
 		Additions:             0,
@@ -66,10 +73,10 @@ func NewEmptyState() *State {
 	}
 }
 
-//NewEmptyInfo returns an empty info struct
+// NewEmptyInfo returns an empty info struct
 func NewEmptyInfo() *Info {
 	return &Info{
-		Properties: NewEmptyPropeties(),
+		Properties: NewEmptyProperties(),
 		State:      NewEmptyState(),
 	}
 }

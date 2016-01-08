@@ -188,7 +188,6 @@ func (m *Manager) autoSave() {
 			// FIXME: print out something
 		}
 	}
-	fmt.Println("STOPPED")
 }
 
 // NewManager ...

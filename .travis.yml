@@ -1,8 +1,6 @@
 language: go
 go:
  - 1.5
- - release
- - tip
 
 install:
  - go get github.com/hashicorp/golang-lru
