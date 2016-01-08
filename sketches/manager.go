@@ -75,7 +75,20 @@ func (m *Manager) AddToSketch(info *datamodel.Info, values []string) error {
 
 // GetFromSketch ...
 func (m *Manager) GetFromSketch(info *datamodel.Info, data interface{}) (interface{}, error) {
-	return m.sketches[info.ID()].Get(data)
+	var values []string
+	if data != nil {
+		values = data.([]string)
+	}
+
+	byts := make([][]byte, len(values), len(values))
+	for i, v := range values {
+		byts[i] = []byte(v)
+	}
+	v, ok := m.sketches[info.ID()]
+	if !ok {
+		return nil, fmt.Errorf("No such key %s", info.ID())
+	}
+	return v.Get(byts)
 }
 
 // Save ...
@@ -175,6 +188,7 @@ func (m *Manager) autoSave() {
 			// FIXME: print out something
 		}
 	}
+	fmt.Println("STOPPED")
 }
 
 // NewManager ...
@@ -197,8 +211,6 @@ func NewManager() (*Manager, error) {
 
 // Destroy ...
 func (m *Manager) Destroy() {
-	if m.ticker != nil {
-		m.ticker.Stop()
-	}
+	m.ticker.Stop()
 	_ = m.storage.Close()
 }

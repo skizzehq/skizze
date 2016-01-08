@@ -3,6 +3,7 @@ package sketches
 import (
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/seiflotfy/skizze/config"
 	"github.com/seiflotfy/skizze/datamodel"
@@ -10,6 +11,7 @@ import (
 )
 
 func TestNewManager(t *testing.T) {
+	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
 	if _, err := NewManager(); err != nil {
@@ -18,6 +20,7 @@ func TestNewManager(t *testing.T) {
 }
 
 func TestNoSketches(t *testing.T) {
+	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
 	m, err := NewManager()
@@ -30,6 +33,7 @@ func TestNoSketches(t *testing.T) {
 }
 
 func TestCreateSketch(t *testing.T) {
+	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
@@ -53,6 +57,7 @@ func TestCreateSketch(t *testing.T) {
 }
 
 func TestCreateGetSketch(t *testing.T) {
+	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
@@ -78,6 +83,7 @@ func TestCreateGetSketch(t *testing.T) {
 }
 
 func TestCreateDuplicateSketch(t *testing.T) {
+	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
@@ -103,6 +109,7 @@ func TestCreateDuplicateSketch(t *testing.T) {
 }
 
 func TestCreateInvalidSketch(t *testing.T) {
+	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
@@ -123,6 +130,7 @@ func TestCreateInvalidSketch(t *testing.T) {
 }
 
 func TestDeleteNonExistingSketch(t *testing.T) {
+	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
@@ -143,6 +151,7 @@ func TestDeleteNonExistingSketch(t *testing.T) {
 }
 
 func TestDeleteSketch(t *testing.T) {
+	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
@@ -170,7 +179,8 @@ func TestDeleteSketch(t *testing.T) {
 	}
 }
 
-func TestSaveLoad(t *testing.T) {
+func TestCardSaveLoad(t *testing.T) {
+	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
@@ -234,5 +244,74 @@ func TestSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	} else if res.(uint) != 4 {
 		t.Error("Expected res = 4, got", res)
+	}
+	time.Sleep(time.Second * 2)
+}
+
+func TestFreqSaveLoad(t *testing.T) {
+	config.Reset()
+	utils.SetupTests()
+	defer utils.TearDownTests()
+
+	m1, err := NewManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	info := datamodel.NewEmptyInfo()
+	info.Properties.Capacity = 10000
+	info.Name = "marvel"
+	info.Type = datamodel.CML
+	if err := m1.CreateSketch(info); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if sketches := m1.GetSketches(); len(sketches) != 1 {
+		t.Error("Expected 1 sketch, got", len(sketches))
+	} else if sketches[0][0] != "marvel" || sketches[0][1] != "freq" {
+		t.Error("Expected [[marvel freq]], got", sketches)
+	}
+
+	if err := m1.AddToSketch(info, []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if err := m1.Save(map[string]*datamodel.Info{info.ID(): info}); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if err := m1.AddToSketch(info, []string{"hulk", "black widow"}); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if res, err := m1.GetFromSketch(info, []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
+		t.Error("Expected no errors, got", err)
+	} else if res.(map[string]uint)["hulk"] != 2 {
+		t.Error("Expected res = 2, got", res)
+	}
+
+	path := filepath.Join(config.GetConfig().DataDir, "marvel.freq")
+	if exists, err := utils.Exists(path); err != nil {
+		t.Error("Expected no errors, got", err)
+	} else if !exists {
+		t.Errorf("Expected file dump %s to exists, but apparently it doesn't", path)
+	}
+
+	m1.Destroy()
+
+	m1, err = NewManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if sketches := m1.GetSketches(); len(sketches) != 1 {
+		t.Error("Expected 1 sketch, got", len(sketches))
+	} else if sketches[0][0] != "marvel" || sketches[0][1] != "freq" {
+		t.Error("Expected [[marvel freq], got", sketches)
+	}
+
+	if res, err := m1.GetFromSketch(info, []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
+		t.Error("Expected no errors, got", err)
+	} else if res.(map[string]uint)["hulk"] != 1 {
+		t.Error("Expected res = 1, got", res)
 	}
 }

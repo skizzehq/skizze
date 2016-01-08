@@ -33,8 +33,8 @@ func (d *Sketch) Get(interface{}) (interface{}, error) {
 }
 
 // Marshal ...
-func (d *Sketch) Marshal() []byte {
-	return d.impl.Marshal()
+func (d *Sketch) Marshal() ([]byte, error) {
+	return d.impl.Marshal(), nil
 }
 
 // Unmarshal ...

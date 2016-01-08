@@ -96,3 +96,8 @@ func GetConfig() *Config {
 	}
 	return config
 }
+
+// Reset ...
+func Reset() {
+	config = nil
+}

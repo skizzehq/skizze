@@ -20,7 +20,7 @@ const (
 //Sketch ...
 type Sketch interface {
 	Add([][]byte) (bool, error)
-	Marshal() []byte
+	Marshal() ([]byte, error)
 	Get(interface{}) (interface{}, error)
 	Unmarshal(*Info, []byte) error
 }

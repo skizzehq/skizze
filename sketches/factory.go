@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/seiflotfy/skizze/datamodel"
+	"github.com/seiflotfy/skizze/sketches/wrappers/count-min-log"
 	"github.com/seiflotfy/skizze/sketches/wrappers/hllpp"
 	"github.com/seiflotfy/skizze/utils"
 )
@@ -32,6 +33,8 @@ func (sp *SketchProxy) Get(data interface{}) (interface{}, error) {
 	switch sp.Type {
 	case datamodel.HLLPP:
 		return sp.sketch.Get(nil)
+	case datamodel.CML:
+		return sp.sketch.Get(data)
 	default:
 		return nil, errors.New("Invalid sketch type: " + sp.Type)
 	}
@@ -39,8 +42,11 @@ func (sp *SketchProxy) Get(data interface{}) (interface{}, error) {
 
 // Save ...
 func (sp *SketchProxy) Save(file *os.File) error {
-	data := sp.sketch.Marshal()
-	_, err := file.Write(data)
+	data, err := sp.sketch.Marshal()
+	if err != nil {
+		return err
+	}
+	_, err = file.Write(data)
 	return err
 }
 
@@ -52,6 +58,8 @@ func createSketch(info *datamodel.Info) (*SketchProxy, error) {
 	switch info.Type {
 	case datamodel.HLLPP:
 		sp.sketch, err = hllpp.NewSketch(info)
+	case datamodel.CML:
+		sp.sketch, err = cml.NewSketch(info)
 	default:
 		return nil, errors.New("Invalid sketch type: " + info.Type)
 	}
@@ -80,6 +88,9 @@ func loadSketch(info *datamodel.Info, file *os.File) (*SketchProxy, error) {
 	switch info.Type {
 	case datamodel.HLLPP:
 		sp.sketch = &hllpp.Sketch{}
+		err = sp.sketch.Unmarshal(info, data)
+	case datamodel.CML:
+		sp.sketch = &cml.Sketch{}
 		err = sp.sketch.Unmarshal(info, data)
 	default:
 		//logger.Info.Println("Invalid sketch type", info.Type)

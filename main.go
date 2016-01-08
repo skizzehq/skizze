@@ -23,9 +23,8 @@ func main() {
 	err := os.Setenv("SKIZZE_PORT", strconv.Itoa(int(port)))
 	utils.PanicOnError(err)
 
-	logger.Info.Println("Starting counts...")
-	conf := config.GetConfig()
-	logger.Info.Println("Using data dir: ", conf.DataDir)
+	logger.Info.Println("Starting Skizze...")
+	logger.Info.Println("Using data dir: ", config.GetConfig().DataDir)
 	//server, err := server.New()
 	//utils.PanicOnError(err)
 	//server.Run()

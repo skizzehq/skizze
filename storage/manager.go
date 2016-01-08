@@ -29,6 +29,7 @@ func NewManager() *Manager {
 	utils.PanicOnError(err)
 	infoPath := filepath.Join(config.GetConfig().InfoDir, "info.db")
 	db, err := bolt.Open(infoPath, 0777, nil)
+	utils.PanicOnError(err)
 	err = db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte("sketches"))
 		return err

@@ -11,8 +11,9 @@ import (
 // SetupTests ...
 func SetupTests() {
 	rand.Seed(time.Now().Unix())
-	dataDir := fmt.Sprintf("/tmp/skizze_storage_data_%d", rand.Uint32())
-	infoDir := fmt.Sprintf("/tmp/skizze_storage_info_%d", rand.Uint32())
+	num := rand.Uint32()
+	dataDir := fmt.Sprintf("/tmp/skizze_storage_data_%d", num)
+	infoDir := fmt.Sprintf("/tmp/skizze_storage_info_%d", num)
 	PanicOnError(os.Setenv("SKZ_DATA_DIR", dataDir))
 	PanicOnError(os.Setenv("SKZ_INFO_DIR", infoDir))
 
