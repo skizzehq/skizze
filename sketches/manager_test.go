@@ -387,3 +387,87 @@ func TestRankSaveLoad(t *testing.T) {
 		t.Error("Expected 'hulk', got", res.([]*datamodel.Element)[0].Key)
 	}
 }
+
+func TestMembershipSaveLoad(t *testing.T) {
+	config.Reset()
+	utils.SetupTests()
+	defer utils.TearDownTests()
+
+	m1, err := NewManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	info := datamodel.NewEmptyInfo()
+	info.Properties.Capacity = 10000
+	info.Name = "marvel"
+	info.Type = datamodel.Bloom
+	if err := m1.CreateSketch(info); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if sketches := m1.GetSketches(); len(sketches) != 1 {
+		t.Error("Expected 1 sketch, got", len(sketches))
+	} else if sketches[0][0] != "marvel" || sketches[0][1] != "memb" {
+		t.Error("Expected [[marvel memb]], got", sketches)
+	}
+
+	if err := m1.AddToSketch(info, []string{"hulk", "hulk", "thor", "iron man", "hawk-eye"}); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if err := m1.Save(map[string]*datamodel.Info{info.ID(): info}); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if err := m1.AddToSketch(info, []string{"hulk", "black widow", "black widow", "black widow", "black widow"}); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+
+	if res, err := m1.GetFromSketch(info, []string{"hulk", "captian america", "black widow"}); err != nil {
+		t.Error("Expected no errors, got", err)
+	} else if len(res.(map[string]bool)) != 3 {
+		t.Error("Expected len(res) = 3, got", len(res.(map[string]bool)))
+	} else if v, _ := res.(map[string]bool)["hulk"]; !v {
+		t.Error("Expected 'hulk' == true , got", v)
+	} else if v, _ := res.(map[string]bool)["captian america"]; v {
+		t.Error("Expected 'captian america' == false , got", v)
+	} else if v, _ := res.(map[string]bool)["black widow"]; !v {
+		t.Error("Expected 'captian america' == true , got", v)
+	}
+
+	path := filepath.Join(config.GetConfig().DataDir, "marvel.memb")
+	if exists, err := utils.Exists(path); err != nil {
+		t.Error("Expected no errors, got", err)
+	} else if !exists {
+		t.Errorf("Expected file dump %s to exists, but apparently it doesn't", path)
+	}
+
+	m1.Destroy()
+
+	m1, err = NewManager()
+	if err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if sketches := m1.GetSketches(); len(sketches) != 1 {
+		t.Error("Expected 1 sketch, got", len(sketches))
+	} else if sketches[0][0] != "marvel" || sketches[0][1] != "memb" {
+		t.Error("Expected [[marvel memb], got", sketches)
+	}
+
+	if res, err := m1.GetFromSketch(info, []string{"hulk", "captian america", "black widow"}); err != nil {
+		t.Error("Expected no errors, got", err)
+	} else if len(res.(map[string]bool)) != 3 {
+		t.Error("Expected len(res) = 3, got", len(res.(map[string]bool)))
+	} else if v, _ := res.(map[string]bool)["hulk"]; !v {
+		t.Error("Expected 'hulk' == true , got", v)
+	} else if v, _ := res.(map[string]bool)["captian america"]; v {
+		t.Error("Expected 'captian america' == false , got", v)
+	} else if v, _ := res.(map[string]bool)["black widow"]; v {
+		t.Error("Expected 'captian america' == false , got", v)
+	}
+}
+
+// TODO: Add tests for having several sketches, saving half way,
+// getting all sketches, then reloading and getting all sketches,
+// Expected the first half of the sketches to be there
