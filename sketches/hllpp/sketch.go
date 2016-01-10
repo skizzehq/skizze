@@ -2,7 +2,7 @@ package hllpp
 
 import (
 	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/sketches/wrappers/hllpp/hllpp"
+	"github.com/seiflotfy/skizze/sketches/hllpp/hllpp"
 )
 
 //var logger = utils.GetLogger()

@@ -7,10 +7,10 @@ import (
 	"sync"
 
 	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/sketches/wrappers/bloom"
-	"github.com/seiflotfy/skizze/sketches/wrappers/count-min-log"
-	"github.com/seiflotfy/skizze/sketches/wrappers/hllpp"
-	"github.com/seiflotfy/skizze/sketches/wrappers/topk"
+	"github.com/seiflotfy/skizze/sketches/bloom"
+	"github.com/seiflotfy/skizze/sketches/count-min-log"
+	"github.com/seiflotfy/skizze/sketches/hllpp"
+	"github.com/seiflotfy/skizze/sketches/topk"
 	"github.com/seiflotfy/skizze/utils"
 )
 
@@ -56,7 +56,8 @@ func (sp *SketchProxy) Save(file *os.File) error {
 	return err
 }
 
-func createSketch(info *datamodel.Info) (*SketchProxy, error) {
+// CreateSketch ...
+func CreateSketch(info *datamodel.Info) (*SketchProxy, error) {
 	var err error
 	var sketch datamodel.Sketch
 	sp := &SketchProxy{info, sketch, sync.RWMutex{}, true}
@@ -80,7 +81,8 @@ func createSketch(info *datamodel.Info) (*SketchProxy, error) {
 	return sp, nil
 }
 
-func loadSketch(info *datamodel.Info, file *os.File) (*SketchProxy, error) {
+// LoadSketch ...
+func LoadSketch(info *datamodel.Info, file *os.File) (*SketchProxy, error) {
 	var sketch datamodel.Sketch
 	sp := &SketchProxy{info, sketch, sync.RWMutex{}, false}
 

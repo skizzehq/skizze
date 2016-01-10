@@ -5,7 +5,7 @@ import (
 	"encoding/gob"
 
 	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/sketches/wrappers/topk/go-topk"
+	"github.com/seiflotfy/skizze/sketches/topk/go-topk"
 	"github.com/seiflotfy/skizze/utils"
 )
 

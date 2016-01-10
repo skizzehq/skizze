@@ -2,7 +2,7 @@ package bloom
 
 import (
 	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/sketches/wrappers/bloom/bloom"
+	"github.com/seiflotfy/skizze/sketches/bloom/bloom"
 )
 
 //var logger = utils.GetLogger()

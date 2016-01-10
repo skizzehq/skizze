@@ -1,4 +1,4 @@
-package sketches
+package manager
 
 import (
 	"path/filepath"
@@ -10,23 +10,11 @@ import (
 	"github.com/seiflotfy/skizze/utils"
 )
 
-func TestNewManager(t *testing.T) {
-	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
-	if _, err := NewManager(); err != nil {
-		t.Error("Expected no errors, got", err)
-	}
-}
-
 func TestNoSketches(t *testing.T) {
 	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
-	m, err := NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m := NewManager()
 	if sketches := m.GetSketches(); len(sketches) != 0 {
 		t.Error("Expected 0 sketches, got", len(sketches))
 	}
@@ -37,12 +25,7 @@ func TestCreateSketch(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	m, err := NewManager()
-
-	// Create a Sketch
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m := NewManager()
 	info := datamodel.NewEmptyInfo()
 	info.Properties.Capacity = 10000
 	info.Name = "marvel"
@@ -78,12 +61,8 @@ func TestCreateAndSaveSketch(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	m, err := NewManager()
+	m := NewManager()
 
-	// Create a Sketch
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
 	info := datamodel.NewEmptyInfo()
 	info.Properties.Capacity = 10000
 	info.Name = "marvel"
@@ -121,10 +100,7 @@ func TestCreateAndSaveSketch(t *testing.T) {
 	m.Destroy()
 
 	// State should be equal before save
-	m, err = NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m = NewManager()
 	if sketches := m.GetSketches(); len(sketches) != 1 {
 		t.Error("Expected 1 sketches, got", len(sketches))
 	} else if sketches[0][0] != "marvel" || sketches[0][1] != "card" {
@@ -138,10 +114,7 @@ func TestCreateDuplicateSketch(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	m, err := NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m := NewManager()
 	info := datamodel.NewEmptyInfo()
 	info.Properties.Capacity = 10000
 	info.Name = "marvel"
@@ -164,10 +137,7 @@ func TestCreateInvalidSketch(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	m, err := NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m := NewManager()
 	info := datamodel.NewEmptyInfo()
 	info.Properties.Capacity = 10000
 	info.Name = "marvel"
@@ -185,10 +155,7 @@ func TestDeleteNonExistingSketch(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	m, err := NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m := NewManager()
 	info := datamodel.NewEmptyInfo()
 	info.Properties.Capacity = 10000
 	info.Name = "marvel"
@@ -206,10 +173,7 @@ func TestDeleteSketch(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	m, err := NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m := NewManager()
 	info := datamodel.NewEmptyInfo()
 	info.Properties.Capacity = 10000
 	info.Name = "marvel"
@@ -235,10 +199,7 @@ func TestCardSaveLoad(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	m, err := NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m := NewManager()
 
 	info := datamodel.NewEmptyInfo()
 	info.Properties.Capacity = 10000
@@ -281,10 +242,7 @@ func TestCardSaveLoad(t *testing.T) {
 
 	m.Destroy()
 
-	m, err = NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m = NewManager()
 	if sketches := m.GetSketches(); len(sketches) != 1 {
 		t.Error("Expected 1 sketch, got", len(sketches))
 	} else if sketches[0][0] != "marvel" || sketches[0][1] != "card" {
@@ -304,10 +262,7 @@ func TestFreqSaveLoad(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	m, err := NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m := NewManager()
 
 	info := datamodel.NewEmptyInfo()
 	info.Properties.Capacity = 10000
@@ -350,10 +305,7 @@ func TestFreqSaveLoad(t *testing.T) {
 
 	m.Destroy()
 
-	m, err = NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m = NewManager()
 	if sketches := m.GetSketches(); len(sketches) != 1 {
 		t.Error("Expected 1 sketch, got", len(sketches))
 	} else if sketches[0][0] != "marvel" || sketches[0][1] != "freq" {
@@ -372,10 +324,7 @@ func TestRankSaveLoad(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	m, err := NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m := NewManager()
 
 	info := datamodel.NewEmptyInfo()
 	info.Properties.Capacity = 10000
@@ -420,10 +369,7 @@ func TestRankSaveLoad(t *testing.T) {
 
 	m.Destroy()
 
-	m, err = NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m = NewManager()
 	if sketches := m.GetSketches(); len(sketches) != 1 {
 		t.Error("Expected 1 sketch, got", len(sketches))
 	} else if sketches[0][0] != "marvel" || sketches[0][1] != "rank" {
@@ -444,10 +390,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	m, err := NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m := NewManager()
 
 	info := datamodel.NewEmptyInfo()
 	info.Properties.Capacity = 10000
@@ -496,10 +439,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 
 	m.Destroy()
 
-	m, err = NewManager()
-	if err != nil {
-		t.Error("Expected no errors, got", err)
-	}
+	m = NewManager()
 	if sketches := m.GetSketches(); len(sketches) != 1 {
 		t.Error("Expected 1 sketch, got", len(sketches))
 	} else if sketches[0][0] != "marvel" || sketches[0][1] != "memb" {

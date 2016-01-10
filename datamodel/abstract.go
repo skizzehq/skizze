@@ -10,6 +10,7 @@ Dict  => dictionary
 Bloom => Bloom Filter
 */
 const (
+	DOM   = "dom"
 	HLLPP = "card"
 	CML   = "freq"
 	TopK  = "rank"

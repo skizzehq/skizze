@@ -2,7 +2,7 @@ package cml
 
 import (
 	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/sketches/wrappers/count-min-log/count-min-log"
+	"github.com/seiflotfy/skizze/sketches/count-min-log/count-min-log"
 	"github.com/seiflotfy/skizze/utils"
 )
 
