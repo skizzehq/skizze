@@ -46,7 +46,7 @@ func (m *infoManager) save(id string) error {
 	if info, ok := m.info[id]; ok {
 		infos[id] = info
 		if err := m.storage.SaveInfo(infos); err != nil {
-			// FIXME: shoudl we panic here or handle gracefully
+			// FIXME: should we panic here or handle gracefully
 			return err
 		}
 	}
