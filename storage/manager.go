@@ -76,7 +76,7 @@ func (m *Manager) SaveInfo(info map[string]*datamodel.Info) error {
 }
 
 // SaveDomain ...
-func (m *Manager) SaveDomain(info map[string][]*datamodel.Info) error {
+func (m *Manager) SaveDomain(info map[string][]string) error {
 	return m.db.Update(func(tx *bolt.Tx) error {
 		tmpInfo := make(map[string]interface{})
 		for k, v := range info {
@@ -108,16 +108,16 @@ func (m *Manager) LoadAllInfo() (map[string]*datamodel.Info, error) {
 }
 
 // LoadAllDomains ...
-func (m *Manager) LoadAllDomains() (map[string][]*datamodel.Info, error) {
-	infos := map[string][]*datamodel.Info{}
+func (m *Manager) LoadAllDomains() (map[string][]string, error) {
+	ids := map[string][]string{}
 	err := m.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("domains"))
 		err := b.ForEach(func(k, v []byte) error {
-			var info []*datamodel.Info
-			if err := json.Unmarshal(v, &info); err != nil {
+			var vals []string
+			if err := json.Unmarshal(v, &vals); err != nil {
 				return err
 			}
-			infos[string(k)] = info
+			ids[string(k)] = vals
 			return nil
 		})
 		return err
@@ -125,7 +125,7 @@ func (m *Manager) LoadAllDomains() (map[string][]*datamodel.Info, error) {
 	if err != nil {
 		return nil, err
 	}
-	return infos, nil
+	return ids, nil
 }
 
 // Close ...

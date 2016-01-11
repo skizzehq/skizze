@@ -22,6 +22,11 @@ func newInfoManager(storage *storage.Manager) *infoManager {
 	}
 }
 
+func (m *infoManager) get(id string) *datamodel.Info {
+	info, _ := m.info[id]
+	return info
+}
+
 func (m *infoManager) create(info *datamodel.Info) error {
 	if _, ok := m.info[info.ID()]; ok {
 		return fmt.Errorf(`Sketch of type "%s" with name "%s" already exists`,
@@ -31,6 +36,7 @@ func (m *infoManager) create(info *datamodel.Info) error {
 	return nil
 }
 
+// FIXME: should take array or map instead?
 func (m *infoManager) delete(info *datamodel.Info) error {
 	if _, ok := m.info[info.ID()]; !ok {
 		return fmt.Errorf(`Sketch of type "%s" with name "%s" already exists`,

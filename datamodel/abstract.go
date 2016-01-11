@@ -6,7 +6,6 @@ import "fmt"
 HLLPP	=> HyperLogLogPlusPlus
 CML		=> Count-min-log sketch
 TopK	=> Top-K
-Dict  => dictionary
 Bloom => Bloom Filter
 */
 const (
@@ -14,9 +13,13 @@ const (
 	HLLPP = "card"
 	CML   = "freq"
 	TopK  = "rank"
-	Dict  = "dict"
 	Bloom = "memb"
 )
+
+// GetTypes ...
+func GetTypes() []string {
+	return []string{HLLPP, CML, TopK, Bloom}
+}
 
 // Element ...
 type Element struct {
