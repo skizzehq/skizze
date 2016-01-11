@@ -34,7 +34,7 @@ func NewManager() *Manager {
 		if _, err := tx.CreateBucketIfNotExists([]byte("info")); err != nil {
 			return err
 		}
-		_, err := tx.CreateBucketIfNotExists([]byte("domains"))
+		_, err := tx.CreateBucketIfNotExists([]byte("domain"))
 		return err
 	})
 	utils.PanicOnError(err)
@@ -52,6 +52,20 @@ func (m *Manager) GetFile(id string) (*os.File, error) {
 
 func (m *Manager) saveToBoltDB(tx *bolt.Tx, bucketID string, info map[string]interface{}) error {
 	b := tx.Bucket([]byte(bucketID))
+
+	// Remove deleted keys
+	err := b.ForEach(func(k, v []byte) error {
+		if _, ok := info[string(k)]; !ok {
+			if err := b.Delete(k); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		// TODO: print something here
+	}
+
 	for k, v := range info {
 		rawInfo, err := json.Marshal(v)
 		if err != nil {
@@ -75,8 +89,8 @@ func (m *Manager) SaveInfo(info map[string]*datamodel.Info) error {
 	})
 }
 
-// SaveDomain ...
-func (m *Manager) SaveDomain(info map[string][]string) error {
+// SaveDomains ...
+func (m *Manager) SaveDomains(info map[string][]string) error {
 	return m.db.Update(func(tx *bolt.Tx) error {
 		tmpInfo := make(map[string]interface{})
 		for k, v := range info {
@@ -111,7 +125,7 @@ func (m *Manager) LoadAllInfo() (map[string]*datamodel.Info, error) {
 func (m *Manager) LoadAllDomains() (map[string][]string, error) {
 	ids := map[string][]string{}
 	err := m.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("domains"))
+		b := tx.Bucket([]byte("domain"))
 		err := b.ForEach(func(k, v []byte) error {
 			var vals []string
 			if err := json.Unmarshal(v, &vals); err != nil {

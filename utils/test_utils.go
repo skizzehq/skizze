@@ -31,5 +31,5 @@ func SetupTests() {
 func TearDownTests() {
 	PanicOnError(os.RemoveAll(os.Getenv("SKZ_DATA_DIR")))
 	PanicOnError(os.RemoveAll(os.Getenv("SKZ_INFO_DIR")))
-	time.Sleep(time.Millisecond * 50)
+	time.Sleep(50 * time.Millisecond)
 }
