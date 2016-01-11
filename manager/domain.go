@@ -50,14 +50,14 @@ func (m *domainManager) create(id string, infos map[string]*datamodel.Info) erro
 	if len(tmpInfos) != len(infos) {
 		for _, v := range tmpInfos {
 			if err := m.info.delete(v); err != nil {
-				//TODO: print out something
+				// TODO: print out something
 			}
 		}
 	}
 	if len(tmpSketches) != len(infos) {
 		for _, v := range tmpSketches {
 			if err := m.sketches.delete(v); err != nil {
-				//TODO: print out something
+				// TODO: print out something
 			}
 		}
 	}
