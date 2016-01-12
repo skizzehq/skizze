@@ -19,14 +19,12 @@ type SketchProxy struct {
 	*datamodel.Info
 	sketch datamodel.Sketch
 	lock   sync.RWMutex
-	dirty  bool
 }
 
 // Add ...
 func (sp *SketchProxy) Add(values [][]byte) (bool, error) {
 	sp.lock.Lock()
 	defer sp.lock.Unlock()
-	sp.dirty = true
 	return sp.sketch.Add(values)
 }
 
@@ -60,7 +58,7 @@ func (sp *SketchProxy) Save(file *os.File) error {
 func CreateSketch(info *datamodel.Info) (*SketchProxy, error) {
 	var err error
 	var sketch datamodel.Sketch
-	sp := &SketchProxy{info, sketch, sync.RWMutex{}, true}
+	sp := &SketchProxy{info, sketch, sync.RWMutex{}}
 
 	switch info.Type {
 	case datamodel.HLLPP:
@@ -84,7 +82,7 @@ func CreateSketch(info *datamodel.Info) (*SketchProxy, error) {
 // LoadSketch ...
 func LoadSketch(info *datamodel.Info, file *os.File) (*SketchProxy, error) {
 	var sketch datamodel.Sketch
-	sp := &SketchProxy{info, sketch, sync.RWMutex{}, false}
+	sp := &SketchProxy{info, sketch, sync.RWMutex{}}
 
 	size, err := utils.GetFileSize(file)
 	if err != nil {

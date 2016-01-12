@@ -47,14 +47,13 @@ func (m *infoManager) delete(info *datamodel.Info) error {
 	return nil
 }
 
-func (m *infoManager) save(id string) error {
-	infos := make(map[string]*datamodel.Info)
-	if info, ok := m.info[id]; ok {
-		infos[id] = info
-		if err := m.storage.SaveInfo(infos); err != nil {
-			// FIXME: shoudl we panic here or handle gracefully
-			return err
-		}
+func (m *infoManager) save(infos map[string]*datamodel.Info) error {
+	if infos == nil || len(infos) == 0 {
+		infos = m.info
 	}
-	return nil
+	return m.storage.SaveInfo(infos)
+}
+
+func (m *infoManager) getCopy() map[string]*datamodel.Info {
+	return (map[string]*datamodel.Info)(m.info)
 }

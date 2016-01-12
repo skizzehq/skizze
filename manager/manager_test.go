@@ -77,7 +77,7 @@ func TestCreateAndSaveSketch(t *testing.T) {
 	}
 
 	// Save state
-	if err := m.Save(map[string]*datamodel.Info{info.ID(): info}); err != nil {
+	if err := m.Save(); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -219,7 +219,7 @@ func TestCardSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.Save(map[string]*datamodel.Info{info.ID(): info}); err != nil {
+	if err := m.Save(); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -282,7 +282,7 @@ func TestFreqSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.Save(map[string]*datamodel.Info{info.ID(): info}); err != nil {
+	if err := m.Save(); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -344,7 +344,7 @@ func TestRankSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.Save(map[string]*datamodel.Info{info.ID(): info}); err != nil {
+	if err := m.Save(); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -410,7 +410,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.Save(map[string]*datamodel.Info{info.ID(): info}); err != nil {
+	if err := m.Save(); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -456,5 +456,40 @@ func TestMembershipSaveLoad(t *testing.T) {
 		t.Error("Expected 'captian america' == false , got", v)
 	} else if v, _ := res.(map[string]bool)["black widow"]; v {
 		t.Error("Expected 'captian america' == false , got", v)
+	}
+}
+
+func TestCreateDomain(t *testing.T) {
+	config.Reset()
+	utils.SetupTests()
+	defer utils.TearDownTests()
+
+	m := NewManager()
+	info := datamodel.NewEmptyInfo()
+	info.Properties.Capacity = 1000000
+	info.Properties.Rank = 100
+	info.Name = "marvel"
+	if err := m.CreateDomain(info); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if sketches := m.GetSketches(); len(sketches) != 4 {
+		t.Error("Expected 1 sketches, got", len(sketches))
+	} else if sketches[0][0] != "marvel" || sketches[0][1] != "card" {
+		t.Error("Expected [[marvel card]], got", sketches)
+	}
+
+	// Create a second Sketch
+	info = datamodel.NewEmptyInfo()
+	info.Properties.Capacity = 10000
+	info.Name = "dc"
+	if err := m.CreateDomain(info); err != nil {
+		t.Error("Expected no errors, got", err)
+	}
+	if sketches := m.GetSketches(); len(sketches) != 8 {
+		t.Error("Expected 8 sketches, got", len(sketches))
+	} else if sketches[0][0] != "dc" || sketches[0][1] != "card" {
+		t.Error("Expected [[dc card]], got", sketches[0][0], sketches[0][1])
+	} else if sketches[1][0] != "dc" || sketches[1][1] != "freq" {
+		t.Error("Expected [[dc freq]], got", sketches[1][0], sketches[1][1])
 	}
 }

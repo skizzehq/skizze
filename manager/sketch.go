@@ -9,6 +9,13 @@ import (
 	"github.com/seiflotfy/skizze/utils"
 )
 
+type lockedError struct {
+}
+
+func (e *lockedError) Error() string {
+	return "locked"
+}
+
 type sketchManager struct {
 	storage  *storage.Manager
 	sketches map[string]*sketches.SketchProxy
@@ -45,6 +52,16 @@ func (m *sketchManager) load(info *datamodel.Info) error {
 	return nil
 }
 
+func (m *sketchManager) lock(info *datamodel.Info) error {
+	sketch, ok := m.sketches[info.ID()]
+	if ok {
+		return fmt.Errorf(`Sketch of type "%s" with name "%s" already loaded`,
+			info.Type, info.Name)
+	}
+	sketch.Lock()
+	return nil
+}
+
 // CreateSketch ...
 func (m *sketchManager) create(info *datamodel.Info) error {
 	sketch, err := sketches.CreateSketch(info)
@@ -77,6 +94,11 @@ func (m *sketchManager) save(info *datamodel.Info) error {
 }
 
 func (m *sketchManager) add(id string, values []string) error {
+	if m.sketches[id].Locked() {
+		// Append to File here
+		return nil //&lockedError{}
+	}
+
 	byts := make([][]byte, len(values), len(values))
 	for i, v := range values {
 		byts[i] = []byte(v)

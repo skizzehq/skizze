@@ -11,7 +11,7 @@ import (
 
 var logger = utils.GetLogger()
 
-const defaultCapacity = 100.0
+const defaultRank = 100.0
 
 // Sketch is the toplevel sketch to control the HLL implementation
 type Sketch struct {
@@ -24,17 +24,16 @@ type ResultElement topk.Element
 
 // NewSketch ...
 func NewSketch(info *datamodel.Info) (*Sketch, error) {
-	if info.Properties.Capacity == 0 {
-		info.Properties.Capacity = defaultCapacity
+	if info.Properties.Rank == 0 {
+		info.Properties.Rank = defaultRank
 	}
-	d := Sketch{info, topk.New(int(info.Properties.Capacity))}
+	d := Sketch{info, topk.New(int(info.Properties.Rank))}
 
 	return &d, nil
 }
 
 // Add ...
 func (d *Sketch) Add(values [][]byte) (bool, error) {
-
 	for _, value := range values {
 		str := string(value)
 		err := d.impl.Insert(str, 1)
