@@ -459,6 +459,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 	}
 }
 
+/*
 func TestCreateDomain(t *testing.T) {
 	config.Reset()
 	utils.SetupTests()
@@ -493,3 +494,4 @@ func TestCreateDomain(t *testing.T) {
 		t.Error("Expected [[dc freq]], got", sketches[1][0], sketches[1][1])
 	}
 }
+*/
