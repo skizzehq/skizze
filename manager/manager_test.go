@@ -160,7 +160,7 @@ func TestDeleteNonExistingSketch(t *testing.T) {
 	info.Properties.Capacity = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.HLLPP
-	if err := m.DeleteSketch(info); err == nil {
+	if err := m.DeleteSketch(info.ID()); err == nil {
 		t.Error("Expected errors deleting non-existing sketch, got", err)
 	}
 	if sketches := m.GetSketches(); len(sketches) != 0 {
@@ -186,7 +186,7 @@ func TestDeleteSketch(t *testing.T) {
 	} else if sketches[0][0] != "marvel" || sketches[0][1] != "card" {
 		t.Error("Expected [[marvel card]], got", sketches)
 	}
-	if err := m.DeleteSketch(info); err != nil {
+	if err := m.DeleteSketch(info.ID()); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 	if sketches := m.GetSketches(); len(sketches) != 0 {
@@ -215,7 +215,7 @@ func TestCardSaveLoad(t *testing.T) {
 		t.Error("Expected [[marvel card]], got", sketches)
 	}
 
-	if err := m.AddToSketch(info, []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
+	if err := m.AddToSketch(info.ID(), []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -223,7 +223,7 @@ func TestCardSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.AddToSketch(info, []string{"hulk", "black widow"}); err != nil {
+	if err := m.AddToSketch(info.ID(), []string{"hulk", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -278,7 +278,7 @@ func TestFreqSaveLoad(t *testing.T) {
 		t.Error("Expected [[marvel freq]], got", sketches)
 	}
 
-	if err := m.AddToSketch(info, []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
+	if err := m.AddToSketch(info.ID(), []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -286,7 +286,7 @@ func TestFreqSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.AddToSketch(info, []string{"hulk", "black widow"}); err != nil {
+	if err := m.AddToSketch(info.ID(), []string{"hulk", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -340,7 +340,7 @@ func TestRankSaveLoad(t *testing.T) {
 		t.Error("Expected [[marvel rank]], got", sketches)
 	}
 
-	if err := m.AddToSketch(info, []string{"hulk", "hulk", "thor", "iron man", "hawk-eye"}); err != nil {
+	if err := m.AddToSketch(info.ID(), []string{"hulk", "hulk", "thor", "iron man", "hawk-eye"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -348,7 +348,7 @@ func TestRankSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.AddToSketch(info, []string{"hulk", "black widow", "black widow", "black widow", "black widow"}); err != nil {
+	if err := m.AddToSketch(info.ID(), []string{"hulk", "black widow", "black widow", "black widow", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -406,7 +406,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 		t.Error("Expected [[marvel memb]], got", sketches)
 	}
 
-	if err := m.AddToSketch(info, []string{"hulk", "hulk", "thor", "iron man", "hawk-eye"}); err != nil {
+	if err := m.AddToSketch(info.ID(), []string{"hulk", "hulk", "thor", "iron man", "hawk-eye"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 
@@ -414,7 +414,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.AddToSketch(info, []string{"hulk", "black widow", "black widow", "black widow", "black widow"}); err != nil {
+	if err := m.AddToSketch(info.ID(), []string{"hulk", "black widow", "black widow", "black widow", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 

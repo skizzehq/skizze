@@ -13,7 +13,7 @@ import (
 // SketchProxy ...
 type SketchProxy struct {
 	*datamodel.Info
-	sketch datamodel.Sketch
+	sketch datamodel.Sketcher
 	lock   sync.RWMutex
 }
 
@@ -53,7 +53,7 @@ func (sp *SketchProxy) Save(file *os.File) error {
 // CreateSketch ...
 func CreateSketch(info *datamodel.Info) (*SketchProxy, error) {
 	var err error
-	var sketch datamodel.Sketch
+	var sketch datamodel.Sketcher
 	sp := &SketchProxy{info, sketch, sync.RWMutex{}}
 
 	switch info.Type {
@@ -77,7 +77,7 @@ func CreateSketch(info *datamodel.Info) (*SketchProxy, error) {
 
 // LoadSketch ...
 func LoadSketch(info *datamodel.Info, file *os.File) (*SketchProxy, error) {
-	var sketch datamodel.Sketch
+	var sketch datamodel.Sketcher
 	sp := &SketchProxy{info, sketch, sync.RWMutex{}}
 
 	size, err := utils.GetFileSize(file)

@@ -2,40 +2,6 @@ package datamodel
 
 import "fmt"
 
-/*
-HLLPP	=> HyperLogLogPlusPlus
-CML		=> Count-min-log sketch
-TopK	=> Top-K
-Bloom => Bloom Filter
-*/
-const (
-	DOM   = "dom"
-	HLLPP = "card"
-	CML   = "freq"
-	TopK  = "rank"
-	Bloom = "memb"
-)
-
-// GetTypes ...
-func GetTypes() []string {
-	return []string{HLLPP, CML, TopK, Bloom}
-}
-
-// Element ...
-type Element struct {
-	Key   string
-	Count int
-	Error int
-}
-
-// Sketch ...
-type Sketch interface {
-	Add([][]byte) (bool, error)
-	Marshal() ([]byte, error)
-	Get(interface{}) (interface{}, error)
-	Unmarshal(*Info, []byte) error
-}
-
 // Properties ...
 type Properties struct {
 	Capacity uint `json:"capacity"`

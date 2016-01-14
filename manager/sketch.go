@@ -54,6 +54,19 @@ func (m *sketchManager) setLockAll(b bool) {
 	}
 }
 
+func (m *sketchManager) setLock(id string, b bool) error {
+	sketch, ok := m.sketches[id]
+	if !ok {
+		return fmt.Errorf(`Sketch "%s" does not exist`, id)
+	}
+	if b {
+		sketch.Lock()
+	} else {
+		sketch.Unlock()
+	}
+	return nil
+}
+
 // CreateSketch ...
 func (m *sketchManager) create(info *datamodel.Info) error {
 	sketch, err := sketches.CreateSketch(info)

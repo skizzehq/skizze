@@ -153,16 +153,16 @@ func (m *Manager) CreateDomain(info *datamodel.Info) error {
 }
 
 // AddToSketch ...
-func (m *Manager) AddToSketch(info *datamodel.Info, values []string) error {
-	return m.sketches.add(info.ID(), values)
+func (m *Manager) AddToSketch(id string, values []string) error {
+	return m.sketches.add(id, values)
 }
 
 // DeleteSketch ...
-func (m *Manager) DeleteSketch(info *datamodel.Info) error {
-	if err := m.infos.delete(info.ID()); err != nil {
+func (m *Manager) DeleteSketch(id string) error {
+	if err := m.infos.delete(id); err != nil {
 		return err
 	}
-	return m.sketches.delete(info.ID())
+	return m.sketches.delete(id)
 }
 
 type getSketchesResults [][2]string
