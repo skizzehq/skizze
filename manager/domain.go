@@ -49,14 +49,14 @@ func (m *domainManager) create(id string, infos map[string]*datamodel.Info) erro
 
 	if len(tmpInfos) != len(infos) {
 		for _, v := range tmpInfos {
-			if err := m.info.delete(v); err != nil {
+			if err := m.info.delete(v.ID()); err != nil {
 				// TODO: print out something
 			}
 		}
 	}
 	if len(tmpSketches) != len(infos) {
 		for _, v := range tmpSketches {
-			if err := m.sketches.delete(v); err != nil {
+			if err := m.sketches.delete(v.ID()); err != nil {
 				// TODO: print out something
 			}
 		}
@@ -70,10 +70,10 @@ func (m *domainManager) delete(id string) error {
 	if ids, ok := m.domains[id]; ok {
 		for _, id := range ids {
 			if info := m.info.get(id); info != nil {
-				if err := m.sketches.delete(info); err != nil {
+				if err := m.sketches.delete(info.ID()); err != nil {
 					// TODO: print something ?
 				}
-				if err := m.info.delete(info); err != nil {
+				if err := m.info.delete(info.ID()); err != nil {
 					// TODO: print something ?
 				}
 			}

@@ -27,8 +27,8 @@ type Manager struct {
 	storage  *storage.Manager
 }
 
-func (m *Manager) saveSketch(info *datamodel.Info) error {
-	return m.sketches.save(info)
+func (m *Manager) saveSketch(id string) error {
+	return m.sketches.save(id)
 }
 
 func (m *Manager) saveSketches() {
@@ -39,12 +39,13 @@ func (m *Manager) saveSketches() {
 		running++
 		go func(info *datamodel.Info) {
 			// a) save sketch
-			if err := m.saveSketch(info); err != nil {
+			if err := m.saveSketch(info.ID()); err != nil {
 				// TODO: log something here
 			}
 			// b) replay from AOF (SELECT * FROM ops WHERE sketchId = ?)
 			// TODO: Replay from AOF
 			// c) unlock sketch
+
 			wg.Done()
 		}(v)
 		// Just 4 at a time
@@ -74,8 +75,12 @@ func (m *Manager) Save() error {
 	// TODO: clear AOF
 
 	// 4) Save deep copied sketches info from previously
-	m.infos.save()
-	m.domains.save()
+	if err := m.infos.save(); err != nil {
+		// TODO: Do somthing here?
+	}
+	if err := m.domains.save(); err != nil {
+		// TODO: Do somthing here?
+	}
 
 	// 5) For each sketch
 	m.saveSketches()
@@ -127,7 +132,7 @@ func (m *Manager) CreateSketch(info *datamodel.Info) error {
 	}
 	if err := m.sketches.create(info); err != nil {
 		// If error occurred during creation of sketch, delete info
-		if err2 := m.infos.delete(info); err2 != nil {
+		if err2 := m.infos.delete(info.ID()); err2 != nil {
 			return fmt.Errorf("%q\n%q ", err, err2)
 		}
 		return err
@@ -154,10 +159,10 @@ func (m *Manager) AddToSketch(info *datamodel.Info, values []string) error {
 
 // DeleteSketch ...
 func (m *Manager) DeleteSketch(info *datamodel.Info) error {
-	if err := m.infos.delete(info); err != nil {
+	if err := m.infos.delete(info.ID()); err != nil {
 		return err
 	}
-	return m.sketches.delete(info)
+	return m.sketches.delete(info.ID())
 }
 
 type getSketchesResults [][2]string
@@ -189,7 +194,7 @@ func (m *Manager) GetSketches() [][2]string {
 
 // GetFromSketch ...
 func (m *Manager) GetFromSketch(info *datamodel.Info, data interface{}) (interface{}, error) {
-	return m.sketches.get(info, data)
+	return m.sketches.get(info.ID(), data)
 }
 
 // Destroy ...

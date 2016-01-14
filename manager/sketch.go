@@ -9,13 +9,6 @@ import (
 	"github.com/seiflotfy/skizze/utils"
 )
 
-type lockedError struct {
-}
-
-func (e *lockedError) Error() string {
-	return "locked"
-}
-
 type sketchManager struct {
 	storage  *storage.Manager
 	sketches map[string]*sketches.SketchProxy
@@ -45,8 +38,7 @@ func (m *sketchManager) load(info *datamodel.Info) error {
 	}
 	sketch, err = sketches.LoadSketch(info, file)
 	if err != nil {
-		return fmt.Errorf(`Could not load sketch "%s" with name "%s", %q`,
-			info.Type, info.Name, err)
+		return fmt.Errorf(`Could not load sketch "%s" with name "%s", %q`, info.Type, info.Name, err)
 	}
 	m.sketches[info.ID()] = sketch
 	return nil
@@ -72,25 +64,22 @@ func (m *sketchManager) create(info *datamodel.Info) error {
 	return nil
 }
 
-func (m *sketchManager) save(info *datamodel.Info) error {
-	sketch, ok := m.sketches[info.ID()]
+func (m *sketchManager) save(id string) error {
+	sketch, ok := m.sketches[id]
 	if !ok {
-		return fmt.Errorf(`Sketch of type "%s" with name "%s" does not exists`,
-			info.Type, info.Name)
+		return fmt.Errorf(`Sketch "%s" does not exists`, id)
 	}
 
-	file, err := m.storage.GetFile(info.ID())
+	file, err := m.storage.GetFile(id)
 	defer utils.CloseFile(file)
 
 	if err != nil {
-		return fmt.Errorf(`Could not get destination file for sketch of type "%s" and name "%s", %q`,
-			info.Type, info.Name, err)
+		return fmt.Errorf(`Could not get destination file for sketch "%s", %q`, id, err)
 	}
 	if err := sketch.Save(file); err != nil {
-		return fmt.Errorf(`Could not save sketch "%s" with name "%s", %q`,
-			info.Type, info.Name, err)
+		return fmt.Errorf(`Could not save sketch "%s", %q`, id, err)
 	}
-	return m.storage.SaveInfo(map[string]*datamodel.Info{info.ID(): info})
+	return nil
 }
 
 func (m *sketchManager) add(id string, values []string) error {
@@ -108,16 +97,15 @@ func (m *sketchManager) add(id string, values []string) error {
 	return err
 }
 
-func (m *sketchManager) delete(info *datamodel.Info) error {
-	if _, ok := m.sketches[info.ID()]; !ok {
-		return fmt.Errorf(`Sketch of type "%s" with name "%s" does not exists`,
-			info.Type, info.Name)
+func (m *sketchManager) delete(id string) error {
+	if _, ok := m.sketches[id]; !ok {
+		return fmt.Errorf(`Sketch "%s" does not exists`, id)
 	}
-	delete(m.sketches, info.ID())
+	delete(m.sketches, id)
 	return nil
 }
 
-func (m *sketchManager) get(info *datamodel.Info, data interface{}) (interface{}, error) {
+func (m *sketchManager) get(id string, data interface{}) (interface{}, error) {
 	var values []string
 	if data != nil {
 		values = data.([]string)
@@ -127,9 +115,9 @@ func (m *sketchManager) get(info *datamodel.Info, data interface{}) (interface{}
 	for i, v := range values {
 		byts[i] = []byte(v)
 	}
-	v, ok := m.sketches[info.ID()]
+	v, ok := m.sketches[id]
 	if !ok {
-		return nil, fmt.Errorf("No such key %s", info.ID())
+		return nil, fmt.Errorf("No such key %s", id)
 	}
 	return v.Get(byts)
 }
