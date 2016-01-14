@@ -227,7 +227,7 @@ func TestCardSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if res, err := m.GetFromSketch(info, nil); err != nil {
+	if res, err := m.GetFromSketch(info.ID(), nil); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if res.(uint) != 5 {
 		t.Error("Expected res = 5, got", res)
@@ -249,7 +249,7 @@ func TestCardSaveLoad(t *testing.T) {
 		t.Error("Expected [[marvel card], got", sketches)
 	}
 
-	if res, err := m.GetFromSketch(info, nil); err != nil {
+	if res, err := m.GetFromSketch(info.ID(), nil); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if res.(uint) != 4 {
 		t.Error("Expected res = 4, got", res)
@@ -290,7 +290,7 @@ func TestFreqSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if res, err := m.GetFromSketch(info, []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
+	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if res.(map[string]uint)["hulk"] != 2 {
 		t.Error("Expected res = 2, got", res)
@@ -312,7 +312,7 @@ func TestFreqSaveLoad(t *testing.T) {
 		t.Error("Expected [[marvel freq], got", sketches)
 	}
 
-	if res, err := m.GetFromSketch(info, []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
+	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if res.(map[string]uint)["hulk"] != 1 {
 		t.Error("Expected res = 1, got", res)
@@ -352,7 +352,7 @@ func TestRankSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if res, err := m.GetFromSketch(info, nil); err != nil {
+	if res, err := m.GetFromSketch(info.ID(), nil); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if len(res.([]*datamodel.Element)) != 5 {
 		t.Error("Expected len(res) = 5, got", len(res.([]*datamodel.Element)))
@@ -376,7 +376,7 @@ func TestRankSaveLoad(t *testing.T) {
 		t.Error("Expected [[marvel rank], got", sketches)
 	}
 
-	if res, err := m.GetFromSketch(info, nil); err != nil {
+	if res, err := m.GetFromSketch(info.ID(), nil); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if len(res.([]*datamodel.Element)) != 4 {
 		t.Error("Expected len(res) = 4, got", len(res.([]*datamodel.Element)))
@@ -418,7 +418,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if res, err := m.GetFromSketch(info, []string{"hulk", "captian america", "black widow"}); err != nil {
+	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "captian america", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if len(res.(map[string]bool)) != 3 {
 		t.Error("Expected len(res) = 3, got", len(res.(map[string]bool)))
@@ -446,7 +446,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 		t.Error("Expected [[marvel memb], got", sketches)
 	}
 
-	if res, err := m.GetFromSketch(info, []string{"hulk", "captian america", "black widow"}); err != nil {
+	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "captian america", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if len(res.(map[string]bool)) != 3 {
 		t.Error("Expected len(res) = 3, got", len(res.(map[string]bool)))

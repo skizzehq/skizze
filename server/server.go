@@ -10,9 +10,12 @@ import (
 	"google.golang.org/grpc"
 )
 
-type server struct {
+type serverStruct struct {
 	manager *manager.Manager
+	g       *grpc.Server
 }
+
+var server *serverStruct
 
 // Run ...
 func Run(manager *manager.Manager, port uint) {
@@ -22,8 +25,13 @@ func Run(manager *manager.Manager, port uint) {
 	}
 	g := grpc.NewServer()
 
-	server := &server{manager}
+	server = &serverStruct{manager, g}
 
 	pb.RegisterSkizzeServer(g, server)
 	g.Serve(lis)
+}
+
+// Stop ...
+func Stop() {
+	server.g.Stop()
 }

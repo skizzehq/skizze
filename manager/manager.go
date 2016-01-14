@@ -193,8 +193,8 @@ func (m *Manager) GetSketches() [][2]string {
 }
 
 // GetFromSketch ...
-func (m *Manager) GetFromSketch(info *datamodel.Info, data interface{}) (interface{}, error) {
-	return m.sketches.get(info.ID(), data)
+func (m *Manager) GetFromSketch(id string, data interface{}) (interface{}, error) {
+	return m.sketches.get(id, data)
 }
 
 // Destroy ...

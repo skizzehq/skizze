@@ -6,43 +6,39 @@ import (
 	"golang.org/x/net/context"
 )
 
-func (s *server) List(ctx context.Context, in *pb.ListRequest) (*pb.ListReply, error) {
+func (s *serverStruct) List(ctx context.Context, in *pb.ListRequest) (*pb.ListReply, error) {
 	return nil, nil
 }
-func (s *server) ListAll(ctx context.Context, in *pb.Empty) (*pb.ListReply, error) {
+func (s *serverStruct) ListAll(ctx context.Context, in *pb.Empty) (*pb.ListReply, error) {
 	return nil, nil
 }
-func (s *server) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListDomainsReply, error) {
+func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListDomainsReply, error) {
 	return nil, nil
 }
-func (s *server) SetDefaults(ctx context.Context, in *pb.Defaults) (*pb.Defaults, error) {
+func (s *serverStruct) SetDefaults(ctx context.Context, in *pb.Defaults) (*pb.Defaults, error) {
 	return nil, nil
 }
-func (s *server) GetDefaults(ctx context.Context, in *pb.Empty) (*pb.Defaults, error) {
+func (s *serverStruct) GetDefaults(ctx context.Context, in *pb.Empty) (*pb.Defaults, error) {
 	return nil, nil
 }
-func (s *server) CreateDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
+func (s *serverStruct) CreateDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
 	return nil, nil
 }
-func (s *server) DeleteDomain(ctx context.Context, in *pb.Domain) (*pb.Empty, error) {
+func (s *serverStruct) DeleteDomain(ctx context.Context, in *pb.Domain) (*pb.Empty, error) {
 	return nil, nil
 }
-func (s *server) GetDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
+func (s *serverStruct) GetDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
 	return nil, nil
 }
-func (s *server) CreateSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
+func (s *serverStruct) DeleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Empty, error) {
 	return nil, nil
 }
-func (s *server) DeleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Empty, error) {
+func (s *serverStruct) GetSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
 	return nil, nil
 }
-func (s *server) GetSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
+func (s *serverStruct) CreateSnapshot(ctx context.Context, in *pb.CreateSnapshotRequest) (*pb.CreateSnapshotReply, error) {
 	return nil, nil
 }
-
-func (s *server) CreateSnapshot(ctx context.Context, in *pb.CreateSnapshotRequest) (*pb.CreateSnapshotReply, error) {
-	return nil, nil
-}
-func (s *server) GetSnapshot(ctx context.Context, in *pb.GetSnapshotRequest) (*pb.GetSnapshotReply, error) {
+func (s *serverStruct) GetSnapshot(ctx context.Context, in *pb.GetSnapshotRequest) (*pb.GetSnapshotReply, error) {
 	return nil, nil
 }
