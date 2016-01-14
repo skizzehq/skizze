@@ -1,4 +1,4 @@
-package cml
+package sketches
 
 import (
 	"testing"
@@ -15,7 +15,7 @@ func TestAdd(t *testing.T) {
 	info.Properties.Capacity = 1000000000
 	info.Name = "marvel"
 	info.Type = datamodel.HLLPP
-	sketch, err := NewSketch(info)
+	sketch, err := NewCMLSketch(info)
 
 	if err != nil {
 		t.Error("expected avengers to have no error, got", err)

@@ -21,10 +21,10 @@ func isValidType(info *datamodel.Info) bool {
 type Manager struct {
 	infos    *infoManager
 	sketches *sketchManager
-	//domains  *domainManager
-	lock    sync.RWMutex
-	ticker  *time.Ticker
-	storage *storage.Manager
+	domains  *domainManager
+	lock     sync.RWMutex
+	ticker   *time.Ticker
+	storage  *storage.Manager
 }
 
 func (m *Manager) saveSketch(info *datamodel.Info) error {
@@ -74,7 +74,8 @@ func (m *Manager) Save() error {
 	// TODO: clear AOF
 
 	// 4) Save deep copied sketches info from previously
-	m.infos.Save()
+	m.infos.save()
+	m.domains.save()
 
 	// 5) For each sketch
 	m.saveSketches()
@@ -90,15 +91,15 @@ func NewManager() *Manager {
 	storage := storage.NewManager()
 	sketches := newSketchManager(storage)
 	infos := newInfoManager(storage)
-	//domains := newDomainManager(infos, sketches, storage)
+	domains := newDomainManager(infos, sketches, storage)
 
 	m := &Manager{
 		sketches: sketches,
 		infos:    infos,
-		//domain:  domains,
-		lock:    sync.RWMutex{},
-		ticker:  time.NewTicker(time.Second * time.Duration(config.GetConfig().SaveThresholdSeconds)),
-		storage: storage,
+		domains:  domains,
+		lock:     sync.RWMutex{},
+		ticker:   time.NewTicker(time.Second * time.Duration(config.GetConfig().SaveThresholdSeconds)),
+		storage:  storage,
 	}
 
 	for _, info := range infos.info {
@@ -134,7 +135,6 @@ func (m *Manager) CreateSketch(info *datamodel.Info) error {
 	return nil
 }
 
-/*
 // CreateDomain ...
 func (m *Manager) CreateDomain(info *datamodel.Info) error {
 	types := datamodel.GetTypes()
@@ -146,7 +146,7 @@ func (m *Manager) CreateDomain(info *datamodel.Info) error {
 	}
 	return m.domains.create(info.Name, infos)
 }
-*/
+
 // AddToSketch ...
 func (m *Manager) AddToSketch(info *datamodel.Info, values []string) error {
 	return m.sketches.add(info.ID(), values)

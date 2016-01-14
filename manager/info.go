@@ -47,7 +47,7 @@ func (m *infoManager) delete(info *datamodel.Info) error {
 	return nil
 }
 
-func (m *infoManager) Save() error {
+func (m *infoManager) save() error {
 	return m.storage.SaveInfo(m.info)
 }
 

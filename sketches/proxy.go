@@ -7,10 +7,6 @@ import (
 	"sync"
 
 	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/sketches/bloom"
-	"github.com/seiflotfy/skizze/sketches/count-min-log"
-	"github.com/seiflotfy/skizze/sketches/hllpp"
-	"github.com/seiflotfy/skizze/sketches/topk"
 	"github.com/seiflotfy/skizze/utils"
 )
 
@@ -62,13 +58,13 @@ func CreateSketch(info *datamodel.Info) (*SketchProxy, error) {
 
 	switch info.Type {
 	case datamodel.HLLPP:
-		sp.sketch, err = hllpp.NewSketch(info)
+		sp.sketch, err = NewHLLPPSketch(info)
 	case datamodel.CML:
-		sp.sketch, err = cml.NewSketch(info)
+		sp.sketch, err = NewCMLSketch(info)
 	case datamodel.TopK:
-		sp.sketch, err = topk.NewSketch(info)
+		sp.sketch, err = NewTopKSketch(info)
 	case datamodel.Bloom:
-		sp.sketch, err = bloom.NewSketch(info)
+		sp.sketch, err = NewBloomSketch(info)
 	default:
 		return nil, errors.New("Invalid sketch type: " + info.Type)
 	}
@@ -97,16 +93,16 @@ func LoadSketch(info *datamodel.Info, file *os.File) (*SketchProxy, error) {
 
 	switch info.Type {
 	case datamodel.HLLPP:
-		sp.sketch = &hllpp.Sketch{}
+		sp.sketch = &HLLPPSketch{}
 		err = sp.sketch.Unmarshal(info, data)
 	case datamodel.CML:
-		sp.sketch = &cml.Sketch{}
+		sp.sketch = &CMLSketch{}
 		err = sp.sketch.Unmarshal(info, data)
 	case datamodel.TopK:
-		sp.sketch = &topk.Sketch{}
+		sp.sketch = &TopKSketch{}
 		err = sp.sketch.Unmarshal(info, data)
 	case datamodel.Bloom:
-		sp.sketch = &bloom.Sketch{}
+		sp.sketch = &BloomSketch{}
 		err = sp.sketch.Unmarshal(info, data)
 	default:
 		//logger.Info.Println("Invalid sketch type", info.Type)

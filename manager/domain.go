@@ -83,6 +83,6 @@ func (m *domainManager) delete(id string) error {
 	return nil
 }
 
-func (m *domainManager) save(id string) error {
+func (m *domainManager) save() error {
 	return m.storage.SaveDomains(m.domains)
 }
