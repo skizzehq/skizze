@@ -52,14 +52,14 @@ func (m *sketchManager) load(info *datamodel.Info) error {
 	return nil
 }
 
-func (m *sketchManager) lock(info *datamodel.Info) error {
-	sketch, ok := m.sketches[info.ID()]
-	if ok {
-		return fmt.Errorf(`Sketch of type "%s" with name "%s" already loaded`,
-			info.Type, info.Name)
+func (m *sketchManager) setLockAll(b bool) {
+	for _, sketch := range m.sketches {
+		if b {
+			sketch.Lock()
+		} else {
+			sketch.Unlock()
+		}
 	}
-	sketch.Lock()
-	return nil
 }
 
 // CreateSketch ...

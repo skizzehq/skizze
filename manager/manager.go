@@ -31,27 +31,7 @@ func (m *Manager) saveSketch(info *datamodel.Info) error {
 	return m.sketches.save(info)
 }
 
-func (m *Manager) lockSketches() {
-	for _, v := range m.infos.info {
-		_ = m.sketches.lock(v)
-	}
-}
-
-// Save ...
-func (m *Manager) Save() error {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-
-	// 1) deep copy all sketches Info
-	infoCopy := m.infos.getCopy()
-	// 2) save DEFAULT SETTINGS
-	// TODO: save defaut settings
-	// 3) lock all sketches from being allowed to do ADD
-	m.lockSketches()
-	// 4) Clear AOF
-	// TODO: clear AOF
-
-	// 5) For each sketch
+func (m *Manager) saveSketches() {
 	var wg sync.WaitGroup
 	running := 0
 	for _, v := range m.infos.info {
@@ -65,7 +45,6 @@ func (m *Manager) Save() error {
 			// b) replay from AOF (SELECT * FROM ops WHERE sketchId = ?)
 			// TODO: Replay from AOF
 			// c) unlock sketch
-			v.Unlock()
 			wg.Done()
 		}(v)
 		// Just 4 at a time
@@ -74,9 +53,36 @@ func (m *Manager) Save() error {
 		}
 	}
 	wg.Wait()
+}
 
-	// 6) Save deep copied sketches info from previously
-	m.infos.save(infoCopy)
+func (m *Manager) setLockSketches(b bool) {
+	m.sketches.setLockAll(b)
+}
+
+// Save ...
+func (m *Manager) Save() error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	// 1) save DEFAULT SETTINGS
+	// TODO: save defaut settings
+
+	// 2) lock all sketches from being allowed to do ADD
+	m.setLockSketches(true)
+
+	// 3) Clear AOF
+	// TODO: clear AOF
+
+	// 4) Save deep copied sketches info from previously
+	m.infos.save()
+	m.domains.save()
+
+	// 5) For each sketch
+	m.saveSketches()
+
+	// 6) Unlock sketches
+	m.setLockSketches(false)
+
 	return nil
 }
 

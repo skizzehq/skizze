@@ -1,32 +1,32 @@
-package bloom
+package sketches
 
 import (
 	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/sketches/bloom/bloom"
+	"github.com/willf/bloom"
 )
 
 //var logger = utils.GetLogger()
 
 const defaultCapacity = 1000000
 
-// Sketch is the toplevel Sketch to control the count-min-log implementation
-type Sketch struct {
+// BloomSketch is the toplevel Sketch to control the count-min-log implementation
+type BloomSketch struct {
 	*datamodel.Info
-	impl *bloom.Filter
+	impl *bloom.BloomFilter
 }
 
-// NewSketch ...
-func NewSketch(info *datamodel.Info) (*Sketch, error) {
+// NewBloomSketch ...
+func NewBloomSketch(info *datamodel.Info) (*BloomSketch, error) {
 	if info.Properties.Capacity == 0 {
 		info.Properties.Capacity = defaultCapacity
 	}
 	sketch := bloom.New(uint(info.Properties.Capacity), 4)
-	d := Sketch{info, sketch}
+	d := BloomSketch{info, sketch}
 	return &d, nil
 }
 
 // Add ...
-func (d *Sketch) Add(values [][]byte) (bool, error) {
+func (d *BloomSketch) Add(values [][]byte) (bool, error) {
 	for _, value := range values {
 		d.impl.Add(value)
 	}
@@ -34,12 +34,12 @@ func (d *Sketch) Add(values [][]byte) (bool, error) {
 }
 
 // Marshal ...
-func (d *Sketch) Marshal() ([]byte, error) {
+func (d *BloomSketch) Marshal() ([]byte, error) {
 	return d.impl.GobEncode()
 }
 
 // Get ...
-func (d *Sketch) Get(data interface{}) (interface{}, error) {
+func (d *BloomSketch) Get(data interface{}) (interface{}, error) {
 	values := data.([][]byte)
 	res := make(map[string]bool)
 	for _, value := range values {
@@ -49,8 +49,8 @@ func (d *Sketch) Get(data interface{}) (interface{}, error) {
 }
 
 // Unmarshal ...
-func (d *Sketch) Unmarshal(info *datamodel.Info, data []byte) error {
-	sketch := &bloom.Filter{}
+func (d *BloomSketch) Unmarshal(info *datamodel.Info, data []byte) error {
+	sketch := &bloom.BloomFilter{}
 	err := sketch.GobDecode(data)
 
 	if err != nil {
