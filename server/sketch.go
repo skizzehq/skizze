@@ -107,3 +107,10 @@ func (s *serverStruct) GetRank(ctx context.Context, in *pb.GetRequest) (*pb.GetR
 	}
 	return reply, nil
 }
+
+func (s *serverStruct) DeleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Empty, error) {
+	info := pb.NewEmptyInfo()
+	info.Name = in.GetName()
+	info.Type = strings.ToLower(in.GetType().String())
+	return &pb.Empty{}, s.manager.DeleteSketch(info.ID())
+}
