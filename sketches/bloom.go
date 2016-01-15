@@ -41,9 +41,12 @@ func (d *BloomSketch) Marshal() ([]byte, error) {
 // Get ...
 func (d *BloomSketch) Get(data interface{}) (interface{}, error) {
 	values := data.([][]byte)
-	res := make(map[string]bool)
-	for _, value := range values {
-		res[string(value)] = d.impl.Test(value)
+	res := make([]*datamodel.Member, len(values), len(values))
+	for i, v := range values {
+		res[i] = &datamodel.Member{
+			Key:    string(v),
+			Member: d.impl.Test(v),
+		}
 	}
 	return res, nil
 }
@@ -51,9 +54,7 @@ func (d *BloomSketch) Get(data interface{}) (interface{}, error) {
 // Unmarshal ...
 func (d *BloomSketch) Unmarshal(info *datamodel.Info, data []byte) error {
 	sketch := &bloom.BloomFilter{}
-	err := sketch.GobDecode(data)
-
-	if err != nil {
+	if err := sketch.GobDecode(data); err != nil {
 		return err
 	}
 	d.Info = info

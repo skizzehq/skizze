@@ -96,7 +96,11 @@ func (m *sketchManager) save(id string) error {
 }
 
 func (m *sketchManager) add(id string, values []string) error {
-	if m.sketches[id].Locked() {
+	sketch, ok := m.sketches[id]
+	if !ok {
+		return fmt.Errorf(`Sketch "%s" does not exists`, id)
+	}
+	if sketch.Locked() {
 		// Append to File here
 		return nil //&lockedError{}
 	}
@@ -106,7 +110,7 @@ func (m *sketchManager) add(id string, values []string) error {
 		byts[i] = []byte(v)
 	}
 	// FIXME: return if adding was successful or not
-	_, err := m.sketches[id].Add(byts)
+	_, err := sketch.Add(byts)
 	return err
 }
 
@@ -123,7 +127,6 @@ func (m *sketchManager) get(id string, data interface{}) (interface{}, error) {
 	if data != nil {
 		values = data.([]string)
 	}
-
 	byts := make([][]byte, len(values), len(values))
 	for i, v := range values {
 		byts[i] = []byte(v)

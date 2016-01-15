@@ -420,13 +420,13 @@ func TestMembershipSaveLoad(t *testing.T) {
 
 	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "captian america", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
-	} else if len(res.(map[string]bool)) != 3 {
+	} else if len(res.([]*datamodel.Member)) != 3 {
 		t.Error("Expected len(res) = 3, got", len(res.(map[string]bool)))
-	} else if v, _ := res.(map[string]bool)["hulk"]; !v {
+	} else if v := res.([]*datamodel.Member)[0].Member; !v {
 		t.Error("Expected 'hulk' == true , got", v)
-	} else if v, _ := res.(map[string]bool)["captian america"]; v {
+	} else if v := res.([]*datamodel.Member)[1].Member; v {
 		t.Error("Expected 'captian america' == false , got", v)
-	} else if v, _ := res.(map[string]bool)["black widow"]; !v {
+	} else if v := res.([]*datamodel.Member)[2].Member; !v {
 		t.Error("Expected 'captian america' == true , got", v)
 	}
 
@@ -448,14 +448,14 @@ func TestMembershipSaveLoad(t *testing.T) {
 
 	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "captian america", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
-	} else if len(res.(map[string]bool)) != 3 {
+	} else if len(res.([]*datamodel.Member)) != 3 {
 		t.Error("Expected len(res) = 3, got", len(res.(map[string]bool)))
-	} else if v, _ := res.(map[string]bool)["hulk"]; !v {
+	} else if v := res.([]*datamodel.Member)[0].Member; !v {
 		t.Error("Expected 'hulk' == true , got", v)
-	} else if v, _ := res.(map[string]bool)["captian america"]; v {
+	} else if v := res.([]*datamodel.Member)[1].Member; v {
 		t.Error("Expected 'captian america' == false , got", v)
-	} else if v, _ := res.(map[string]bool)["black widow"]; v {
-		t.Error("Expected 'captian america' == false , got", v)
+	} else if v := res.([]*datamodel.Member)[2].Member; v {
+		t.Error("Expected 'captian america' == true , got", v)
 	}
 }
 

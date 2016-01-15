@@ -37,17 +37,18 @@ func (s *serverStruct) GetMembership(ctx context.Context, in *pb.GetRequest) (*p
 	sketch := in.GetSketch()
 	info := pb.NewEmptyInfo()
 	info.Name = sketch.GetName()
-	info.Type = strings.ToLower(in.GetSketch().GetType().String())
+	info.Type = strings.ToLower(pb.SketchType_MEMB.String())
 	res, err := s.manager.GetFromSketch(info.ID(), in.GetValues())
 	if err != nil {
 		return nil, err
 	}
 	reply := &pb.GetMembershipReply{}
+	values := res.([]*pb.Member)
 	// FIXME: return in same order
-	for k, v := range res.(map[string]bool) {
+	for _, v := range values {
 		reply.Memberships = append(reply.Memberships, &pb.Membership{
-			Value:    &k,
-			IsMember: &v,
+			Value:    proto.String(v.Key),
+			IsMember: proto.Bool(v.Member),
 		})
 	}
 	return reply, nil
@@ -57,7 +58,7 @@ func (s *serverStruct) GetFrequency(ctx context.Context, in *pb.GetRequest) (*pb
 	sketch := in.GetSketch()
 	info := pb.NewEmptyInfo()
 	info.Name = sketch.GetName()
-	info.Type = strings.ToLower(in.GetSketch().GetType().String())
+	info.Type = strings.ToLower(pb.SketchType_FREQ.String())
 	res, err := s.manager.GetFromSketch(info.ID(), in.GetValues())
 	if err != nil {
 		return nil, err
@@ -66,8 +67,8 @@ func (s *serverStruct) GetFrequency(ctx context.Context, in *pb.GetRequest) (*pb
 	// FIXME: return in same order
 	for k, v := range res.(map[string]uint) {
 		reply.Frequencies = append(reply.Frequencies, &pb.Frequency{
-			Value:     &k,
-			Frequency: proto.Int64(int64(v)),
+			Value: proto.String(k),
+			Count: proto.Int64(int64(v)),
 		})
 	}
 	return reply, nil
@@ -77,7 +78,7 @@ func (s *serverStruct) GetCardinality(ctx context.Context, in *pb.GetRequest) (*
 	sketch := in.GetSketch()
 	info := pb.NewEmptyInfo()
 	info.Name = sketch.GetName()
-	info.Type = strings.ToLower(in.GetSketch().GetType().String())
+	info.Type = strings.ToLower(pb.SketchType_CARD.String())
 	res, err := s.manager.GetFromSketch(info.ID(), in.GetValues())
 	if err != nil {
 		return nil, err
@@ -92,7 +93,7 @@ func (s *serverStruct) GetRank(ctx context.Context, in *pb.GetRequest) (*pb.GetR
 	sketch := in.GetSketch()
 	info := pb.NewEmptyInfo()
 	info.Name = sketch.GetName()
-	info.Type = strings.ToLower(in.GetSketch().GetType().String())
+	info.Type = strings.ToLower(pb.SketchType_RANK.String())
 	res, err := s.manager.GetFromSketch(info.ID(), in.GetValues())
 	if err != nil {
 		return nil, err
@@ -100,8 +101,8 @@ func (s *serverStruct) GetRank(ctx context.Context, in *pb.GetRequest) (*pb.GetR
 	reply := &pb.GetRankReply{}
 	for _, v := range res.([]*pb.Element) {
 		reply.Ranks = append(reply.Ranks, &pb.Rank{
-			Value: &v.Key,
-			Rank:  proto.Int64(int64(v.Count)),
+			Value: proto.String(v.Key),
+			Count: proto.Int64(int64(v.Count)),
 		})
 	}
 	return reply, nil

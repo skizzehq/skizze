@@ -8,13 +8,13 @@ import (
 
 var logger = utils.GetLogger()
 
-//CMLSketch is the toplevel Sketch to control the count-min-log implementation
+// CMLSketch is the toplevel Sketch to control the count-min-log implementation
 type CMLSketch struct {
 	*datamodel.Info
 	impl *cml.Sketch
 }
 
-//NewCMLSketch ...
+// NewCMLSketch ...
 func NewCMLSketch(info *datamodel.Info) (*CMLSketch, error) {
 	if info.Properties.Capacity == 0 {
 		info.Properties.Capacity = defaultCapacity
@@ -27,7 +27,7 @@ func NewCMLSketch(info *datamodel.Info) (*CMLSketch, error) {
 	return &d, nil
 }
 
-//Add ...
+// Add ...
 func (d *CMLSketch) Add(values [][]byte) (bool, error) {
 	success := true
 	for _, v := range values {
@@ -38,7 +38,7 @@ func (d *CMLSketch) Add(values [][]byte) (bool, error) {
 	return success, nil
 }
 
-//Get ...
+// Get ...
 func (d *CMLSketch) Get(data interface{}) (interface{}, error) {
 	values := data.([][]byte)
 	res := make(map[string]uint)
@@ -49,7 +49,7 @@ func (d *CMLSketch) Get(data interface{}) (interface{}, error) {
 	return res, nil
 }
 
-//Marshal ...
+// Marshal ...
 func (d *CMLSketch) Marshal() ([]byte, error) {
 	return d.impl.Marshal()
 }

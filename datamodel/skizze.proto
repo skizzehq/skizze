@@ -84,12 +84,12 @@ message Membership {
 
 message Frequency {
   required string value      = 1;
-  required int64  frequency  = 2;
+  required int64  count  = 2;
 }
 
 message Rank {
   required string value = 1;
-  required int64  rank  = 2;
+  required int64  count  = 2;
 }
 
 //

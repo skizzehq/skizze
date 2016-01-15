@@ -6,3 +6,9 @@ type Element struct {
 	Count int
 	Error int
 }
+
+// Member ...
+type Member struct {
+	Key    string
+	Member bool
+}
