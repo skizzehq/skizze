@@ -6,12 +6,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-func (s *serverStruct) List(ctx context.Context, in *pb.ListRequest) (*pb.ListReply, error) {
-	return nil, nil
-}
-func (s *serverStruct) ListAll(ctx context.Context, in *pb.Empty) (*pb.ListReply, error) {
-	return nil, nil
-}
 func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListDomainsReply, error) {
 	return nil, nil
 }
@@ -37,5 +31,8 @@ func (s *serverStruct) CreateSnapshot(ctx context.Context, in *pb.CreateSnapshot
 	return nil, nil
 }
 func (s *serverStruct) GetSnapshot(ctx context.Context, in *pb.GetSnapshotRequest) (*pb.GetSnapshotReply, error) {
+	return nil, nil
+}
+func (s *serverStruct) List(ctx context.Context, in *pb.ListRequest) (*pb.ListReply, error) {
 	return nil, nil
 }

@@ -114,3 +114,25 @@ func (s *serverStruct) DeleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Emp
 	info.Type = strings.ToLower(in.GetType().String())
 	return &pb.Empty{}, s.manager.DeleteSketch(info.ID())
 }
+
+func (s *serverStruct) ListAll(ctx context.Context, in *pb.Empty) (*pb.ListReply, error) {
+	sketches := s.manager.GetSketches()
+	filtered := &pb.ListReply{}
+	for _, v := range sketches {
+		typ := pb.SketchType_UNKNOWN
+		switch v[1] {
+		case pb.CML:
+			typ = pb.SketchType_FREQ
+		case pb.TopK:
+			typ = pb.SketchType_RANK
+		case pb.HLLPP:
+			typ = pb.SketchType_CARD
+		case pb.Bloom:
+			typ = pb.SketchType_MEMB
+		default:
+			continue
+		}
+		filtered.Sketches = append(filtered.Sketches, &pb.Sketch{Name: proto.String(v[0]), Type: &typ})
+	}
+	return filtered, nil
+}
