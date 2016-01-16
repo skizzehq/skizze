@@ -20,6 +20,7 @@ install:
  - go get github.com/gogo/protobuf/proto
  - go get google.golang.org/grpc
  - go get golang.org/x/net/context
+ - go get github.com/peterh/liner
 
 # before_script:
  - go vet ./...
