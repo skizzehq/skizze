@@ -8,6 +8,8 @@ import (
 	_ "net/http/pprof"
 
 	"github.com/seiflotfy/skizze/config"
+	"github.com/seiflotfy/skizze/manager"
+	"github.com/seiflotfy/skizze/server"
 	"github.com/seiflotfy/skizze/utils"
 )
 
@@ -28,4 +30,8 @@ func main() {
 	//server, err := server.New()
 	//utils.PanicOnError(err)
 	//server.Run()
+	mngr := manager.NewManager()
+	if p, err := strconv.Atoi(os.Getenv("SKIZZE_PORT")); err == nil {
+		server.Run(mngr, uint(p))
+	}
 }
