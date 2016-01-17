@@ -7,10 +7,10 @@ import (
 
 	_ "net/http/pprof"
 
-	"github.com/skizzehq/skizze/config"
-	"github.com/skizzehq/skizze/manager"
-	"github.com/skizzehq/skizze/server"
-	"github.com/skizzehq/skizze/utils"
+	"config"
+	"manager"
+	"server"
+	"utils"
 )
 
 var logger = utils.GetLogger()

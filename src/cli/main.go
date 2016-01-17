@@ -14,7 +14,8 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/peterh/liner"
-	pb "github.com/skizzehq/skizze/datamodel"
+
+	pb "datamodel"
 )
 
 var client pb.SkizzeClient

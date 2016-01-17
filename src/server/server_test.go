@@ -4,9 +4,10 @@ import (
 	"log"
 	"time"
 
-	pb "github.com/skizzehq/skizze/datamodel"
-	"github.com/skizzehq/skizze/manager"
 	"google.golang.org/grpc"
+
+	pb "datamodel"
+	"manager"
 )
 
 func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {

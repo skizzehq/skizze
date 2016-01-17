@@ -3,12 +3,12 @@ package server
 import (
 	"testing"
 
+	"github.com/gogo/protobuf/proto"
 	"golang.org/x/net/context"
 
-	"github.com/gogo/protobuf/proto"
-	"github.com/skizzehq/skizze/config"
-	pb "github.com/skizzehq/skizze/datamodel"
-	"github.com/skizzehq/skizze/utils"
+	"config"
+	pb "datamodel"
+	"utils"
 )
 
 func TestCreateSketch(t *testing.T) {

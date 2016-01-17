@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/skizzehq/skizze/config"
-	"github.com/skizzehq/skizze/datamodel"
-	"github.com/skizzehq/skizze/utils"
+	"config"
+	"datamodel"
+	"utils"
 )
 
 func TestSaveLoadInfo(t *testing.T) {

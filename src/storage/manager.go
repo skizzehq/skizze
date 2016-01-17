@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/boltdb/bolt"
-	"github.com/skizzehq/skizze/config"
-	"github.com/skizzehq/skizze/datamodel"
-	"github.com/skizzehq/skizze/utils"
+
+	"config"
+	"datamodel"
+	"utils"
 )
 
 // Manager the storage should deal with 2 types of on disk files, info and data

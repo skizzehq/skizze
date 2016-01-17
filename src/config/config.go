@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/skizzehq/skizze/utils"
-
 	"github.com/BurntSushi/toml"
+
+	"utils"
 )
 
 // Config stores all configuration parameters for Go
@@ -35,7 +35,7 @@ func parseConfigTOML() *Config {
 		utils.PanicOnError(err)
 		path, err = filepath.Abs(path)
 		utils.PanicOnError(err)
-		configPath = filepath.Join(path, "config/default.toml")
+		configPath = filepath.Join(path, "src/config/default.toml")
 	}
 	_, err := os.Open(configPath)
 	utils.PanicOnError(err)

@@ -3,10 +3,10 @@ package manager
 import (
 	"fmt"
 
-	"github.com/skizzehq/skizze/datamodel"
-	"github.com/skizzehq/skizze/sketches"
-	"github.com/skizzehq/skizze/storage"
-	"github.com/skizzehq/skizze/utils"
+	"datamodel"
+	"sketches"
+	"storage"
+	"utils"
 )
 
 type sketchManager struct {

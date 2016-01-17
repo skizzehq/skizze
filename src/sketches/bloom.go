@@ -1,8 +1,9 @@
 package sketches
 
 import (
-	"github.com/skizzehq/skizze/datamodel"
 	"github.com/willf/bloom"
+
+	"datamodel"
 )
 
 //var logger = utils.GetLogger()

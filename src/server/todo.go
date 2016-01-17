@@ -1,9 +1,9 @@
 package server
 
 import (
-	pb "github.com/skizzehq/skizze/datamodel"
-
 	"golang.org/x/net/context"
+
+	pb "datamodel"
 )
 
 func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListDomainsReply, error) {
