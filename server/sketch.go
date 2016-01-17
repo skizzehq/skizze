@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/gogo/protobuf/proto"
-	pb "github.com/seiflotfy/skizze/datamodel"
+	pb "github.com/skizzehq/skizze/datamodel"
 
 	"golang.org/x/net/context"
 )

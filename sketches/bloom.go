@@ -1,7 +1,7 @@
 package sketches
 
 import (
-	"github.com/seiflotfy/skizze/datamodel"
+	"github.com/skizzehq/skizze/datamodel"
 	"github.com/willf/bloom"
 )
 

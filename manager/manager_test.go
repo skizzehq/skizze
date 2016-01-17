@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/seiflotfy/skizze/config"
-	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/utils"
+	"github.com/skizzehq/skizze/config"
+	"github.com/skizzehq/skizze/datamodel"
+	"github.com/skizzehq/skizze/utils"
 )
 
 func TestNoSketches(t *testing.T) {

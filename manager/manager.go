@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/seiflotfy/skizze/config"
-	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/storage"
-	"github.com/seiflotfy/skizze/utils"
+	"github.com/skizzehq/skizze/config"
+	"github.com/skizzehq/skizze/datamodel"
+	"github.com/skizzehq/skizze/storage"
+	"github.com/skizzehq/skizze/utils"
 )
 
 func isValidType(info *datamodel.Info) bool {

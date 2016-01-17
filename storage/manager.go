@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/boltdb/bolt"
-	"github.com/seiflotfy/skizze/config"
-	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/utils"
+	"github.com/skizzehq/skizze/config"
+	"github.com/skizzehq/skizze/datamodel"
+	"github.com/skizzehq/skizze/utils"
 )
 
 // Manager the storage should deal with 2 types of on disk files, info and data

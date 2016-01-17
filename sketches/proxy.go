@@ -6,8 +6,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/utils"
+	"github.com/skizzehq/skizze/datamodel"
+	"github.com/skizzehq/skizze/utils"
 )
 
 // SketchProxy ...

@@ -2,7 +2,7 @@ package sketches
 
 import (
 	"github.com/retailnext/hllpp"
-	"github.com/seiflotfy/skizze/datamodel"
+	"github.com/skizzehq/skizze/datamodel"
 )
 
 //var logger = utils.GetLogger()

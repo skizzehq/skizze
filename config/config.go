@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/seiflotfy/skizze/utils"
+	"github.com/skizzehq/skizze/utils"
 
 	"github.com/BurntSushi/toml"
 )

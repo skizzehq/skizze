@@ -14,7 +14,7 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/peterh/liner"
-	pb "github.com/seiflotfy/skizze/datamodel"
+	pb "github.com/skizzehq/skizze/datamodel"
 )
 
 var client pb.SkizzeClient
@@ -79,6 +79,18 @@ func sendCreateSketchRequest(fields []string, in *pb.Sketch) error {
 	return err
 }
 
+func sendAddSketchRequest(fields []string, in *pb.Sketch) error {
+	if len(fields) < 4 {
+		return fmt.Errorf("Expected at least 4 values, got %q", len(fields))
+	}
+	addRequest := &pb.AddRequest{
+		Sketch: in,
+		Values: fields[2:],
+	}
+	_, err := client.Add(context.Background(), addRequest)
+	return err
+}
+
 func sendSketchRequest(fields []string, typ pb.SketchType) error {
 	name := fields[2]
 	in := &pb.Sketch{
@@ -92,6 +104,7 @@ func sendSketchRequest(fields []string, typ pb.SketchType) error {
 	case "info":
 	case "destroy":
 	case "add":
+		return sendAddSketchRequest(fields, in)
 	default:
 		return fmt.Errorf("unkown operation: %s", fields[1])
 	}

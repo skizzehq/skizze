@@ -2,8 +2,8 @@ package sketches
 
 import (
 	"github.com/seiflotfy/count-min-log"
-	"github.com/seiflotfy/skizze/datamodel"
-	"github.com/seiflotfy/skizze/utils"
+	"github.com/skizzehq/skizze/datamodel"
+	"github.com/skizzehq/skizze/utils"
 )
 
 var logger = utils.GetLogger()
