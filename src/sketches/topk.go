@@ -71,7 +71,7 @@ func (d *TopKSketch) Unmarshal(info *datamodel.Info, data []byte) error {
 	var network bytes.Buffer //  Stand-in for a network connection
 	_, err := network.Write(data)
 	if err != nil {
-		logger.Error.Println("an error has occurred while loading sketch from data: " + err.Error())
+		logger.Errorf("an error has occurred while loading sketch from data: " + err.Error())
 		return err
 	}
 	dec := gob.NewDecoder(&network) //  Will read from network.

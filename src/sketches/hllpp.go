@@ -6,8 +6,6 @@ import (
 	"datamodel"
 )
 
-//var logger = utils.GetLogger()
-
 // HLLPPSketch is the toplevel sketch to control the HLL implementation
 type HLLPPSketch struct {
 	*datamodel.Info
