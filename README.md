@@ -25,8 +25,8 @@ Skizze is a (fire and forget) service that provides a probabilistic data structu
 ## How to build and install
 
 ```
-go build && go install
-skizze
+make dist
+./bin/skizze
 ```
 
 ## Example usage:
