@@ -3,8 +3,8 @@ package sketches
 import (
 	"testing"
 
-	"github.com/skizzehq/skizze/datamodel"
-	"github.com/skizzehq/skizze/utils"
+	"datamodel"
+	"utils"
 )
 
 func TestAdd(t *testing.T) {

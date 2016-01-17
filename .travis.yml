@@ -3,27 +3,11 @@ go:
  - 1.5
 
 install:
- - go get github.com/hashicorp/golang-lru
- - go get github.com/BurntSushi/toml
- - go get code.google.com/p/gofarmhash
- - go get github.com/boltdb/bolt
- - go get github.com/facebookgo/httpdown
- - go get github.com/facebookgo/grace/gracehttp
- - go get github.com/dgryski/go-farm
- - go get github.com/lazybeaver/xorshift
- - go get github.com/dgryski/go-pcgr
- - go get github.com/willf/bitset
- - go get github.com/willf/bloom
- - go get github.com/retailnext/hllpp
- - go get github.com/skizzehq/count-min-log
- - go get github.com/dgryski/go-topk
- - go get github.com/gogo/protobuf/proto
- - go get google.golang.org/grpc
- - go get golang.org/x/net/context
- - go get github.com/peterh/liner
+ - go get github.com/constabulary/gb/...
 
 # before_script:
- - go vet ./...
+ - gb vendor restore
+ - go build
 
 script:
- - go test -v ./...
+ - gb test -v

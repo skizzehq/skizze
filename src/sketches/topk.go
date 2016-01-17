@@ -5,7 +5,8 @@ import (
 	"encoding/gob"
 
 	"github.com/dgryski/go-topk"
-	"github.com/skizzehq/skizze/datamodel"
+
+	"datamodel"
 )
 
 const defaultRank = 100.0
