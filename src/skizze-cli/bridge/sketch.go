@@ -7,8 +7,9 @@ import (
 
 	"golang.org/x/net/context"
 
+	pb "datamodel"
+
 	"github.com/gogo/protobuf/proto"
-	pb "github.com/skizzehq/skizze/datamodel"
 )
 
 func createSketch(fields []string, in *pb.Sketch) error {

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gogo/protobuf/proto"
@@ -26,7 +25,6 @@ func (s *serverStruct) CreateSketch(ctx context.Context, in *pb.Sketch) (*pb.Ske
 func (s *serverStruct) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddReply, error) {
 	info := pb.NewEmptyInfo()
 	if dom := in.GetDomain(); dom != nil {
-		fmt.Println(dom)
 		info.Name = dom.GetName()
 		info.Type = pb.DOM
 		err := s.manager.AddToDomain(info.Name, in.GetValues())

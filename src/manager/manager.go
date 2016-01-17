@@ -143,15 +143,12 @@ func (m *Manager) CreateSketch(info *datamodel.Info) error {
 // CreateDomain ...
 func (m *Manager) CreateDomain(info *datamodel.Info) error {
 	types := datamodel.GetTypes()
-	fmt.Println(types)
 	infos := make(map[string]*datamodel.Info)
 	for _, typ := range types {
 		tmpInfo := datamodel.Info(*info)
 		tmpInfo.Type = typ
 		infos[tmpInfo.ID()] = &tmpInfo
 	}
-	fmt.Println(infos)
-	fmt.Println("=====")
 	return m.domains.create(info.Name, infos)
 }
 

@@ -9,8 +9,9 @@ import (
 
 	"google.golang.org/grpc"
 
+	pb "datamodel"
+
 	"github.com/peterh/liner"
-	pb "github.com/skizzehq/skizze/datamodel"
 )
 
 var client pb.SkizzeClient

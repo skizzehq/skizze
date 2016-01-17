@@ -66,7 +66,6 @@ func (m *domainManager) create(id string, infos map[string]*datamodel.Info) erro
 		return fmt.Errorf("Not enough sketches")
 	}
 	m.domains[id] = ids
-	fmt.Println(m.domains)
 	return nil
 }
 
@@ -93,7 +92,6 @@ func (m *domainManager) save() error {
 
 func (m *domainManager) add(id string, values []string) error {
 	sketches, ok := m.domains[id]
-	fmt.Println(sketches)
 	if !ok {
 		return fmt.Errorf(`Domain "%s" does not exists`, id)
 	}

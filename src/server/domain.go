@@ -1,7 +1,8 @@
 package server
 
 import (
-	pb "github.com/skizzehq/skizze/datamodel"
+	pb "datamodel"
+
 	"golang.org/x/net/context"
 )
 
