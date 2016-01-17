@@ -69,6 +69,7 @@ message Domain {
   required string     name     = 1;
   required DomainType type     = 2;
   repeated Sketch     sketches = 3;
+  optional Defaults   defaults = 4;
 }
 
 message Sketch {
