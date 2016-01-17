@@ -1,11 +1,17 @@
 package utils
 
-import "os"
+import (
+	"os"
+
+	"github.com/njpatel/loggo"
+)
+
+var logger = loggo.GetLogger("util")
 
 // PanicOnError is a helper function to panic on Error
 func PanicOnError(err error) {
 	if err != nil {
-		logger.Error.Println(err)
+		logger.Errorf("%v", err)
 		panic(err)
 	}
 }

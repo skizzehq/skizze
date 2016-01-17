@@ -6,8 +6,6 @@ import (
 	"datamodel"
 )
 
-//var logger = utils.GetLogger()
-
 const defaultCapacity = 1000000
 
 // BloomSketch is the toplevel Sketch to control the count-min-log implementation

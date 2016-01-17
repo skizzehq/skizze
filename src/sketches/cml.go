@@ -4,10 +4,7 @@ import (
 	"github.com/seiflotfy/count-min-log"
 
 	"datamodel"
-	"utils"
 )
-
-var logger = utils.GetLogger()
 
 // CMLSketch is the toplevel Sketch to control the count-min-log implementation
 type CMLSketch struct {
@@ -23,7 +20,7 @@ func NewCMLSketch(info *datamodel.Info) (*CMLSketch, error) {
 	sketch, err := cml.NewForCapacity16(uint64(info.Properties.Capacity), 0.01)
 	d := CMLSketch{info, sketch}
 	if err != nil {
-		logger.Error.Printf("an error has occurred while saving CMLSketch: %s", err.Error())
+		logger.Errorf("an error has occurred while saving CMLSketch: %s", err.Error())
 	}
 	return &d, nil
 }

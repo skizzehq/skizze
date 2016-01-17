@@ -32,6 +32,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/fatih/color",
+			"repository": "https://github.com/fatih/color",
+			"revision": "9aae6aaa22315390f03959adca2c4d395b02fcef",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/gogo/protobuf/proto",
 			"repository": "https://github.com/gogo/protobuf",
 			"revision": "c57e439bad574c2e0877ff18d514badcfced004d",
@@ -66,6 +72,30 @@
 			"path": "/proto/testdata"
 		},
 		{
+			"importpath": "github.com/juju/loggo",
+			"repository": "https://github.com/juju/loggo",
+			"revision": "8477fc936adf0e382d680310047ca27e128a309a",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/mattn/go-colorable",
+			"repository": "https://github.com/mattn/go-colorable",
+			"revision": "3dac7b4f76f6e17fb39b768b89e3783d16e237fe",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/mattn/go-isatty",
+			"repository": "https://github.com/mattn/go-isatty",
+			"revision": "56b76bdf51f7708750eac80fa38b952bb9f32639",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/njpatel/loggo",
+			"repository": "https://github.com/njpatel/loggo",
+			"revision": "5f24b0ca9bb52d28c4b215550d34e688d0ee2f3d",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/peterh/liner",
 			"repository": "https://github.com/peterh/liner",
 			"revision": "d5e5aeeb67ca5aeeddeb0b6c3af05421ff63a0b6",
@@ -94,6 +124,13 @@
 			"repository": "https://github.com/willf/bloom",
 			"revision": "73320a6e73f3e139842058d7e4886e09ca83ac9b",
 			"branch": "master"
+		},
+		{
+			"importpath": "golang.org/x/crypto/ssh/terminal",
+			"repository": "https://go.googlesource.com/crypto",
+			"revision": "3760e016850398b85094c4c99e955b8c3dea5711",
+			"branch": "master",
+			"path": "/ssh/terminal"
 		},
 		{
 			"importpath": "golang.org/x/net/context",

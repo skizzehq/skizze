@@ -6,9 +6,13 @@ import (
 	"os"
 	"sync"
 
+	"github.com/njpatel/loggo"
+
 	"datamodel"
 	"utils"
 )
+
+var logger = loggo.GetLogger("sketches")
 
 // SketchProxy ...
 type SketchProxy struct {
@@ -105,7 +109,7 @@ func LoadSketch(info *datamodel.Info, file *os.File) (*SketchProxy, error) {
 		sp.sketch = &BloomSketch{}
 		err = sp.sketch.Unmarshal(info, data)
 	default:
-		//logger.Info.Println("Invalid sketch type", info.Type)
+		logger.Warningf("Invalid sketch type", info.Type)
 	}
 	if err != nil {
 		return nil, err

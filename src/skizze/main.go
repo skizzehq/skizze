@@ -7,13 +7,20 @@ import (
 
 	_ "net/http/pprof"
 
+	"github.com/njpatel/loggo"
+	"golang.org/x/crypto/ssh/terminal"
+
 	"config"
 	"manager"
 	"server"
 	"utils"
 )
 
-var logger = utils.GetLogger()
+var logger = loggo.GetLogger("skizze")
+
+func init() {
+	setupLoggers()
+}
 
 func main() {
 	var port uint
@@ -25,8 +32,8 @@ func main() {
 	err := os.Setenv("SKIZZE_PORT", strconv.Itoa(int(port)))
 	utils.PanicOnError(err)
 
-	logger.Info.Println("Starting Skizze...")
-	logger.Info.Println("Using data dir: ", config.GetConfig().DataDir)
+	logger.Infof("Starting Skizze...")
+	logger.Infof("Using data dir: ", config.GetConfig().DataDir)
 	//server, err := server.New()
 	//utils.PanicOnError(err)
 	//server.Run()
@@ -34,4 +41,23 @@ func main() {
 	if p, err := strconv.Atoi(os.Getenv("SKIZZE_PORT")); err == nil {
 		server.Run(mngr, uint(p))
 	}
+}
+
+func setupLoggers() {
+	loggerSpec := os.Getenv("SKIZZE_DEBUG")
+
+	// Setup logging and such things if we're running in a term
+	if terminal.IsTerminal(int(os.Stdout.Fd())) {
+		if loggerSpec == "" {
+			loggerSpec = "<root>=DEBUG"
+		}
+		// As we're in a terminal, let's make the output a little nicer
+		loggo.ReplaceDefaultWriter(loggo.NewSimpleWriter(os.Stderr, &loggo.ColorFormatter{}))
+	} else {
+		if loggerSpec == "" {
+			loggerSpec = "<root>=WARNING"
+		}
+	}
+
+	loggo.ConfigureLoggers(loggerSpec)
 }
