@@ -1,62 +1,135 @@
-# Counts
-A domain-counter data store
+<img src="http://i.imgur.com/9z47NdA.png" align="center" height="190" width="600">
+<br>
+
+
+
+[![Build Status](https://travis-ci.org/skizzehq/skizze.svg?branch=master)](https://travis-ci.org/skizzehq/skizze) [![license](http://img.shields.io/badge/license-Apache-blue.svg)](https://raw.githubusercontent.com/skizzehq/skizze/master/LICENSE) [![Join the chat at https://gitter.im/seiflotfy/skizze](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/skizzehq/skizze?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+Skizze ([ˈskɪt͡sə]: german for sketch) is a sketch data store to deal with all problems around counting and sketching using probabilistic data-structures.
+
+Unlike a Key-Value store, Skizze does not store values, but rather appends values to defined sketches, allowing one to solve frequency and cardinality queries in near O(1) time, with minimal memory footprint.
+
+<b> Current status ==> pre-Alpha </b>
 
 ## Motivation
 
-From [Synopses for Massive Data: Samples, Histograms, Wavelets, Sketches](http://db.cs.berkeley.edu/cs286/papers/synopses-fntdb2012.pdf)
-By Graham Cormode, Minos Garofalakis, Peter J. Haas and Chris Jermaine
+[![Join the chat at https://gitter.im/skizzehq/skizze](https://badges.gitter.im/skizzehq/skizze.svg)](https://gitter.im/skizzehq/skizze?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-#####The Need for Synopses
-The use of synopses is essential for managing the massive data that arises in modern information management scenarios. When handling large datasets, from gigabytes to petabytes in size, it is often impractical to operate on them in full. Instead, it is much more convenient to build a synopsis, and then use this synopsis to analyze the data. This approach captures a variety of use-cases:
+Statistical analysis and mining of huge multi-terabyte data sets is a common task nowadays, especially in areas like web analytics and Internet advertising. Analysis of such large data sets often requires powerful distributed data stores like Hadoop and heavy data processing with techniques like MapReduce. This approach often leads to heavyweight high-latency analytical processes and poor applicability to realtime use cases. On the other hand, when one is interested only in simple additive metrics like total page views or average price of conversion, it is obvious that raw data can be efficiently summarized, for example, on a daily basis or using simple in-stream counters.  Computation of more advanced metrics like a number of unique visitor or most frequent items is more challenging and requires a lot of resources if implemented straightforwardly.
 
-* A search engine collects logs of every search made, amounting to billions of queries every day. It would be too slow, and energy-intensive, to look for trends and patterns on the full data. Instead, it is preferable to use a synopsis that is guaranteed to preserve most of the as-yet undiscovered patterns in the data.
-* A team of analysts for a retail chain would like to study the impact of different promotions and pricing strategies on sales of different items. It is not cost-effective to give each analyst the resources needed to study the national sales data in full, but by working with synopses of the data, each analyst can perform their explorations on their own laptops.
-* A large cellphone provider wants to track the health of its network by studying statistics of calls made in different regions, on hardware from different manufacturers, under different levels of contention, and so on. The volume of information is too large to retain in a database, but instead the provider can build a synopsis of the data as it is observed live, and then use the synopsis off-line for further analysis.
+Skizze is a (fire and forget) service that provides a probabilistic data structures (sketches) storage that allows estimation of these and many other metrics, with a trade off in precision of the estimations for the memory consumption. These data structures can be used both as temporary data accumulators in query processing procedures and, perhaps more important, as a compact – sometimes astonishingly compact – replacement of raw data in stream-based computing.
 
-These examples expose a variety of settings. The full data may reside in a traditional data warehouse, where it is indexed and accessible, but is too costly to work on in full. In other cases, the data is stored as flat files in a distributed file system; or it may never be stored in full, but be accessible only as it is observed in a streaming fashion. Sometimes synopsis construction is a one-time process, and sometimes we need to update the synopsis as the base data is modified or as accuracy requirements change. In all cases though, being able to construct a high quality synopsis enables much faster and more scalable data analysis.
+## Example use cases (queries)?
+* How many distinct elements are in the data set (i.e. what is the cardinality of the data set)?
+* What are the most frequent elements (the terms “heavy hitters” and “top-k elements” are also used)?
+* What are the frequencies of the most frequent elements?
+* How many elements belong to the specified range (range query, in SQL it looks like `SELECT count(v) WHERE v >= c1 AND v < c2)?`
+* Does the data set contain a particular element (membership query)?
 
+## How to build and install
 
-## Other example problems?
-* Is this URI in my spam list? (spam list over a million entries)
-* How many users like my post? (a like being subject to change)
-* How may times did oliver watch this video? (counting frequencies)
-* How many unique users visited my website in the last 3 hours? (sliding hyperloglog)
+```
+make dist
+./bin/skizze
+```
 
+## Example usage:
 
-## API-Documentation
+```
+./bin/skizze-cli
+```
 
-	GET	/
-	Lists all available counters.
+**Create** a new Domain (Collection of Sketches):
+```{r, engine='bash', count_lines}
+#CREATE DOM $name $estCardinality $topk
+CREATE DOM demostream 10000000 100
+```
 
-	MERGE	/
-	Merges multiple HyperLogLog counters.
+**Add** values to the domain:
+```{r, engine='bash', count_lines}
+#ADD DOM $name $value1, $value2 ....
+ADD DOM demostream zod joker grod zod zod grod
+```
 
-	POST	/<key>
-	Creates a new Counter.
+**Get** the *cardinality* of the domain:
+```{r, engine='bash', count_lines}
+# GET CARD $name
+GET CARD demostream
 
-	GET	/<key>
-	Returns the count/cardinality of a counter.
+# returns:
+# Cardinality: 9
+```
 
-	PUT	/<key>
-	Updates a counter.
-	Adds values to a cardinality/counter or increments a counter.
+**Get** the *rankings* of the domain:
+```{r, engine='bash', count_lines}
+# GET RANK $name
+GET RANK demostream
 
-	PURGE	/<key>
-	Purges values from a counter.
+# returns:
+# Rank: 1	  Value: zod	  Hits: 3
+# Rank: 2	  Value: grod	  Hits: 2
+# Rank: 3	  Value: joker	  Hits: 1
+```
 
-	DELETE	/<key>
-	Deletes a counter.
+**Get** the *frequencies* of values in the domain:
+```{r, engine='bash', count_lines}
+# GET FREQ $name $value1 $value2 ...
+GET FREQ demostream zod joker batman grod
 
+# returns
+# Value: zod	  Hits: 3
+# Value: joker	  Hits: 1
+# Value: batman	  Hits: 0
+# Value: grod	  Hits: 2
+```
 
-## TODO
-- [x] Design and implement REST API
-- [x] Create counter manager
-- [x] Integrate UniqueIncremental Counter (Hyperloglog++)
-- [x] Integrate Unique (CuckooFilter and possibly play with the idea of CuckooLogLog)
-- [ ] Integrate UniqueFrequency Counter (minCount)
-- [ ] Integrate UniqueIncrementalExpiring (Sliding Hyperloglog)
-- [ ] Integrate Free (Just a plain +1 and -1 Counter)
-- [ ] Store to Disk
-- [ ] Replication on multiple servers
-- [ ] Expand `GET /` API so counters can be filtered using query params
-- [ ] Add pagination to `GET /` API
+**Get** the *membership* of values in the domain:
+```{r, engine='bash', count_lines}
+# GET MEMB $name $value1 $value2 ...
+GET MEMB demostream zod joker batman grod
+
+# returns
+# Value: zod	  Member: true
+# Value: joker	  Member: true
+# Value: batman	  Member: false
+# Value: grod	  Member: true
+```
+
+**List** all available sketches (created by domains):
+```{r, engine='bash', count_lines}
+LIST
+
+# returns
+# Name: demostream  Type: CARD
+# Name: demostream  Type: FREQ
+# Name: demostream  Type: MEMB
+# Name: demostream  Type: RANK
+```
+
+**Create** a new sketch of type $type (CARD, MEMB, FREQ or RANK):
+```{r, engine='bash', count_lines}
+# CREATE CARD $name
+CREATE CARD demosketch
+```
+
+**Add** values to the sketch of type $type (CARD, MEMB, FREQ or RANK):
+```{r, engine='bash', count_lines}
+#ADD $type $name $value1, $value2 ....
+ADD CARD demostream zod joker grod zod zod grod
+```
+
+## In Progress:
+### More REPL
+* [x] Redesign data-structures main interface
+* [x] Add new domains model
+* [x] Add snapshotting
+* [ ] Add AOF
+* [ ] Add gRPC API
+* [ ] Add REPL
+  * [ ] DELETE DOM $name 							# delete domain and all its sketches
+  * [ ] DELETE $type $name 						# delete a sketch of $type CARD, MEMB, FREQ, RANK and $name
+  * [ ] ATTACH DOM $domName $sketchName $type 	# attach sketch $sketchName $type to $domName
+  * [ ] LIST DOM 									# list all domains
+  * [ ] SAVE 										# Explicityly save state of all domains and sketches
+* [ ] New Docs
+* [x] Clean up
