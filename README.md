@@ -1,4 +1,7 @@
-![Skizze](http://i.imgur.com/9z47NdA.png)
+<img src="http://i.imgur.com/9z47NdA.png" align="center" height="190" width="600">
+<br>
+
+
 
 [![Build Status](https://travis-ci.org/seiflotfy/skizze.svg?branch=master)](https://travis-ci.org/seiflotfy/skizze) [![license](http://img.shields.io/badge/license-Apache-blue.svg)](https://raw.githubusercontent.com/seiflotfy/skizze/master/LICENSE) [![Join the chat at https://gitter.im/seiflotfy/skizze](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/seiflotfy/skizze?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
