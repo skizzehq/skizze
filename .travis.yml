@@ -1,23 +1,13 @@
 language: go
 go:
  - 1.5
- - release
- - tip
 
 install:
- - go get github.com/hashicorp/golang-lru
- - go get github.com/BurntSushi/toml
- - go get code.google.com/p/gofarmhash
- - go get github.com/boltdb/bolt
- - go get github.com/facebookgo/httpdown
- - go get github.com/facebookgo/grace/gracehttp
- - go get github.com/dgryski/go-farm
- - go get github.com/lazybeaver/xorshift
- - go get github.com/dgryski/go-pcgr
- - go get github.com/willf/bitset
+ - go get github.com/constabulary/gb/...
 
 # before_script:
-#   - go vet ./...
+ - gb vendor restore
+ - go build
 
 script:
- - go test -v ./...
+ - gb test -v

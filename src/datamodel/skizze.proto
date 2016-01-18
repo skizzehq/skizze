@@ -1,0 +1,160 @@
+syntax = "proto2";
+
+package datamodel;
+
+service Skizze {
+  rpc CreateSnapshot (CreateSnapshotRequest) returns (CreateSnapshotReply) {}
+  rpc GetSnapshot (GetSnapshotRequest) returns (GetSnapshotReply) {}
+
+  rpc List (ListRequest) returns (ListReply) {}
+  rpc ListAll (Empty) returns (ListReply) {}
+  rpc ListDomains (Empty) returns (ListDomainsReply) {}
+
+  rpc SetDefaults (Defaults) returns (Defaults) {}
+  rpc GetDefaults (Empty) returns (Defaults) {}
+
+  rpc CreateDomain (Domain) returns (Domain) {}
+  rpc DeleteDomain (Domain) returns (Empty) {}
+  rpc GetDomain (Domain) returns (Domain) {}
+
+  rpc CreateSketch(Sketch) returns (Sketch) {}
+  rpc DeleteSketch(Sketch) returns (Empty) {}
+  rpc GetSketch(Sketch) returns (Sketch) {}
+
+  rpc Add (AddRequest) returns (AddReply) {}
+
+  rpc GetMembership (GetRequest) returns (GetMembershipReply) {}
+  rpc GetFrequency (GetRequest) returns (GetFrequencyReply) {}
+  rpc GetCardinality (GetRequest) returns (GetCardinalityReply) {}
+  rpc GetRank (GetRequest) returns (GetRankReply) {}
+}
+
+
+//
+// Enums
+//
+enum SketchType {
+  UNKNOWN = 0;
+
+  MEMB = 1;
+  FREQ = 2;
+  RANK = 3;
+  CARD = 4;
+}
+
+enum DomainType {
+  STRING = 0;
+}
+
+enum SnapshotStatus {
+  PENDING     = 0;
+  IN_PROGRESS = 1;
+  SUCCESSFUL  = 2;
+  FAILED      = 3;
+}
+
+
+//
+// Generic Structures
+//
+message Empty {
+}
+
+message Defaults {
+  required int64 rank     = 1;
+  required int64 capacity = 2;
+}
+
+message Domain {
+  required string     name     = 1;
+  required DomainType type     = 2;
+  repeated Sketch     sketches = 3;
+  optional Defaults   defaults = 4;
+}
+
+message Sketch {
+  required string     name     = 1;
+  required SketchType type     = 2;
+  optional Defaults   defaults = 3;
+}
+
+message Membership {
+  required string value    = 1;
+  required bool   isMember = 2;
+}
+
+message Frequency {
+  required string value      = 1;
+  required int64  count  = 2;
+}
+
+message Rank {
+  required string value = 1;
+  required int64  count  = 2;
+}
+
+//
+// Request/Reply Envelopes
+// 
+
+// Right now empty but in the future can request specific snapshot location
+// (e.g. S3 or disk) and snapshot options
+message CreateSnapshotRequest {
+}
+
+message CreateSnapshotReply {
+  required SnapshotStatus status        = 1;
+  optional string         statusMessage = 2;
+}
+
+// Empty for now, future can send in id of specific snapshot
+message GetSnapshotRequest {
+}
+
+message GetSnapshotReply {
+  required SnapshotStatus status        = 1;
+  optional string         statusMessage = 2;
+  optional int64          timestamp     = 3;
+}
+
+message ListRequest {
+  required SketchType type = 1;
+}
+
+message ListReply {
+  repeated Sketch sketches = 1;
+}
+
+message ListDomainsReply {
+  repeated string name = 1;
+}
+
+message AddRequest {
+  optional Domain domain = 1;
+  optional Sketch sketch = 2;
+  repeated string values = 3;
+}
+
+message AddReply {
+}
+
+message GetRequest {
+  required Sketch sketch = 1;
+  repeated string values = 2;
+}
+
+message GetMembershipReply {
+  repeated Membership memberships = 1;
+}
+
+message GetFrequencyReply {
+  repeated Frequency frequencies = 2;
+}
+
+message GetCardinalityReply {
+  required int64 cardinality = 1;
+}
+
+message GetRankReply {
+  repeated Rank ranks = 1;
+}

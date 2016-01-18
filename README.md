@@ -24,58 +24,107 @@ Skizze is a (fire and forget) service that provides a probabilistic data structu
 ## How to build and install
 
 ```
-go build && go install
-skizze
+make dist
+./bin/skizze
 ```
 
 ## Example usage:
 
-**Creating** a new empty sketch of type HyperLogLog++ (card) with the id "sketch_1":
+```
+./bin/skizze-cli
+```
+
+**Create** a new Domain (Collection of Sketches):
 ```{r, engine='bash', count_lines}
-curl -XPOST http://localhost:3596/card/sketch_1
+#CREATE DOM $name $estCardinality $topk
+CREATE DOM demostream 10000000 100
 ```
 
-
-**Adding** values to the sketch with id "sketch_1":
+**Add** values to the domain:
 ```{r, engine='bash', count_lines}
-curl -XPUT http://localhost:3596/card/sketch_1 -d '{
-  "values": ["image", "rick grimes"]
-}'
+#ADD DOM $name $value1, $value2 ....
+ADD DOM demostream zod joker grod zod zod grod
 ```
 
-
-**Retrieving** the cardinality of "sketch_1":
+**Get** the *cardinality* of the domain:
 ```{r, engine='bash', count_lines}
-curl -XGET http://localhost:3596/card/sketch_1
-```
-returns
-```json
-{
-  "result":2,
-  "error":null
-}
+# GET CARD $name
+GET CARD demostream
+
+# returns:
+# Cardinality: 9
 ```
 
-**Listing** all available sketches:
+**Get** the *rankings* of the domain:
 ```{r, engine='bash', count_lines}
-curl -XGET http://localhost:3596
-```
-returns
-```json
-{
-  "result":[
-    "card/sketch_1"
-  ],
-  "error":null
-}
+# GET RANK $name
+GET RANK demostream
+
+# returns:
+# Rank: 1	  Value: zod	  Hits: 3
+# Rank: 2	  Value: grod	  Hits: 2
+# Rank: 3	  Value: joker	  Hits: 1
 ```
 
-**Deleting** the sketch of type "card" with id "sketch_1":
+**Get** the *frequencies* of values in the domain:
 ```{r, engine='bash', count_lines}
-curl -XDELETE http://localhost:3596/card/sketch_1
+# GET FREQ $name $value1 $value2 ...
+GET FREQ demostream zod joker batman grod
+
+# returns
+# Value: zod	  Hits: 3
+# Value: joker	  Hits: 1
+# Value: batman	  Hits: 0
+# Value: grod	  Hits: 2
 ```
 
+**Get** the *membership* of values in the domain:
+```{r, engine='bash', count_lines}
+# GET MEMB $name $value1 $value2 ...
+GET MEMB demostream zod joker batman grod
 
-## API
+# returns
+# Value: zod	  Member: true
+# Value: joker	  Member: true
+# Value: batman	  Member: false
+# Value: grod	  Member: true
+```
 
-See [API](docs/API.md)
+**List** all available sketches (created by domains):
+```{r, engine='bash', count_lines}
+LIST
+
+# returns
+# Name: demostream  Type: CARD
+# Name: demostream  Type: FREQ
+# Name: demostream  Type: MEMB
+# Name: demostream  Type: RANK
+```
+
+**Create** a new sketch of type $type (CARD, MEMB, FREQ or RANK):
+```{r, engine='bash', count_lines}
+# CREATE CARD $name
+CREATE CARD demosketch
+```
+
+**Add** values to the sketch of type $type (CARD, MEMB, FREQ or RANK):
+```{r, engine='bash', count_lines}
+#ADD $type $name $value1, $value2 ....
+ADD CARD demostream zod joker grod zod zod grod
+```
+
+## In Progress:
+### More REPL
+* [x] Redesign data-structures main interface
+* [x] Add new domains model
+* [x] Add snapshotting
+* [ ] Add AOF
+* [ ] Add gRPC API
+* [ ] Add REPL
+  * [ ] DELETE DOM $name 							# delete domain and all its sketches
+  * [ ] DELETE $type $name 						# delete a sketch of $type CARD, MEMB, FREQ, RANK and $name
+  * [ ] ATTACH DOM $domName $sketchName $type 	# attach sketch $sketchName $type to $domName
+  * [ ] LIST DOM 									# list all domains
+  * [ ] SAVE 										# Explicityly save state of all domains and sketches
+* [ ] New Docs
+* [x] Clean up
