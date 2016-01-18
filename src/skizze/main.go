@@ -33,7 +33,7 @@ func main() {
 	utils.PanicOnError(err)
 
 	logger.Infof("Starting Skizze...")
-	logger.Infof("Using data dir: ", config.GetConfig().DataDir)
+	logger.Infof("Using data dir: %s", config.GetConfig().DataDir)
 	//server, err := server.New()
 	//utils.PanicOnError(err)
 	//server.Run()
@@ -52,12 +52,12 @@ func setupLoggers() {
 			loggerSpec = "<root>=DEBUG"
 		}
 		// As we're in a terminal, let's make the output a little nicer
-		loggo.ReplaceDefaultWriter(loggo.NewSimpleWriter(os.Stderr, &loggo.ColorFormatter{}))
+		_, _ = loggo.ReplaceDefaultWriter(loggo.NewSimpleWriter(os.Stderr, &loggo.ColorFormatter{}))
 	} else {
 		if loggerSpec == "" {
 			loggerSpec = "<root>=WARNING"
 		}
 	}
 
-	loggo.ConfigureLoggers(loggerSpec)
+	_ = loggo.ConfigureLoggers(loggerSpec)
 }

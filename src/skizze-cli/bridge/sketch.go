@@ -13,21 +13,21 @@ import (
 )
 
 func createSketch(fields []string, in *pb.Sketch) error {
-	if len(fields) > 4 {
-		return fmt.Errorf("Too many argumets, expected 4 got %d", len(fields))
-	}
+	if in.GetType() != pb.SketchType_CARD {
+		if len(fields) > 4 {
+			return fmt.Errorf("Too many argumets, expected 4 got %d", len(fields))
+		}
+		num, err := strconv.Atoi(fields[3])
+		if err != nil {
+			return fmt.Errorf("Expected last argument to be of type int: %q", err)
+		}
 
-	num, err := strconv.Atoi(fields[3])
-	if err != nil {
-		return fmt.Errorf("Expected last argument to be of type int: %q", err)
+		in.Defaults = &pb.Defaults{
+			Rank:     proto.Int64(int64(num)),
+			Capacity: proto.Int64(int64(num)),
+		}
 	}
-
-	in.Defaults = &pb.Defaults{
-		Rank:     proto.Int64(int64(num)),
-		Capacity: proto.Int64(int64(num)),
-	}
-
-	_, err = client.CreateSketch(context.Background(), in)
+	_, err := client.CreateSketch(context.Background(), in)
 	return err
 }
 
