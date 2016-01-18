@@ -6,8 +6,7 @@ install:
  - go get github.com/constabulary/gb/...
 
 # before_script:
- - gb vendor restore
- - go build
+ - make dist
 
 script:
  - gb test -v
