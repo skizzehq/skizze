@@ -1,11 +1,13 @@
 package bridge
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/tabwriter"
 
 	"google.golang.org/grpc"
 
@@ -17,6 +19,7 @@ import (
 var client pb.SkizzeClient
 var conn *grpc.ClientConn
 var historyFn = filepath.Join(os.TempDir(), ".skizze_history")
+var w = new(tabwriter.Writer)
 
 func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 	// Connect to the server.
@@ -28,7 +31,7 @@ func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 }
 
 func tearDownClient(conn *grpc.ClientConn) {
-	conn.Close()
+	_ = conn.Close()
 }
 
 func getFields(query string) []string {
@@ -43,26 +46,41 @@ func getFields(query string) []string {
 
 func evalutateQuery(query string) error {
 	fields := getFields(query)
-	switch strings.ToLower(fields[0]) {
-	case pb.HLLPP:
-		return sendSketchRequest(fields, pb.SketchType_CARD)
-	case pb.CML:
-		return sendSketchRequest(fields, pb.SketchType_FREQ)
-	case pb.TopK:
-		return sendSketchRequest(fields, pb.SketchType_RANK)
-	case pb.Bloom:
-		return sendSketchRequest(fields, pb.SketchType_MEMB)
-	case pb.DOM:
-		return sendDomainRequest(fields)
-	default:
-		return fmt.Errorf("unkown field or command %s", fields[0])
+	if len(fields) == 1 {
+		//TODO: global stuff might be set
+		switch strings.ToLower(fields[0]) {
+		case "list":
+			return listSketches()
+		default:
+			return fmt.Errorf("Invalid operation: %s", query)
+		}
 	}
+
+	if len(fields) > 2 {
+		switch strings.ToLower(fields[1]) {
+		case pb.HLLPP:
+			return sendSketchRequest(fields, pb.SketchType_CARD)
+		case pb.CML:
+			return sendSketchRequest(fields, pb.SketchType_FREQ)
+		case pb.TopK:
+			return sendSketchRequest(fields, pb.SketchType_RANK)
+		case pb.Bloom:
+			return sendSketchRequest(fields, pb.SketchType_MEMB)
+		case pb.DOM:
+			return sendDomainRequest(fields)
+		default:
+			return fmt.Errorf("unkown field or command %s", fields[1])
+		}
+	}
+	return errors.New("Invalid operation")
 }
 
 // Run ...
 func Run() {
 	client, conn = setupClient()
 	line := liner.NewLiner()
+	w.Init(os.Stdout, 0, 8, 0, '\t', 0)
+
 	defer func() { _ = line.Close() }()
 
 	line.SetCtrlCAborts(true)
@@ -74,10 +92,11 @@ func Run() {
 	}
 
 	for {
-		if query, err := line.Prompt("skizze-cli> "); err == nil {
+		if query, err := line.Prompt("skizze> "); err == nil {
 			if err := evalutateQuery(query); err != nil {
 				fmt.Println(err)
 			}
+			fmt.Println("")
 			line.AppendHistory(query)
 		} else if err == liner.ErrPromptAborted {
 			log.Print("Aborted")

@@ -50,7 +50,7 @@ func sendSketchRequest(fields []string, typ pb.SketchType) error {
 		Type: &typ,
 	}
 
-	switch strings.ToLower(fields[1]) {
+	switch strings.ToLower(fields[0]) {
 	case "create":
 		return createSketch(fields, in)
 	case "add":
@@ -60,9 +60,21 @@ func sendSketchRequest(fields []string, typ pb.SketchType) error {
 	case "destroy":
 	case "info":
 	default:
-		return fmt.Errorf("unkown operation: %s", fields[1])
+		return fmt.Errorf("unkown operation: %s", fields[0])
 	}
 	return nil
+}
+
+func listSketches() error {
+	reply, err := client.ListAll(context.Background(), &pb.Empty{})
+	if err == nil {
+		for _, v := range reply.GetSketches() {
+			line := fmt.Sprintf("Name: %s\t  Type: %s", v.GetName(), v.GetType().String())
+			_, _ = fmt.Fprintln(w, line)
+		}
+		_ = w.Flush()
+	}
+	return err
 }
 
 func getFromSketch(fields []string, in *pb.Sketch) error {
@@ -78,25 +90,37 @@ func getFromSketch(fields []string, in *pb.Sketch) error {
 	case pb.SketchType_CARD:
 		reply, err := client.GetCardinality(context.Background(), getRequest)
 		if err == nil {
-			fmt.Println(reply)
+			fmt.Println("Cardinality:", reply.GetCardinality())
 		}
 		return err
 	case pb.SketchType_FREQ:
 		reply, err := client.GetFrequency(context.Background(), getRequest)
 		if err == nil {
-			fmt.Println(reply)
+			for _, v := range reply.GetFrequencies() {
+				line := fmt.Sprintf("Value: %s\t  Hits: %d", v.GetValue(), v.GetCount())
+				_, _ = fmt.Fprintln(w, line)
+			}
+			_ = w.Flush()
 		}
 		return err
 	case pb.SketchType_MEMB:
 		reply, err := client.GetMembership(context.Background(), getRequest)
 		if err == nil {
-			fmt.Println(reply)
+			for _, v := range reply.GetMemberships() {
+				line := fmt.Sprintf("Value: %s\t  Member: %t", v.GetValue(), v.GetIsMember())
+				_, _ = fmt.Fprintln(w, line)
+			}
+			_ = w.Flush()
 		}
 		return err
 	case pb.SketchType_RANK:
 		reply, err := client.GetRank(context.Background(), getRequest)
 		if err == nil {
-			fmt.Println(reply)
+			for i, v := range reply.GetRanks() {
+				line := fmt.Sprintf("Rank: %d\t  Value: %s\t  Hits: %d", i+1, v.GetValue(), v.GetCount())
+				_, _ = fmt.Fprintln(w, line)
+			}
+			_ = w.Flush()
 		}
 		return err
 	default:

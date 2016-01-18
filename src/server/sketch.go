@@ -3,11 +3,10 @@ package server
 import (
 	"strings"
 
-	"github.com/gogo/protobuf/proto"
-
-	"golang.org/x/net/context"
-
 	pb "datamodel"
+
+	"github.com/gogo/protobuf/proto"
+	"golang.org/x/net/context"
 )
 
 func (s *serverStruct) CreateSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {

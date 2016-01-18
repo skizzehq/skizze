@@ -57,7 +57,7 @@ func sendDomainRequest(fields []string) error {
 		Type: &typ,
 	}
 
-	switch strings.ToLower(fields[1]) {
+	switch strings.ToLower(fields[0]) {
 	case "create":
 		return createDomain(fields, in)
 	case "add":
@@ -65,6 +65,6 @@ func sendDomainRequest(fields []string) error {
 	//case "destroy":
 	//case "info":
 	default:
-		return fmt.Errorf("unkown operation: %s", fields[1])
+		return fmt.Errorf("unkown operation: %s", fields[0])
 	}
 }
