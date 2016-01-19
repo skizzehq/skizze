@@ -3,6 +3,7 @@ package manager
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"sync"
 	"time"
 
@@ -170,31 +171,41 @@ func (m *Manager) DeleteSketch(id string) error {
 	return m.sketches.delete(id)
 }
 
-type getSketchesResults [][2]string
+type tupleResult [][2]string
 
-func (slice getSketchesResults) Len() int {
+func (slice tupleResult) Len() int {
 	return len(slice)
 }
 
-func (slice getSketchesResults) Less(i, j int) bool {
+func (slice tupleResult) Less(i, j int) bool {
 	if slice[i][0] == slice[j][0] {
 		return slice[i][1] < slice[j][1]
 	}
 	return slice[i][0] < slice[j][0]
 }
 
-func (slice getSketchesResults) Swap(i, j int) {
+func (slice tupleResult) Swap(i, j int) {
 	slice[i], slice[j] = slice[j], slice[i]
 }
 
 // GetSketches return a list of sketch tuples [name, type]
 func (m *Manager) GetSketches() [][2]string {
-	sketches := getSketchesResults{}
+	sketches := tupleResult{}
 	for _, v := range m.infos.info {
 		sketches = append(sketches, [2]string{v.Name, v.Type})
 	}
 	sort.Sort(sketches)
 	return sketches
+}
+
+// GetDomains return a list of sketch tuples [name, type]
+func (m *Manager) GetDomains() [][2]string {
+	domains := tupleResult{}
+	for k, v := range m.domains.domains {
+		domains = append(domains, [2]string{k, strconv.Itoa(len(v))})
+	}
+	sort.Sort(domains)
+	return domains
 }
 
 // GetFromSketch ...

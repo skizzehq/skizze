@@ -46,11 +46,15 @@ func getFields(query string) []string {
 
 func evalutateQuery(query string) error {
 	fields := getFields(query)
-	if len(fields) == 1 {
+	if len(fields) == 2 {
 		//TODO: global stuff might be set
 		switch strings.ToLower(fields[0]) {
 		case "list":
-			return listSketches()
+			if len(fields) == 1 {
+				return listSketches()
+			} else if len(fields) == 2 && fields[1] == strings.ToLower("dom") {
+				return listDomains()
+			}
 		default:
 			return fmt.Errorf("Invalid operation: %s", query)
 		}

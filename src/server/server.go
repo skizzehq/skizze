@@ -29,7 +29,7 @@ func Run(manager *manager.Manager, port uint) {
 	server = &serverStruct{manager, g}
 
 	pb.RegisterSkizzeServer(g, server)
-	g.Serve(lis)
+	_ = g.Serve(lis)
 }
 
 // Stop ...

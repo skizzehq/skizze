@@ -18,3 +18,15 @@ func (s *serverStruct) CreateDomain(ctx context.Context, in *pb.Domain) (*pb.Dom
 	}
 	return in, nil
 }
+
+func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListDomainsReply, error) {
+	res := s.manager.GetDomains()
+	names := make([]string, len(res), len(res))
+	for i, n := range res {
+		names[i] = n[0]
+	}
+	doms := &pb.ListDomainsReply{
+		Name: names,
+	}
+	return doms, nil
+}

@@ -6,9 +6,6 @@ import (
 	pb "datamodel"
 )
 
-func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListDomainsReply, error) {
-	return nil, nil
-}
 func (s *serverStruct) SetDefaults(ctx context.Context, in *pb.Defaults) (*pb.Defaults, error) {
 	return nil, nil
 }
