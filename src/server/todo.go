@@ -18,9 +18,6 @@ func (s *serverStruct) DeleteDomain(ctx context.Context, in *pb.Domain) (*pb.Emp
 func (s *serverStruct) GetDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
 	return nil, nil
 }
-func (s *serverStruct) GetSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
-	return nil, nil
-}
 func (s *serverStruct) CreateSnapshot(ctx context.Context, in *pb.CreateSnapshotRequest) (*pb.CreateSnapshotReply, error) {
 	return nil, nil
 }

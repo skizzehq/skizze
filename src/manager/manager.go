@@ -208,6 +208,15 @@ func (m *Manager) GetDomains() [][2]string {
 	return domains
 }
 
+// GetSketch ...
+func (m *Manager) GetSketch(id string) (*datamodel.Info, error) {
+	info := m.infos.get(id)
+	if info == nil {
+		return nil, fmt.Errorf("No such sketch %s", id)
+	}
+	return info, nil
+}
+
 // GetFromSketch ...
 func (m *Manager) GetFromSketch(id string, data interface{}) (interface{}, error) {
 	return m.sketches.get(id, data)

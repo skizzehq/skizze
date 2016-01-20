@@ -59,6 +59,7 @@ func sendSketchRequest(fields []string, typ pb.SketchType) error {
 		return getFromSketch(fields, in)
 	case "destroy":
 	case "info":
+		return getSketchInfo(in)
 	default:
 		return fmt.Errorf("unkown operation: %s", fields[0])
 	}
@@ -74,6 +75,16 @@ func listSketches() error {
 		}
 		_ = w.Flush()
 	}
+	return err
+}
+
+func getSketchInfo(in *pb.Sketch) error {
+	in.Defaults = &pb.Defaults{
+		Capacity: proto.Int64(0),
+		Rank:     proto.Int64(0),
+	}
+	reply, err := client.GetSketch(context.Background(), in)
+	fmt.Println(reply)
 	return err
 }
 
