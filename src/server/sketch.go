@@ -144,3 +144,18 @@ func (s *serverStruct) ListAll(ctx context.Context, in *pb.Empty) (*pb.ListReply
 	}
 	return filtered, nil
 }
+
+func (s *serverStruct) GetSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
+	var err error
+	info := pb.NewEmptyInfo()
+	info.Name = in.GetName()
+	info.Type = strings.ToLower(in.GetType().String())
+	if info, err = s.manager.GetSketch(info.ID()); err != nil {
+		return in, err
+	}
+	in.Defaults = &pb.Defaults{
+		Capacity: proto.Int64(int64(info.Properties.Capacity)),
+		Rank:     proto.Int64(int64(info.Properties.Rank)),
+	}
+	return in, nil
+}
