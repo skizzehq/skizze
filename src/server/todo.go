@@ -12,9 +12,7 @@ func (s *serverStruct) SetDefaults(ctx context.Context, in *pb.Defaults) (*pb.De
 func (s *serverStruct) GetDefaults(ctx context.Context, in *pb.Empty) (*pb.Defaults, error) {
 	return nil, nil
 }
-func (s *serverStruct) DeleteDomain(ctx context.Context, in *pb.Domain) (*pb.Empty, error) {
-	return nil, nil
-}
+
 func (s *serverStruct) GetDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
 	return nil, nil
 }

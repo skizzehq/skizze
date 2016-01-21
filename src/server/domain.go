@@ -30,3 +30,7 @@ func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListD
 	}
 	return doms, nil
 }
+
+func (s *serverStruct) DeleteDomain(ctx context.Context, in *pb.Domain) (*pb.Empty, error) {
+	return &pb.Empty{}, s.manager.DeleteDomain(in.GetName())
+}

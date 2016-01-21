@@ -62,7 +62,8 @@ func sendDomainRequest(fields []string) error {
 		return createDomain(fields, in)
 	case "add":
 		return addToDomain(fields, in)
-	//case "destroy":
+	case "destroy":
+		return deleteDomain(fields, in)
 	//case "info":
 	default:
 		return fmt.Errorf("unkown operation: %s", fields[0])
@@ -79,3 +80,8 @@ func listDomains() error {
 	}
 	return err
 }
+
+func deleteDomain(fields []string, in *pb.Domain) error {
+	_, err := client.DeleteDomain(context.Background(), in)
+	return err
+} 

@@ -171,6 +171,11 @@ func (m *Manager) DeleteSketch(id string) error {
 	return m.sketches.delete(id)
 }
 
+// DeleteDomain ...
+func (m *Manager) DeleteDomain(id string) error {
+	return m.domains.delete(id)
+}
+
 type tupleResult [][2]string
 
 func (slice tupleResult) Len() int {
