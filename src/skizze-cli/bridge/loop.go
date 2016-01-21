@@ -52,7 +52,7 @@ func evalutateQuery(query string) error {
 		case "list":
 			if len(fields) == 1 {
 				return listSketches()
-			} else if len(fields) == 2 && fields[1] == strings.ToLower("dom") {
+			} else if len(fields) == 2 && strings.ToLower(fields[1]) == "dom" {
 				return listDomains()
 			}
 		default:

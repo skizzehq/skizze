@@ -171,6 +171,11 @@ func (m *Manager) DeleteSketch(id string) error {
 	return m.sketches.delete(id)
 }
 
+// DeleteDomain ...
+func (m *Manager) DeleteDomain(id string) error {
+	return m.domains.delete(id)
+}
+
 type tupleResult [][2]string
 
 func (slice tupleResult) Len() int {
@@ -215,6 +220,11 @@ func (m *Manager) GetSketch(id string) (*datamodel.Info, error) {
 		return nil, fmt.Errorf("No such sketch %s", id)
 	}
 	return info, nil
+}
+
+// GetDomain ...
+func (m *Manager) GetDomain(id string) (*datamodel.Domain, error) {
+	return m.domains.get(id)
 }
 
 // GetFromSketch ...

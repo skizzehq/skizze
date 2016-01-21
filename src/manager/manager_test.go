@@ -459,7 +459,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 	}
 }
 
-func TestCreateDomain(t *testing.T) {
+func TestCreateDeleteDomain(t *testing.T) {
 	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()

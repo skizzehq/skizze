@@ -3,6 +3,8 @@ package manager
 import (
 	"fmt"
 
+	"github.com/gogo/protobuf/proto"
+
 	"datamodel"
 	"storage"
 	"utils"
@@ -69,21 +71,26 @@ func (m *domainManager) create(id string, infos map[string]*datamodel.Info) erro
 	return nil
 }
 
+// FIXME: maybe return a list of errors?
 func (m *domainManager) delete(id string) error {
+	var lastErr error
 	if ids, ok := m.domains[id]; ok {
 		for _, id := range ids {
 			if info := m.info.get(id); info != nil {
 				if err := m.sketches.delete(info.ID()); err != nil {
 					// TODO: print something ?
+					lastErr = err
 				}
 				if err := m.info.delete(info.ID()); err != nil {
 					// TODO: print something ?
+					lastErr = err
 				}
 			}
 		}
 	}
+	delete(m.domains, id)
 	// FIXME: return error if not exist ?
-	return nil
+	return lastErr
 }
 
 func (m *domainManager) save() error {
@@ -100,4 +107,16 @@ func (m *domainManager) add(id string, values []string) error {
 		// fmt.Println(err)
 	}
 	return nil
+}
+
+// FIXME: return all sketches with domain
+func (m *domainManager) get(id string) (*datamodel.Domain, error) {
+	if _, ok := m.domains[id]; !ok {
+		return nil, fmt.Errorf("Could not find domain %s", id)
+	}
+	typ := datamodel.DomainType_STRING
+	return &datamodel.Domain{
+		Name: proto.String(id),
+		Type: &typ,
+	}, nil
 }
