@@ -34,3 +34,7 @@ func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListD
 func (s *serverStruct) DeleteDomain(ctx context.Context, in *pb.Domain) (*pb.Empty, error) {
 	return &pb.Empty{}, s.manager.DeleteDomain(in.GetName())
 }
+
+func (s *serverStruct) GetDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
+	return s.manager.GetDomain(in.GetName())
+}

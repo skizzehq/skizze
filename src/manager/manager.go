@@ -222,6 +222,11 @@ func (m *Manager) GetSketch(id string) (*datamodel.Info, error) {
 	return info, nil
 }
 
+// GetDomain ...
+func (m *Manager) GetDomain(id string) (*datamodel.Domain, error) {
+	return m.domains.get(id)
+}
+
 // GetFromSketch ...
 func (m *Manager) GetFromSketch(id string, data interface{}) (interface{}, error) {
 	return m.sketches.get(id, data)
