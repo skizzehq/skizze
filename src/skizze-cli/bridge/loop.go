@@ -9,6 +9,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"golang.org/x/net/context"
+
 	"google.golang.org/grpc"
 
 	pb "datamodel"
@@ -20,6 +22,12 @@ var client pb.SkizzeClient
 var conn *grpc.ClientConn
 var historyFn = filepath.Join(os.TempDir(), ".skizze_history")
 var w = new(tabwriter.Writer)
+var typeMap = map[string]pb.SketchType{
+	pb.HLLPP: pb.SketchType_CARD,
+	pb.CML:   pb.SketchType_FREQ,
+	pb.Bloom: pb.SketchType_MEMB,
+	pb.TopK:  pb.SketchType_RANK,
+}
 
 func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 	// Connect to the server.
@@ -54,7 +62,18 @@ func evalutateQuery(query string) error {
 				return listSketches()
 			} else if len(fields) == 2 && strings.ToLower(fields[1]) == "dom" {
 				return listDomains()
+			} else if len(fields) == 2 {
+				v, ok := typeMap[strings.ToLower(fields[1])]
+				if !ok {
+					return fmt.Errorf("Invalid operation: %s", query)
+				}
+				return listSketchType(v)
 			}
+		case "save":
+			if len(fields) == 1 {
+				return save()
+			}
+			return fmt.Errorf("Invalid operation: %s", query)
 		default:
 			return fmt.Errorf("Invalid operation: %s", query)
 		}
@@ -77,6 +96,11 @@ func evalutateQuery(query string) error {
 		}
 	}
 	return errors.New("Invalid operation")
+}
+
+func save() error {
+	_, err := client.CreateSnapshot(context.Background(), &pb.CreateSnapshotRequest{})
+	return err
 }
 
 // Run ...

@@ -159,3 +159,27 @@ func (s *serverStruct) GetSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch
 	}
 	return in, nil
 }
+
+func (s *serverStruct) List(ctx context.Context, in *pb.ListRequest) (*pb.ListReply, error) {
+	sketches := s.manager.GetSketches()
+	filtered := &pb.ListReply{}
+	for _, v := range sketches {
+		typ := pb.SketchType_UNKNOWN
+		switch v[1] {
+		case pb.CML:
+			typ = pb.SketchType_FREQ
+		case pb.TopK:
+			typ = pb.SketchType_RANK
+		case pb.HLLPP:
+			typ = pb.SketchType_CARD
+		case pb.Bloom:
+			typ = pb.SketchType_MEMB
+		default:
+			continue
+		}
+		if in.GetType() == typ {
+			filtered.Sketches = append(filtered.Sketches, &pb.Sketch{Name: proto.String(v[0]), Type: &typ})
+		}
+	}
+	return filtered, nil
+}
