@@ -122,12 +122,11 @@ ADD CARD demostream zod joker grod zod zod grod
 * [x] Add new domains model
 * [x] Add snapshotting
 * [ ] Add AOF
-* [ ] Add gRPC API
-* [ ] Add REPL
+* [x] Add gRPC API
+* [x] Add REPL
   * [x] DELETE DOM $name 							# delete domain and all its sketches
-  * [x] DELETE $type $name 						# delete a sketch of $type CARD, MEMB, FREQ, RANK and $name
-  * [ ] ATTACH DOM $domName $sketchName $type 	# attach sketch $sketchName $type to $domName
+  * [x] DELETE $type $name 							# delete a sketch of $type CARD, MEMB, FREQ, RANK and $name
   * [x] LIST DOM 									# list all domains
-  * [ ] SAVE 										# Explicityly save state of all domains and sketches
+  * [x] SAVE 										# Explicityly save state of all domains and sketches
 * [ ] New Docs
 * [x] Clean up

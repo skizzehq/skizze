@@ -9,6 +9,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"golang.org/x/net/context"
+
 	"google.golang.org/grpc"
 
 	pb "datamodel"
@@ -67,6 +69,11 @@ func evalutateQuery(query string) error {
 				}
 				return listSketchType(v)
 			}
+		case "save":
+			if len(fields) == 1 {
+				return save()
+			}
+			return fmt.Errorf("Invalid operation: %s", query)
 		default:
 			return fmt.Errorf("Invalid operation: %s", query)
 		}
@@ -89,6 +96,11 @@ func evalutateQuery(query string) error {
 		}
 	}
 	return errors.New("Invalid operation")
+}
+
+func save() error {
+	_, err := client.CreateSnapshot(context.Background(), &pb.CreateSnapshotRequest{})
+	return err
 }
 
 // Run ...
