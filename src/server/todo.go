@@ -18,6 +18,3 @@ func (s *serverStruct) CreateSnapshot(ctx context.Context, in *pb.CreateSnapshot
 func (s *serverStruct) GetSnapshot(ctx context.Context, in *pb.GetSnapshotRequest) (*pb.GetSnapshotReply, error) {
 	return nil, nil
 }
-func (s *serverStruct) List(ctx context.Context, in *pb.ListRequest) (*pb.ListReply, error) {
-	return nil, nil
-}

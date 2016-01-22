@@ -78,6 +78,18 @@ func listSketches() error {
 	return err
 }
 
+func listSketchType(typ pb.SketchType) error {
+	reply, err := client.List(context.Background(), &pb.ListRequest{Type: &typ})
+	if err == nil {
+		for _, v := range reply.GetSketches() {
+			line := fmt.Sprintf("Name: %s\t  Type: %s", v.GetName(), v.GetType().String())
+			_, _ = fmt.Fprintln(w, line)
+		}
+		_ = w.Flush()
+	}
+	return err
+}
+
 func getSketchInfo(in *pb.Sketch) error {
 	in.Defaults = &pb.Defaults{
 		Capacity: proto.Int64(0),
