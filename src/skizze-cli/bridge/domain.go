@@ -79,7 +79,7 @@ func sendDomainRequest(fields []string) error {
 func listDomains() error {
 	reply, err := client.ListDomains(context.Background(), &pb.Empty{})
 	if err == nil {
-		for _, v := range reply.GetName() {
+		for _, v := range reply.GetNames() {
 			_, _ = fmt.Fprintln(w, fmt.Sprintf("Name: %s\t", v))
 		}
 		_ = w.Flush()

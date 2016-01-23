@@ -28,7 +28,7 @@ func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListD
 		names[i] = n[0]
 	}
 	doms := &pb.ListDomainsReply{
-		Name: names,
+		Names: names,
 	}
 	return doms, nil
 }
