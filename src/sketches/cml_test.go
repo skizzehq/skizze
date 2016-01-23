@@ -12,7 +12,7 @@ func TestAdd(t *testing.T) {
 	defer utils.TearDownTests()
 
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 1000000000
+	info.Properties.MaxUniqueItems = 1000000000
 	info.Name = "marvel"
 	info.Type = datamodel.HLLPP
 	sketch, err := NewCMLSketch(info)

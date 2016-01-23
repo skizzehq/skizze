@@ -9,9 +9,11 @@ import (
 func (s *serverStruct) CreateDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
 	info := pb.NewEmptyInfo()
 	info.Name = in.GetName()
-	info.Type = in.GetType().String()
-	info.Properties.Capacity = uint(in.GetDefaults().GetCapacity())
-	info.Properties.Rank = uint(in.GetDefaults().GetRank())
+	// FIXME: A Domain's info should have an array of properties for each Sketch (or just an array
+	// of Sketches, like what the proto has). This is just a hack to choose the first Sketch and
+	// use it's info for now
+	info.Properties.MaxUniqueItems = uint(in.GetSketches()[0].GetProperties().GetMaxUniqueItems())
+	info.Properties.Size = uint(in.GetSketches()[0].GetProperties().GetSize())
 	err := s.manager.CreateDomain(info)
 	if err != nil {
 		return nil, err

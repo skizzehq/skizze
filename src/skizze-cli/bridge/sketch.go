@@ -22,9 +22,9 @@ func createSketch(fields []string, in *pb.Sketch) error {
 			return fmt.Errorf("Expected last argument to be of type int: %q", err)
 		}
 
-		in.Defaults = &pb.Defaults{
-			Rank:     proto.Int64(int64(num)),
-			Capacity: proto.Int64(int64(num)),
+		in.Properties = &pb.SketchProperties{
+			Size:           proto.Int64(int64(num)),
+			MaxUniqueItems: proto.Int64(int64(num)),
 		}
 	}
 	_, err := client.CreateSketch(context.Background(), in)
@@ -91,9 +91,9 @@ func listSketchType(typ pb.SketchType) error {
 }
 
 func getSketchInfo(in *pb.Sketch) error {
-	in.Defaults = &pb.Defaults{
-		Capacity: proto.Int64(0),
-		Rank:     proto.Int64(0),
+	in.Properties = &pb.SketchProperties{
+		MaxUniqueItems: proto.Int64(0),
+		Size:           proto.Int64(0),
 	}
 	reply, err := client.GetSketch(context.Background(), in)
 	fmt.Println(reply)
@@ -105,23 +105,31 @@ func getFromSketch(fields []string, in *pb.Sketch) error {
 		return fmt.Errorf("Expected at least 3 values, got %q", len(fields))
 	}
 	getRequest := &pb.GetRequest{
-		Sketch: in,
-		Values: fields[3:],
+		Sketches: []*pb.Sketch{in},
+		Values:   fields[3:],
 	}
 
 	switch in.GetType() {
 	case pb.SketchType_CARD:
 		reply, err := client.GetCardinality(context.Background(), getRequest)
 		if err == nil {
-			fmt.Println("Cardinality:", reply.GetCardinality())
+			if len(reply.GetResults()) == 0 {
+				fmt.Println(in.GetName(), "does not exist")
+			} else {
+				fmt.Println("Cardinality:", reply.GetResults()[0].GetCardinality())
+			}
 		}
 		return err
 	case pb.SketchType_FREQ:
 		reply, err := client.GetFrequency(context.Background(), getRequest)
 		if err == nil {
-			for _, v := range reply.GetFrequencies() {
-				line := fmt.Sprintf("Value: %s\t  Hits: %d", v.GetValue(), v.GetCount())
-				_, _ = fmt.Fprintln(w, line)
+			if len(reply.GetResults()) == 0 {
+				fmt.Println(in.GetName(), "does not exist")
+			} else {
+				for _, v := range reply.GetResults()[0].GetFrequencies() {
+					line := fmt.Sprintf("Value: %s\t  Hits: %d", v.GetValue(), v.GetCount())
+					_, _ = fmt.Fprintln(w, line)
+				}
 			}
 			_ = w.Flush()
 		}
@@ -129,21 +137,29 @@ func getFromSketch(fields []string, in *pb.Sketch) error {
 	case pb.SketchType_MEMB:
 		reply, err := client.GetMembership(context.Background(), getRequest)
 		if err == nil {
-			for _, v := range reply.GetMemberships() {
-				line := fmt.Sprintf("Value: %s\t  Member: %t", v.GetValue(), v.GetIsMember())
-				_, _ = fmt.Fprintln(w, line)
+			if len(reply.GetResults()) == 0 {
+				fmt.Println(in.GetName(), "does not exist")
+			} else {
+				for _, v := range reply.GetResults()[0].GetMemberships() {
+					line := fmt.Sprintf("Value: %s\t  Member: %t", v.GetValue(), v.GetIsMember())
+					_, _ = fmt.Fprintln(w, line)
+				}
+				_ = w.Flush()
 			}
-			_ = w.Flush()
 		}
 		return err
 	case pb.SketchType_RANK:
-		reply, err := client.GetRank(context.Background(), getRequest)
+		reply, err := client.GetRankings(context.Background(), getRequest)
 		if err == nil {
-			for i, v := range reply.GetRanks() {
-				line := fmt.Sprintf("Rank: %d\t  Value: %s\t  Hits: %d", i+1, v.GetValue(), v.GetCount())
-				_, _ = fmt.Fprintln(w, line)
+			if len(reply.GetResults()) == 0 {
+				fmt.Println(in.GetName(), "does not exist")
+			} else {
+				for i, v := range reply.GetResults()[0].GetRankings() {
+					line := fmt.Sprintf("Rank: %d\t  Value: %s\t  Hits: %d", i+1, v.GetValue(), v.GetCount())
+					_, _ = fmt.Fprintln(w, line)
+				}
+				_ = w.Flush()
 			}
-			_ = w.Flush()
 		}
 		return err
 	default:

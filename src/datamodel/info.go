@@ -4,8 +4,9 @@ import "fmt"
 
 // Properties ...
 type Properties struct {
-	Capacity uint `json:"capacity"`
-	Rank     uint `json:"rank"`
+	MaxUniqueItems uint `json:"maxUniqueItems"`
+	ErrorRate      uint `json:"errorRate"`
+	Size           uint `json:"size"`
 }
 
 // State represents a info string describing the sketch

@@ -10,7 +10,8 @@ It is generated from these files:
 
 It has these top-level messages:
 	Empty
-	Defaults
+	SketchProperties
+	SketchState
 	Domain
 	Sketch
 	Membership
@@ -26,10 +27,14 @@ It has these top-level messages:
 	AddRequest
 	AddReply
 	GetRequest
+	MembershipResult
+	FrequencyResult
+	CardinalityResult
+	RankingsResult
 	GetMembershipReply
 	GetFrequencyReply
 	GetCardinalityReply
-	GetRankReply
+	GetRankingsReply
 */
 package datamodel
 
@@ -53,26 +58,23 @@ var _ = math.Inf
 type SketchType int32
 
 const (
-	SketchType_UNKNOWN SketchType = 0
-	SketchType_MEMB    SketchType = 1
-	SketchType_FREQ    SketchType = 2
-	SketchType_RANK    SketchType = 3
-	SketchType_CARD    SketchType = 4
+	SketchType_MEMB SketchType = 1
+	SketchType_FREQ SketchType = 2
+	SketchType_RANK SketchType = 3
+	SketchType_CARD SketchType = 4
 )
 
 var SketchType_name = map[int32]string{
-	0: "UNKNOWN",
 	1: "MEMB",
 	2: "FREQ",
 	3: "RANK",
 	4: "CARD",
 }
 var SketchType_value = map[string]int32{
-	"UNKNOWN": 0,
-	"MEMB":    1,
-	"FREQ":    2,
-	"RANK":    3,
-	"CARD":    4,
+	"MEMB": 1,
+	"FREQ": 2,
+	"RANK": 3,
+	"CARD": 4,
 }
 
 func (x SketchType) Enum() *SketchType {
@@ -93,57 +95,26 @@ func (x *SketchType) UnmarshalJSON(data []byte) error {
 }
 func (SketchType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-type DomainType int32
-
-const (
-	DomainType_STRING DomainType = 0
-)
-
-var DomainType_name = map[int32]string{
-	0: "STRING",
-}
-var DomainType_value = map[string]int32{
-	"STRING": 0,
-}
-
-func (x DomainType) Enum() *DomainType {
-	p := new(DomainType)
-	*p = x
-	return p
-}
-func (x DomainType) String() string {
-	return proto.EnumName(DomainType_name, int32(x))
-}
-func (x *DomainType) UnmarshalJSON(data []byte) error {
-	value, err := proto.UnmarshalJSONEnum(DomainType_value, data, "DomainType")
-	if err != nil {
-		return err
-	}
-	*x = DomainType(value)
-	return nil
-}
-func (DomainType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
-
 type SnapshotStatus int32
 
 const (
-	SnapshotStatus_PENDING     SnapshotStatus = 0
-	SnapshotStatus_IN_PROGRESS SnapshotStatus = 1
-	SnapshotStatus_SUCCESSFUL  SnapshotStatus = 2
-	SnapshotStatus_FAILED      SnapshotStatus = 3
+	SnapshotStatus_PENDING     SnapshotStatus = 1
+	SnapshotStatus_IN_PROGRESS SnapshotStatus = 2
+	SnapshotStatus_SUCCESSFUL  SnapshotStatus = 3
+	SnapshotStatus_FAILED      SnapshotStatus = 4
 )
 
 var SnapshotStatus_name = map[int32]string{
-	0: "PENDING",
-	1: "IN_PROGRESS",
-	2: "SUCCESSFUL",
-	3: "FAILED",
+	1: "PENDING",
+	2: "IN_PROGRESS",
+	3: "SUCCESSFUL",
+	4: "FAILED",
 }
 var SnapshotStatus_value = map[string]int32{
-	"PENDING":     0,
-	"IN_PROGRESS": 1,
-	"SUCCESSFUL":  2,
-	"FAILED":      3,
+	"PENDING":     1,
+	"IN_PROGRESS": 2,
+	"SUCCESSFUL":  3,
+	"FAILED":      4,
 }
 
 func (x SnapshotStatus) Enum() *SnapshotStatus {
@@ -162,7 +133,7 @@ func (x *SnapshotStatus) UnmarshalJSON(data []byte) error {
 	*x = SnapshotStatus(value)
 	return nil
 }
-func (SnapshotStatus) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (SnapshotStatus) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
 //
 // Generic Structures
@@ -176,56 +147,83 @@ func (m *Empty) String() string            { return proto.CompactTextString(m) }
 func (*Empty) ProtoMessage()               {}
 func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-type Defaults struct {
-	Rank             *int64 `protobuf:"varint,1,req,name=rank" json:"rank,omitempty"`
-	Capacity         *int64 `protobuf:"varint,2,req,name=capacity" json:"capacity,omitempty"`
-	XXX_unrecognized []byte `json:"-"`
+type SketchProperties struct {
+	MaxUniqueItems   *int64   `protobuf:"varint,1,opt,name=maxUniqueItems" json:"maxUniqueItems,omitempty"`
+	ErrorRate        *float32 `protobuf:"fixed32,2,opt,name=errorRate" json:"errorRate,omitempty"`
+	Size             *int64   `protobuf:"varint,3,opt,name=size" json:"size,omitempty"`
+	XXX_unrecognized []byte   `json:"-"`
 }
 
-func (m *Defaults) Reset()                    { *m = Defaults{} }
-func (m *Defaults) String() string            { return proto.CompactTextString(m) }
-func (*Defaults) ProtoMessage()               {}
-func (*Defaults) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (m *SketchProperties) Reset()                    { *m = SketchProperties{} }
+func (m *SketchProperties) String() string            { return proto.CompactTextString(m) }
+func (*SketchProperties) ProtoMessage()               {}
+func (*SketchProperties) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
-func (m *Defaults) GetRank() int64 {
-	if m != nil && m.Rank != nil {
-		return *m.Rank
+func (m *SketchProperties) GetMaxUniqueItems() int64 {
+	if m != nil && m.MaxUniqueItems != nil {
+		return *m.MaxUniqueItems
 	}
 	return 0
 }
 
-func (m *Defaults) GetCapacity() int64 {
-	if m != nil && m.Capacity != nil {
-		return *m.Capacity
+func (m *SketchProperties) GetErrorRate() float32 {
+	if m != nil && m.ErrorRate != nil {
+		return *m.ErrorRate
 	}
 	return 0
 }
 
+func (m *SketchProperties) GetSize() int64 {
+	if m != nil && m.Size != nil {
+		return *m.Size
+	}
+	return 0
+}
+
+type SketchState struct {
+	FillRate         *float32 `protobuf:"fixed32,1,opt,name=fillRate" json:"fillRate,omitempty"`
+	LastSnapshot     *int64   `protobuf:"varint,2,opt,name=lastSnapshot" json:"lastSnapshot,omitempty"`
+	XXX_unrecognized []byte   `json:"-"`
+}
+
+func (m *SketchState) Reset()                    { *m = SketchState{} }
+func (m *SketchState) String() string            { return proto.CompactTextString(m) }
+func (*SketchState) ProtoMessage()               {}
+func (*SketchState) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+func (m *SketchState) GetFillRate() float32 {
+	if m != nil && m.FillRate != nil {
+		return *m.FillRate
+	}
+	return 0
+}
+
+func (m *SketchState) GetLastSnapshot() int64 {
+	if m != nil && m.LastSnapshot != nil {
+		return *m.LastSnapshot
+	}
+	return 0
+}
+
+// CreateDomain: name:required, propertiess:optional (array = nSketchTypes, order of types above)
+// DeleteDomain: name:required
+// GetDomain   : name:required
 type Domain struct {
-	Name             *string     `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
-	Type             *DomainType `protobuf:"varint,2,req,name=type,enum=datamodel.DomainType" json:"type,omitempty"`
-	Sketches         []*Sketch   `protobuf:"bytes,3,rep,name=sketches" json:"sketches,omitempty"`
-	Defaults         *Defaults   `protobuf:"bytes,4,opt,name=defaults" json:"defaults,omitempty"`
-	XXX_unrecognized []byte      `json:"-"`
+	Name             *string   `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
+	Sketches         []*Sketch `protobuf:"bytes,2,rep,name=sketches" json:"sketches,omitempty"`
+	XXX_unrecognized []byte    `json:"-"`
 }
 
 func (m *Domain) Reset()                    { *m = Domain{} }
 func (m *Domain) String() string            { return proto.CompactTextString(m) }
 func (*Domain) ProtoMessage()               {}
-func (*Domain) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (*Domain) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
 func (m *Domain) GetName() string {
 	if m != nil && m.Name != nil {
 		return *m.Name
 	}
 	return ""
-}
-
-func (m *Domain) GetType() DomainType {
-	if m != nil && m.Type != nil {
-		return *m.Type
-	}
-	return DomainType_STRING
 }
 
 func (m *Domain) GetSketches() []*Sketch {
@@ -235,24 +233,21 @@ func (m *Domain) GetSketches() []*Sketch {
 	return nil
 }
 
-func (m *Domain) GetDefaults() *Defaults {
-	if m != nil {
-		return m.Defaults
-	}
-	return nil
-}
-
+// CreateSketch: name:required, type:required, properties:optional
+// DeleteSketch: name:required, type:required
+// GetSketch   : name:required, type:required
 type Sketch struct {
-	Name             *string     `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
-	Type             *SketchType `protobuf:"varint,2,req,name=type,enum=datamodel.SketchType" json:"type,omitempty"`
-	Defaults         *Defaults   `protobuf:"bytes,3,opt,name=defaults" json:"defaults,omitempty"`
-	XXX_unrecognized []byte      `json:"-"`
+	Name             *string           `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
+	Type             *SketchType       `protobuf:"varint,2,req,name=type,enum=datamodel.SketchType" json:"type,omitempty"`
+	Properties       *SketchProperties `protobuf:"bytes,3,opt,name=properties" json:"properties,omitempty"`
+	State            *SketchState      `protobuf:"bytes,4,opt,name=state" json:"state,omitempty"`
+	XXX_unrecognized []byte            `json:"-"`
 }
 
 func (m *Sketch) Reset()                    { *m = Sketch{} }
 func (m *Sketch) String() string            { return proto.CompactTextString(m) }
 func (*Sketch) ProtoMessage()               {}
-func (*Sketch) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+func (*Sketch) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *Sketch) GetName() string {
 	if m != nil && m.Name != nil {
@@ -265,12 +260,19 @@ func (m *Sketch) GetType() SketchType {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return SketchType_UNKNOWN
+	return SketchType_MEMB
 }
 
-func (m *Sketch) GetDefaults() *Defaults {
+func (m *Sketch) GetProperties() *SketchProperties {
 	if m != nil {
-		return m.Defaults
+		return m.Properties
+	}
+	return nil
+}
+
+func (m *Sketch) GetState() *SketchState {
+	if m != nil {
+		return m.State
 	}
 	return nil
 }
@@ -284,7 +286,7 @@ type Membership struct {
 func (m *Membership) Reset()                    { *m = Membership{} }
 func (m *Membership) String() string            { return proto.CompactTextString(m) }
 func (*Membership) ProtoMessage()               {}
-func (*Membership) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+func (*Membership) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
 func (m *Membership) GetValue() string {
 	if m != nil && m.Value != nil {
@@ -309,7 +311,7 @@ type Frequency struct {
 func (m *Frequency) Reset()                    { *m = Frequency{} }
 func (m *Frequency) String() string            { return proto.CompactTextString(m) }
 func (*Frequency) ProtoMessage()               {}
-func (*Frequency) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+func (*Frequency) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 func (m *Frequency) GetValue() string {
 	if m != nil && m.Value != nil {
@@ -334,7 +336,7 @@ type Rank struct {
 func (m *Rank) Reset()                    { *m = Rank{} }
 func (m *Rank) String() string            { return proto.CompactTextString(m) }
 func (*Rank) ProtoMessage()               {}
-func (*Rank) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+func (*Rank) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 func (m *Rank) GetValue() string {
 	if m != nil && m.Value != nil {
@@ -359,7 +361,7 @@ type CreateSnapshotRequest struct {
 func (m *CreateSnapshotRequest) Reset()                    { *m = CreateSnapshotRequest{} }
 func (m *CreateSnapshotRequest) String() string            { return proto.CompactTextString(m) }
 func (*CreateSnapshotRequest) ProtoMessage()               {}
-func (*CreateSnapshotRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+func (*CreateSnapshotRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
 
 type CreateSnapshotReply struct {
 	Status           *SnapshotStatus `protobuf:"varint,1,req,name=status,enum=datamodel.SnapshotStatus" json:"status,omitempty"`
@@ -370,7 +372,7 @@ type CreateSnapshotReply struct {
 func (m *CreateSnapshotReply) Reset()                    { *m = CreateSnapshotReply{} }
 func (m *CreateSnapshotReply) String() string            { return proto.CompactTextString(m) }
 func (*CreateSnapshotReply) ProtoMessage()               {}
-func (*CreateSnapshotReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+func (*CreateSnapshotReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *CreateSnapshotReply) GetStatus() SnapshotStatus {
 	if m != nil && m.Status != nil {
@@ -394,7 +396,7 @@ type GetSnapshotRequest struct {
 func (m *GetSnapshotRequest) Reset()                    { *m = GetSnapshotRequest{} }
 func (m *GetSnapshotRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetSnapshotRequest) ProtoMessage()               {}
-func (*GetSnapshotRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
+func (*GetSnapshotRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
 
 type GetSnapshotReply struct {
 	Status           *SnapshotStatus `protobuf:"varint,1,req,name=status,enum=datamodel.SnapshotStatus" json:"status,omitempty"`
@@ -406,7 +408,7 @@ type GetSnapshotReply struct {
 func (m *GetSnapshotReply) Reset()                    { *m = GetSnapshotReply{} }
 func (m *GetSnapshotReply) String() string            { return proto.CompactTextString(m) }
 func (*GetSnapshotReply) ProtoMessage()               {}
-func (*GetSnapshotReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
+func (*GetSnapshotReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
 
 func (m *GetSnapshotReply) GetStatus() SnapshotStatus {
 	if m != nil && m.Status != nil {
@@ -437,13 +439,13 @@ type ListRequest struct {
 func (m *ListRequest) Reset()                    { *m = ListRequest{} }
 func (m *ListRequest) String() string            { return proto.CompactTextString(m) }
 func (*ListRequest) ProtoMessage()               {}
-func (*ListRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
+func (*ListRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
 
 func (m *ListRequest) GetType() SketchType {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return SketchType_UNKNOWN
+	return SketchType_MEMB
 }
 
 type ListReply struct {
@@ -454,7 +456,7 @@ type ListReply struct {
 func (m *ListReply) Reset()                    { *m = ListReply{} }
 func (m *ListReply) String() string            { return proto.CompactTextString(m) }
 func (*ListReply) ProtoMessage()               {}
-func (*ListReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
+func (*ListReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
 
 func (m *ListReply) GetSketches() []*Sketch {
 	if m != nil {
@@ -471,7 +473,7 @@ type ListDomainsReply struct {
 func (m *ListDomainsReply) Reset()                    { *m = ListDomainsReply{} }
 func (m *ListDomainsReply) String() string            { return proto.CompactTextString(m) }
 func (*ListDomainsReply) ProtoMessage()               {}
-func (*ListDomainsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
+func (*ListDomainsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
 
 func (m *ListDomainsReply) GetName() []string {
 	if m != nil {
@@ -490,7 +492,7 @@ type AddRequest struct {
 func (m *AddRequest) Reset()                    { *m = AddRequest{} }
 func (m *AddRequest) String() string            { return proto.CompactTextString(m) }
 func (*AddRequest) ProtoMessage()               {}
-func (*AddRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
+func (*AddRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
 
 func (m *AddRequest) GetDomain() *Domain {
 	if m != nil {
@@ -520,22 +522,24 @@ type AddReply struct {
 func (m *AddReply) Reset()                    { *m = AddReply{} }
 func (m *AddReply) String() string            { return proto.CompactTextString(m) }
 func (*AddReply) ProtoMessage()               {}
-func (*AddReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
+func (*AddReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
 
+// All Sketches will be of one kind
+// All values will apply to all sketches (if card or ranking, values will be ignored)
 type GetRequest struct {
-	Sketch           *Sketch  `protobuf:"bytes,1,req,name=sketch" json:"sketch,omitempty"`
-	Values           []string `protobuf:"bytes,2,rep,name=values" json:"values,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
+	Sketches         []*Sketch `protobuf:"bytes,1,rep,name=sketches" json:"sketches,omitempty"`
+	Values           []string  `protobuf:"bytes,2,rep,name=values" json:"values,omitempty"`
+	XXX_unrecognized []byte    `json:"-"`
 }
 
 func (m *GetRequest) Reset()                    { *m = GetRequest{} }
 func (m *GetRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetRequest) ProtoMessage()               {}
-func (*GetRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
+func (*GetRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
 
-func (m *GetRequest) GetSketch() *Sketch {
+func (m *GetRequest) GetSketches() []*Sketch {
 	if m != nil {
-		return m.Sketch
+		return m.Sketches
 	}
 	return nil
 }
@@ -547,77 +551,146 @@ func (m *GetRequest) GetValues() []string {
 	return nil
 }
 
-type GetMembershipReply struct {
+type MembershipResult struct {
 	Memberships      []*Membership `protobuf:"bytes,1,rep,name=memberships" json:"memberships,omitempty"`
 	XXX_unrecognized []byte        `json:"-"`
 }
 
-func (m *GetMembershipReply) Reset()                    { *m = GetMembershipReply{} }
-func (m *GetMembershipReply) String() string            { return proto.CompactTextString(m) }
-func (*GetMembershipReply) ProtoMessage()               {}
-func (*GetMembershipReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
+func (m *MembershipResult) Reset()                    { *m = MembershipResult{} }
+func (m *MembershipResult) String() string            { return proto.CompactTextString(m) }
+func (*MembershipResult) ProtoMessage()               {}
+func (*MembershipResult) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
 
-func (m *GetMembershipReply) GetMemberships() []*Membership {
+func (m *MembershipResult) GetMemberships() []*Membership {
 	if m != nil {
 		return m.Memberships
 	}
 	return nil
 }
 
-type GetFrequencyReply struct {
+type FrequencyResult struct {
 	Frequencies      []*Frequency `protobuf:"bytes,2,rep,name=frequencies" json:"frequencies,omitempty"`
 	XXX_unrecognized []byte       `json:"-"`
 }
 
-func (m *GetFrequencyReply) Reset()                    { *m = GetFrequencyReply{} }
-func (m *GetFrequencyReply) String() string            { return proto.CompactTextString(m) }
-func (*GetFrequencyReply) ProtoMessage()               {}
-func (*GetFrequencyReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
+func (m *FrequencyResult) Reset()                    { *m = FrequencyResult{} }
+func (m *FrequencyResult) String() string            { return proto.CompactTextString(m) }
+func (*FrequencyResult) ProtoMessage()               {}
+func (*FrequencyResult) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
 
-func (m *GetFrequencyReply) GetFrequencies() []*Frequency {
+func (m *FrequencyResult) GetFrequencies() []*Frequency {
 	if m != nil {
 		return m.Frequencies
 	}
 	return nil
 }
 
-type GetCardinalityReply struct {
+type CardinalityResult struct {
 	Cardinality      *int64 `protobuf:"varint,1,req,name=cardinality" json:"cardinality,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *GetCardinalityReply) Reset()                    { *m = GetCardinalityReply{} }
-func (m *GetCardinalityReply) String() string            { return proto.CompactTextString(m) }
-func (*GetCardinalityReply) ProtoMessage()               {}
-func (*GetCardinalityReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
+func (m *CardinalityResult) Reset()                    { *m = CardinalityResult{} }
+func (m *CardinalityResult) String() string            { return proto.CompactTextString(m) }
+func (*CardinalityResult) ProtoMessage()               {}
+func (*CardinalityResult) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
 
-func (m *GetCardinalityReply) GetCardinality() int64 {
+func (m *CardinalityResult) GetCardinality() int64 {
 	if m != nil && m.Cardinality != nil {
 		return *m.Cardinality
 	}
 	return 0
 }
 
-type GetRankReply struct {
-	Ranks            []*Rank `protobuf:"bytes,1,rep,name=ranks" json:"ranks,omitempty"`
+type RankingsResult struct {
+	Rankings         []*Rank `protobuf:"bytes,1,rep,name=rankings" json:"rankings,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *GetRankReply) Reset()                    { *m = GetRankReply{} }
-func (m *GetRankReply) String() string            { return proto.CompactTextString(m) }
-func (*GetRankReply) ProtoMessage()               {}
-func (*GetRankReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
+func (m *RankingsResult) Reset()                    { *m = RankingsResult{} }
+func (m *RankingsResult) String() string            { return proto.CompactTextString(m) }
+func (*RankingsResult) ProtoMessage()               {}
+func (*RankingsResult) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
 
-func (m *GetRankReply) GetRanks() []*Rank {
+func (m *RankingsResult) GetRankings() []*Rank {
 	if m != nil {
-		return m.Ranks
+		return m.Rankings
+	}
+	return nil
+}
+
+type GetMembershipReply struct {
+	Results          []*MembershipResult `protobuf:"bytes,1,rep,name=results" json:"results,omitempty"`
+	XXX_unrecognized []byte              `json:"-"`
+}
+
+func (m *GetMembershipReply) Reset()                    { *m = GetMembershipReply{} }
+func (m *GetMembershipReply) String() string            { return proto.CompactTextString(m) }
+func (*GetMembershipReply) ProtoMessage()               {}
+func (*GetMembershipReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{22} }
+
+func (m *GetMembershipReply) GetResults() []*MembershipResult {
+	if m != nil {
+		return m.Results
+	}
+	return nil
+}
+
+type GetFrequencyReply struct {
+	Results          []*FrequencyResult `protobuf:"bytes,1,rep,name=results" json:"results,omitempty"`
+	XXX_unrecognized []byte             `json:"-"`
+}
+
+func (m *GetFrequencyReply) Reset()                    { *m = GetFrequencyReply{} }
+func (m *GetFrequencyReply) String() string            { return proto.CompactTextString(m) }
+func (*GetFrequencyReply) ProtoMessage()               {}
+func (*GetFrequencyReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{23} }
+
+func (m *GetFrequencyReply) GetResults() []*FrequencyResult {
+	if m != nil {
+		return m.Results
+	}
+	return nil
+}
+
+type GetCardinalityReply struct {
+	Results          []*CardinalityResult `protobuf:"bytes,1,rep,name=results" json:"results,omitempty"`
+	XXX_unrecognized []byte               `json:"-"`
+}
+
+func (m *GetCardinalityReply) Reset()                    { *m = GetCardinalityReply{} }
+func (m *GetCardinalityReply) String() string            { return proto.CompactTextString(m) }
+func (*GetCardinalityReply) ProtoMessage()               {}
+func (*GetCardinalityReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{24} }
+
+func (m *GetCardinalityReply) GetResults() []*CardinalityResult {
+	if m != nil {
+		return m.Results
+	}
+	return nil
+}
+
+type GetRankingsReply struct {
+	Results          []*RankingsResult `protobuf:"bytes,1,rep,name=results" json:"results,omitempty"`
+	XXX_unrecognized []byte            `json:"-"`
+}
+
+func (m *GetRankingsReply) Reset()                    { *m = GetRankingsReply{} }
+func (m *GetRankingsReply) String() string            { return proto.CompactTextString(m) }
+func (*GetRankingsReply) ProtoMessage()               {}
+func (*GetRankingsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{25} }
+
+func (m *GetRankingsReply) GetResults() []*RankingsResult {
+	if m != nil {
+		return m.Results
 	}
 	return nil
 }
 
 func init() {
 	proto.RegisterType((*Empty)(nil), "datamodel.Empty")
-	proto.RegisterType((*Defaults)(nil), "datamodel.Defaults")
+	proto.RegisterType((*SketchProperties)(nil), "datamodel.SketchProperties")
+	proto.RegisterType((*SketchState)(nil), "datamodel.SketchState")
 	proto.RegisterType((*Domain)(nil), "datamodel.Domain")
 	proto.RegisterType((*Sketch)(nil), "datamodel.Sketch")
 	proto.RegisterType((*Membership)(nil), "datamodel.Membership")
@@ -633,12 +706,15 @@ func init() {
 	proto.RegisterType((*AddRequest)(nil), "datamodel.AddRequest")
 	proto.RegisterType((*AddReply)(nil), "datamodel.AddReply")
 	proto.RegisterType((*GetRequest)(nil), "datamodel.GetRequest")
+	proto.RegisterType((*MembershipResult)(nil), "datamodel.MembershipResult")
+	proto.RegisterType((*FrequencyResult)(nil), "datamodel.FrequencyResult")
+	proto.RegisterType((*CardinalityResult)(nil), "datamodel.CardinalityResult")
+	proto.RegisterType((*RankingsResult)(nil), "datamodel.RankingsResult")
 	proto.RegisterType((*GetMembershipReply)(nil), "datamodel.GetMembershipReply")
 	proto.RegisterType((*GetFrequencyReply)(nil), "datamodel.GetFrequencyReply")
 	proto.RegisterType((*GetCardinalityReply)(nil), "datamodel.GetCardinalityReply")
-	proto.RegisterType((*GetRankReply)(nil), "datamodel.GetRankReply")
+	proto.RegisterType((*GetRankingsReply)(nil), "datamodel.GetRankingsReply")
 	proto.RegisterEnum("datamodel.SketchType", SketchType_name, SketchType_value)
-	proto.RegisterEnum("datamodel.DomainType", DomainType_name, DomainType_value)
 	proto.RegisterEnum("datamodel.SnapshotStatus", SnapshotStatus_name, SnapshotStatus_value)
 }
 
@@ -654,8 +730,6 @@ type SkizzeClient interface {
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListReply, error)
 	ListAll(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ListReply, error)
 	ListDomains(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ListDomainsReply, error)
-	SetDefaults(ctx context.Context, in *Defaults, opts ...grpc.CallOption) (*Defaults, error)
-	GetDefaults(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Defaults, error)
 	CreateDomain(ctx context.Context, in *Domain, opts ...grpc.CallOption) (*Domain, error)
 	DeleteDomain(ctx context.Context, in *Domain, opts ...grpc.CallOption) (*Empty, error)
 	GetDomain(ctx context.Context, in *Domain, opts ...grpc.CallOption) (*Domain, error)
@@ -666,7 +740,7 @@ type SkizzeClient interface {
 	GetMembership(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetMembershipReply, error)
 	GetFrequency(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetFrequencyReply, error)
 	GetCardinality(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetCardinalityReply, error)
-	GetRank(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetRankReply, error)
+	GetRankings(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetRankingsReply, error)
 }
 
 type skizzeClient struct {
@@ -716,24 +790,6 @@ func (c *skizzeClient) ListAll(ctx context.Context, in *Empty, opts ...grpc.Call
 func (c *skizzeClient) ListDomains(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ListDomainsReply, error) {
 	out := new(ListDomainsReply)
 	err := grpc.Invoke(ctx, "/datamodel.Skizze/ListDomains", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *skizzeClient) SetDefaults(ctx context.Context, in *Defaults, opts ...grpc.CallOption) (*Defaults, error) {
-	out := new(Defaults)
-	err := grpc.Invoke(ctx, "/datamodel.Skizze/SetDefaults", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *skizzeClient) GetDefaults(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Defaults, error) {
-	out := new(Defaults)
-	err := grpc.Invoke(ctx, "/datamodel.Skizze/GetDefaults", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -830,9 +886,9 @@ func (c *skizzeClient) GetCardinality(ctx context.Context, in *GetRequest, opts 
 	return out, nil
 }
 
-func (c *skizzeClient) GetRank(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetRankReply, error) {
-	out := new(GetRankReply)
-	err := grpc.Invoke(ctx, "/datamodel.Skizze/GetRank", in, out, c.cc, opts...)
+func (c *skizzeClient) GetRankings(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetRankingsReply, error) {
+	out := new(GetRankingsReply)
+	err := grpc.Invoke(ctx, "/datamodel.Skizze/GetRankings", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -847,8 +903,6 @@ type SkizzeServer interface {
 	List(context.Context, *ListRequest) (*ListReply, error)
 	ListAll(context.Context, *Empty) (*ListReply, error)
 	ListDomains(context.Context, *Empty) (*ListDomainsReply, error)
-	SetDefaults(context.Context, *Defaults) (*Defaults, error)
-	GetDefaults(context.Context, *Empty) (*Defaults, error)
 	CreateDomain(context.Context, *Domain) (*Domain, error)
 	DeleteDomain(context.Context, *Domain) (*Empty, error)
 	GetDomain(context.Context, *Domain) (*Domain, error)
@@ -859,7 +913,7 @@ type SkizzeServer interface {
 	GetMembership(context.Context, *GetRequest) (*GetMembershipReply, error)
 	GetFrequency(context.Context, *GetRequest) (*GetFrequencyReply, error)
 	GetCardinality(context.Context, *GetRequest) (*GetCardinalityReply, error)
-	GetRank(context.Context, *GetRequest) (*GetRankReply, error)
+	GetRankings(context.Context, *GetRequest) (*GetRankingsReply, error)
 }
 
 func RegisterSkizzeServer(s *grpc.Server, srv SkizzeServer) {
@@ -920,30 +974,6 @@ func _Skizze_ListDomains_Handler(srv interface{}, ctx context.Context, dec func(
 		return nil, err
 	}
 	out, err := srv.(SkizzeServer).ListDomains(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func _Skizze_SetDefaults_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
-	in := new(Defaults)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	out, err := srv.(SkizzeServer).SetDefaults(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func _Skizze_GetDefaults_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	out, err := srv.(SkizzeServer).GetDefaults(ctx, in)
 	if err != nil {
 		return nil, err
 	}
@@ -1070,12 +1100,12 @@ func _Skizze_GetCardinality_Handler(srv interface{}, ctx context.Context, dec fu
 	return out, nil
 }
 
-func _Skizze_GetRank_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
+func _Skizze_GetRankings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(GetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	out, err := srv.(SkizzeServer).GetRank(ctx, in)
+	out, err := srv.(SkizzeServer).GetRankings(ctx, in)
 	if err != nil {
 		return nil, err
 	}
@@ -1105,14 +1135,6 @@ var _Skizze_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListDomains",
 			Handler:    _Skizze_ListDomains_Handler,
-		},
-		{
-			MethodName: "SetDefaults",
-			Handler:    _Skizze_SetDefaults_Handler,
-		},
-		{
-			MethodName: "GetDefaults",
-			Handler:    _Skizze_GetDefaults_Handler,
 		},
 		{
 			MethodName: "CreateDomain",
@@ -1155,69 +1177,73 @@ var _Skizze_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Skizze_GetCardinality_Handler,
 		},
 		{
-			MethodName: "GetRank",
-			Handler:    _Skizze_GetRank_Handler,
+			MethodName: "GetRankings",
+			Handler:    _Skizze_GetRankings_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{},
 }
 
 var fileDescriptor0 = []byte{
-	// 892 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xac, 0x55, 0x7f, 0x6f, 0xe2, 0x46,
-	0x10, 0xc5, 0x31, 0x21, 0xf6, 0x98, 0x70, 0xce, 0x26, 0xe9, 0x51, 0xae, 0x8d, 0xa8, 0xdb, 0x4a,
-	0x39, 0xa4, 0xa2, 0x8a, 0x53, 0x2b, 0x55, 0x95, 0xae, 0xa5, 0xfc, 0x12, 0x4d, 0xe0, 0xae, 0x26,
-	0xd1, 0xfd, 0x59, 0x6d, 0x60, 0xef, 0x62, 0xc5, 0x06, 0x17, 0x2f, 0x95, 0xb8, 0x2f, 0xd0, 0xaf,
-	0xd9, 0x8f, 0xd2, 0xfd, 0x61, 0xcc, 0xda, 0xe0, 0x5c, 0x4f, 0xba, 0xff, 0x60, 0xf6, 0xcd, 0x7b,
-	0xb3, 0xb3, 0x33, 0xcf, 0x50, 0x8e, 0x1e, 0xbc, 0xf7, 0xef, 0x49, 0x33, 0x5c, 0x2e, 0xe8, 0x02,
-	0x99, 0x33, 0x4c, 0x71, 0xb0, 0x98, 0x11, 0xdf, 0x39, 0x82, 0xc3, 0x5e, 0x10, 0xd2, 0xb5, 0xd3,
-	0x00, 0xa3, 0x4b, 0xde, 0xe2, 0x95, 0x4f, 0x23, 0x54, 0x86, 0xe2, 0x12, 0xcf, 0x1f, 0xaa, 0x5a,
-	0xfd, 0xe0, 0x52, 0x47, 0x36, 0x18, 0x53, 0x1c, 0xe2, 0xa9, 0x47, 0xd7, 0xd5, 0x03, 0x1e, 0x71,
-	0xfe, 0xd1, 0xa0, 0xd4, 0x5d, 0x04, 0xd8, 0x9b, 0x73, 0xe8, 0x1c, 0x07, 0x44, 0x40, 0x4d, 0xf4,
-	0x35, 0x14, 0xe9, 0x3a, 0x24, 0x02, 0x56, 0x69, 0x9d, 0x37, 0x13, 0x9d, 0xa6, 0x84, 0xdf, 0xb0,
-	0x43, 0x06, 0x32, 0xa2, 0x07, 0x42, 0xa7, 0xf7, 0x24, 0xaa, 0xea, 0x75, 0xfd, 0xd2, 0x6a, 0x9d,
-	0x28, 0xc0, 0x89, 0x38, 0x42, 0xdf, 0x82, 0x31, 0x8b, 0xcb, 0xa9, 0x16, 0xeb, 0x1a, 0x03, 0x9d,
-	0xaa, 0x6c, 0xf1, 0x91, 0x73, 0x07, 0xa5, 0x38, 0xe1, 0xff, 0x16, 0x22, 0xe1, 0xa2, 0x10, 0x55,
-	0x43, 0xcf, 0xd7, 0xf8, 0x0e, 0x60, 0x44, 0x82, 0x3b, 0xb2, 0x8c, 0xee, 0xbd, 0x10, 0x1d, 0xc3,
-	0xe1, 0xdf, 0xd8, 0x5f, 0x6d, 0x84, 0x58, 0x73, 0xbc, 0x48, 0x1e, 0x0b, 0x31, 0xc3, 0x79, 0x0e,
-	0x66, 0x7f, 0x49, 0xfe, 0x5a, 0x91, 0xf9, 0x74, 0x9d, 0x45, 0xb3, 0xbf, 0xd3, 0xc5, 0x6a, 0x4e,
-	0xe3, 0x3e, 0x7e, 0x03, 0x45, 0x97, 0xf5, 0xf9, 0x03, 0xa8, 0xa7, 0x70, 0xde, 0x59, 0x12, 0x4c,
-	0xc9, 0x64, 0x8e, 0xc3, 0xe8, 0x7e, 0x41, 0x5d, 0xce, 0x1e, 0x51, 0xe7, 0x0d, 0x9c, 0x66, 0x0f,
-	0x42, 0x7f, 0x8d, 0x9e, 0x43, 0x29, 0xa2, 0x98, 0xae, 0x22, 0x41, 0x57, 0x69, 0x7d, 0xae, 0xde,
-	0x3e, 0x46, 0x4e, 0x04, 0x00, 0x9d, 0xc3, 0xb1, 0x84, 0x8e, 0x48, 0x14, 0xe1, 0x77, 0xbc, 0x5f,
-	0xda, 0xa5, 0xe9, 0x9c, 0x01, 0x1a, 0x10, 0x9a, 0x95, 0x7b, 0x07, 0x76, 0x2a, 0xfa, 0x49, 0xb4,
-	0xd0, 0x09, 0x98, 0xd4, 0x0b, 0x18, 0x3f, 0x0e, 0x42, 0xf1, 0x0a, 0xba, 0xd3, 0x02, 0xeb, 0xda,
-	0x8b, 0x36, 0xba, 0xc9, 0x5b, 0x6a, 0x8f, 0xbc, 0xa5, 0xf3, 0x3d, 0x98, 0x32, 0x87, 0x57, 0xa5,
-	0x4e, 0x98, 0x96, 0x33, 0x61, 0x4e, 0x1d, 0x6c, 0x9e, 0x21, 0x07, 0x33, 0x92, 0x89, 0xdb, 0x21,
-	0xd2, 0x59, 0x1b, 0xee, 0x00, 0xda, 0xb3, 0xd9, 0xa6, 0x8c, 0xaf, 0xa0, 0x34, 0x13, 0x58, 0x76,
-	0xaa, 0x65, 0x28, 0xe3, 0x65, 0x60, 0x10, 0xa9, 0x2b, 0xee, 0xb6, 0x77, 0xae, 0x2b, 0x50, 0x12,
-	0x4f, 0x2d, 0x47, 0xdf, 0x74, 0x00, 0x0c, 0xa1, 0xc1, 0xd4, 0x9d, 0x5f, 0x00, 0x58, 0x83, 0x15,
-	0xbd, 0x98, 0x8c, 0x5f, 0xfc, 0x03, 0x64, 0x07, 0x82, 0xec, 0x57, 0xf1, 0x6e, 0xdb, 0x61, 0x95,
-	0x97, 0x6a, 0x80, 0x15, 0x24, 0xa1, 0x4d, 0x43, 0xd4, 0x36, 0x6e, 0x13, 0x9c, 0x97, 0x70, 0xc2,
-	0x18, 0x92, 0xf9, 0xdd, 0x3c, 0xb2, 0xf5, 0x36, 0x8e, 0x78, 0xb1, 0x96, 0xd5, 0x3a, 0x53, 0x08,
-	0x12, 0x3c, 0x73, 0x91, 0x53, 0x96, 0xdf, 0xc1, 0xcb, 0x99, 0x37, 0xc7, 0x3e, 0x73, 0x0c, 0xc9,
-	0x70, 0x0a, 0xd6, 0x74, 0x1b, 0x93, 0xbe, 0xe2, 0x34, 0xa1, 0xcc, 0xaf, 0xcb, 0x16, 0x40, 0x82,
-	0x2e, 0xe0, 0x90, 0xbb, 0xce, 0xa6, 0xc2, 0x27, 0x8a, 0x00, 0x07, 0x35, 0xda, 0x00, 0xca, 0xf2,
-	0x5a, 0x70, 0x74, 0x3b, 0xbe, 0x1a, 0xbf, 0x7a, 0x33, 0xb6, 0x0b, 0xc8, 0x80, 0xe2, 0xa8, 0x37,
-	0xfa, 0xcd, 0xd6, 0xf8, 0xaf, 0xbe, 0xdb, 0xfb, 0xc3, 0x3e, 0xe0, 0xbf, 0xdc, 0xf6, 0xf8, 0xca,
-	0xd6, 0xf9, 0xaf, 0x4e, 0xdb, 0xed, 0xda, 0xc5, 0x46, 0x15, 0x40, 0x31, 0x22, 0x60, 0xe6, 0x71,
-	0xe3, 0x0e, 0xc7, 0x03, 0xbb, 0xd0, 0xf8, 0x1d, 0x2a, 0x99, 0x79, 0x65, 0x02, 0xaf, 0x7b, 0xe3,
-	0xae, 0x38, 0x46, 0x4f, 0xc0, 0x1a, 0x8e, 0xff, 0x7c, 0xed, 0xbe, 0x1a, 0xb8, 0xbd, 0xc9, 0x84,
-	0xe9, 0x54, 0x58, 0x31, 0xb7, 0x9d, 0x0e, 0xfb, 0xd3, 0xbf, 0xbd, 0x66, 0x6a, 0x8c, 0xab, 0xdf,
-	0x1e, 0x5e, 0xf7, 0xba, 0xb6, 0xde, 0xfa, 0xd7, 0xe0, 0xae, 0xc4, 0xfd, 0x16, 0xdd, 0x40, 0x25,
-	0xbd, 0xa2, 0xa8, 0xae, 0x5c, 0x6b, 0xef, 0x5a, 0xd7, 0x2e, 0x1e, 0x41, 0xf0, 0x31, 0x29, 0xa0,
-	0x2b, 0xb0, 0x94, 0x4d, 0x44, 0x5f, 0x2a, 0x09, 0xbb, 0x7b, 0x5b, 0x7b, 0x96, 0x77, 0x2c, 0xc9,
-	0x7e, 0x84, 0x22, 0xdf, 0x03, 0xf4, 0x99, 0x02, 0x53, 0xd6, 0xaf, 0x76, 0xb6, 0x13, 0x97, 0x79,
-	0x2f, 0xe0, 0x88, 0xff, 0x6d, 0xfb, 0x3e, 0xb2, 0x15, 0x88, 0xf8, 0x9a, 0xe4, 0x26, 0xbd, 0x94,
-	0xab, 0x1d, 0x2f, 0xdd, 0x9e, 0xc4, 0x67, 0x99, 0x44, 0x75, 0x3d, 0x59, 0xfe, 0x4f, 0x60, 0x4d,
-	0x08, 0x4d, 0x3e, 0x54, 0xfb, 0xfc, 0xba, 0xb6, 0xd7, 0xc4, 0xf9, 0x3d, 0x79, 0xd3, 0x92, 0xd4,
-	0x5d, 0xe9, 0xdc, 0xbc, 0xb2, 0x7c, 0x85, 0x78, 0xc9, 0x77, 0xf7, 0xbe, 0xb6, 0x1b, 0x62, 0x79,
-	0x3f, 0x40, 0xb9, 0x4b, 0x7c, 0xf2, 0x58, 0xde, 0x4e, 0x0d, 0xa2, 0xad, 0x26, 0x2f, 0xf3, 0xe3,
-	0xb4, 0x92, 0x1a, 0x63, 0x63, 0xd8, 0xf5, 0x8a, 0xda, 0x1e, 0x07, 0x54, 0x6a, 0xcc, 0xcf, 0xcb,
-	0xaf, 0xf1, 0x23, 0xb5, 0x5e, 0x80, 0xce, 0x9c, 0x0e, 0xa9, 0xc6, 0xb3, 0x75, 0xd7, 0x54, 0xf3,
-	0x13, 0x43, 0x2c, 0xa0, 0x01, 0x1c, 0xa7, 0x1c, 0x2d, 0x95, 0xbe, 0x35, 0xcb, 0x5a, 0x66, 0x05,
-	0x32, 0x16, 0xc8, 0x88, 0x7a, 0xc2, 0x6c, 0xb6, 0x1f, 0xe6, 0x1c, 0x9e, 0x2f, 0xd2, 0xe1, 0xb4,
-	0x11, 0x32, 0x9a, 0x21, 0x54, 0xd2, 0xfe, 0x96, 0x47, 0x74, 0x91, 0x0e, 0x67, 0x1d, 0x91, 0x51,
-	0xfd, 0x0c, 0x47, 0xb1, 0xfd, 0xe5, 0x71, 0x3c, 0xcd, 0x84, 0x37, 0x4e, 0xe9, 0x14, 0xfe, 0x0b,
-	0x00, 0x00, 0xff, 0xff, 0x26, 0x98, 0x48, 0x89, 0xd0, 0x09, 0x00, 0x00,
+	// 958 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xac, 0x55, 0x5b, 0x73, 0xdb, 0x44,
+	0x14, 0xae, 0x2d, 0xc7, 0x97, 0x23, 0x47, 0x51, 0x36, 0x49, 0x49, 0x9d, 0xd2, 0x49, 0x17, 0x98,
+	0x71, 0x02, 0x0d, 0x8c, 0x43, 0x79, 0x81, 0xe9, 0xe0, 0xda, 0x4e, 0xc6, 0xe4, 0x42, 0x90, 0x9b,
+	0xe1, 0x91, 0x51, 0xe3, 0x6d, 0xa2, 0x89, 0x24, 0x0b, 0xed, 0x9a, 0xc1, 0xf9, 0x1b, 0xfc, 0x56,
+	0xde, 0xd9, 0x8b, 0x2c, 0xaf, 0x24, 0x3b, 0x9d, 0xce, 0xf0, 0x26, 0x1d, 0x7d, 0xdf, 0x77, 0x2e,
+	0x7b, 0xf6, 0x13, 0x34, 0xe9, 0xbd, 0xf7, 0xf0, 0x40, 0x8e, 0xa2, 0x78, 0xc2, 0x26, 0xa8, 0x31,
+	0x76, 0x99, 0x1b, 0x4c, 0xc6, 0xc4, 0xc7, 0x35, 0x58, 0x1b, 0x04, 0x11, 0x9b, 0xe1, 0x33, 0xb0,
+	0x47, 0xf7, 0x84, 0xdd, 0xdc, 0x5d, 0xc5, 0x93, 0x88, 0xc4, 0xcc, 0x23, 0x14, 0x3d, 0x05, 0x2b,
+	0x70, 0xff, 0xbe, 0x0e, 0xbd, 0x3f, 0xa7, 0x64, 0xc8, 0x48, 0x40, 0x77, 0x4b, 0xfb, 0xa5, 0xb6,
+	0x81, 0x36, 0xa1, 0x41, 0xe2, 0x78, 0x12, 0x3b, 0x2e, 0x23, 0xbb, 0x65, 0x1e, 0x2a, 0xa3, 0x26,
+	0x54, 0xa8, 0xf7, 0x40, 0x76, 0x0d, 0x01, 0xc0, 0xaf, 0xc1, 0x54, 0x62, 0x23, 0xc6, 0x21, 0xc8,
+	0x86, 0xfa, 0x07, 0xcf, 0xf7, 0x25, 0xbc, 0x24, 0xe1, 0xdb, 0xd0, 0xf4, 0x5d, 0xca, 0x46, 0xa1,
+	0x1b, 0xd1, 0xbb, 0x09, 0x93, 0x22, 0x06, 0xfe, 0x11, 0xaa, 0xfd, 0x49, 0xe0, 0x7a, 0xa1, 0x90,
+	0x0b, 0xdd, 0x40, 0xa0, 0xcb, 0xed, 0x06, 0xfa, 0x02, 0xea, 0x54, 0xca, 0x11, 0xca, 0x91, 0x46,
+	0xdb, 0xec, 0x6c, 0x1e, 0xa5, 0x2d, 0x1c, 0xa9, 0x4c, 0xf8, 0x9f, 0x12, 0x54, 0xd5, 0x63, 0x81,
+	0x5d, 0x61, 0xb3, 0x48, 0x14, 0x5a, 0x6e, 0x5b, 0x9d, 0x9d, 0x02, 0xf3, 0x1d, 0xff, 0x88, 0xbe,
+	0x05, 0x88, 0xd2, 0xc6, 0x65, 0x17, 0x66, 0x67, 0xaf, 0x00, 0xd5, 0x66, 0xf3, 0x15, 0xac, 0x51,
+	0xd1, 0xdc, 0x6e, 0x45, 0x62, 0x9f, 0x16, 0xb0, 0xb2, 0x75, 0xfc, 0x0a, 0xe0, 0x82, 0x04, 0xef,
+	0x49, 0x4c, 0xef, 0xbc, 0x08, 0xad, 0xc3, 0xda, 0x5f, 0xae, 0x3f, 0x9d, 0x57, 0xc6, 0xe7, 0xe2,
+	0x51, 0xf5, 0x59, 0x56, 0x57, 0xc7, 0x07, 0xd0, 0x38, 0x89, 0x09, 0x1f, 0x77, 0x78, 0x33, 0xcb,
+	0xa3, 0xf9, 0xeb, 0xcd, 0x64, 0x1a, 0x32, 0x09, 0x35, 0xf0, 0x97, 0x50, 0x71, 0xdc, 0xf0, 0xfe,
+	0x23, 0xa8, 0xcf, 0x60, 0xa7, 0x17, 0x13, 0x5e, 0xc9, 0x7c, 0xd4, 0x8e, 0x50, 0xa7, 0x0c, 0xff,
+	0x0e, 0x5b, 0xf9, 0x0f, 0x91, 0x3f, 0x43, 0x07, 0x50, 0x15, 0x6d, 0x4d, 0xa9, 0x94, 0xb3, 0x3a,
+	0xcf, 0xf4, 0xbe, 0x12, 0xe4, 0x48, 0x02, 0xd0, 0x0e, 0xac, 0x2b, 0xe8, 0x05, 0xa1, 0xd4, 0xbd,
+	0x55, 0x9b, 0xd0, 0xc0, 0xdb, 0x80, 0x4e, 0x09, 0xcb, 0xa7, 0xbb, 0x05, 0x3b, 0x13, 0xfd, 0x5f,
+	0x72, 0x89, 0x45, 0x64, 0x5e, 0xc0, 0xf5, 0xdd, 0x20, 0x4a, 0x56, 0xaf, 0x03, 0xe6, 0xb9, 0x47,
+	0xe7, 0x79, 0xd3, 0xc3, 0x2f, 0x3d, 0x72, 0xf8, 0xf8, 0x3b, 0x68, 0x28, 0x8e, 0xa8, 0x4a, 0x5f,
+	0xb6, 0xd2, 0xaa, 0x65, 0xdb, 0x07, 0x5b, 0x30, 0xd4, 0xb6, 0x52, 0x45, 0x5c, 0x6c, 0x9d, 0xc1,
+	0xc7, 0xf0, 0x1e, 0xa0, 0x3b, 0x1e, 0xcf, 0xcb, 0x78, 0x09, 0xd5, 0xb1, 0xc4, 0xca, 0xfd, 0xcf,
+	0x4a, 0x26, 0x2b, 0xcf, 0x21, 0x2a, 0xaf, 0xec, 0x6d, 0x59, 0x56, 0x64, 0x41, 0x55, 0x1e, 0xb5,
+	0x58, 0x50, 0x91, 0x03, 0xa0, 0x2e, 0x73, 0xf0, 0xec, 0xb8, 0x0b, 0xc0, 0x07, 0xbc, 0x68, 0xfb,
+	0xe3, 0x4d, 0x68, 0x72, 0x65, 0x29, 0xf7, 0x06, 0xec, 0xc5, 0xae, 0x3a, 0x84, 0x4e, 0x7d, 0x86,
+	0x0e, 0xc1, 0x0c, 0xd2, 0xd8, 0x5c, 0x4b, 0x1f, 0xe3, 0x82, 0x81, 0x7f, 0x82, 0x8d, 0x74, 0x79,
+	0x13, 0xfa, 0x01, 0x98, 0x1f, 0x92, 0x90, 0x97, 0x5e, 0xde, 0x6d, 0x8d, 0x9e, 0x12, 0x70, 0x1b,
+	0x36, 0x7b, 0x6e, 0x3c, 0xf6, 0x42, 0xd7, 0xf7, 0xd8, 0x9c, 0xbf, 0x05, 0xe6, 0xcd, 0x22, 0x28,
+	0x4f, 0xd1, 0xc0, 0xc7, 0x60, 0x89, 0xcd, 0xf7, 0xc2, 0x5b, 0x9a, 0xc0, 0x5e, 0x42, 0x3d, 0x4e,
+	0x22, 0x49, 0x89, 0x1b, 0x5a, 0x0e, 0x01, 0xc6, 0x6f, 0xe5, 0x5a, 0xea, 0xfd, 0x89, 0x33, 0xfb,
+	0x06, 0x6a, 0xb1, 0x94, 0x98, 0xf3, 0xf6, 0x96, 0xb6, 0xa6, 0xd2, 0xe0, 0x9f, 0x61, 0x93, 0x6b,
+	0x68, 0x3d, 0x0a, 0x89, 0xaf, 0xf3, 0x12, 0xad, 0x65, 0xed, 0x25, 0x0a, 0x7d, 0xd8, 0xe2, 0x0a,
+	0x99, 0x3e, 0x85, 0xc6, 0xab, 0xbc, 0xc6, 0x73, 0x4d, 0xa3, 0x30, 0x15, 0x71, 0x50, 0xe2, 0xac,
+	0xd3, 0x19, 0x08, 0x89, 0xc3, 0xbc, 0xc4, 0xb3, 0xdc, 0x04, 0x16, 0xe3, 0x3a, 0xfc, 0x1e, 0x40,
+	0xb3, 0xbe, 0x3a, 0x54, 0x2e, 0x06, 0x17, 0x6f, 0xed, 0x92, 0x78, 0x3a, 0x71, 0x06, 0xbf, 0xd9,
+	0x65, 0xf1, 0xe4, 0x74, 0x2f, 0xcf, 0x6c, 0x43, 0x3c, 0xf5, 0xba, 0x4e, 0xdf, 0xae, 0x1c, 0xfe,
+	0x02, 0x56, 0xee, 0x56, 0x9a, 0x50, 0xbb, 0x1a, 0x5c, 0xf6, 0x87, 0x97, 0xa7, 0x9c, 0xbc, 0x01,
+	0xe6, 0xf0, 0xf2, 0x8f, 0x2b, 0xe7, 0xd7, 0x53, 0x67, 0x30, 0x1a, 0x71, 0x0d, 0x8b, 0x67, 0xb9,
+	0xee, 0xf5, 0xf8, 0xcb, 0xc9, 0xf5, 0x39, 0x57, 0x02, 0xa8, 0x9e, 0x74, 0x87, 0xe7, 0x03, 0xae,
+	0xd5, 0xf9, 0xb7, 0x26, 0xcc, 0x5a, 0xfc, 0x92, 0xd0, 0x3b, 0xb0, 0xb2, 0x46, 0x84, 0xf6, 0xf5,
+	0xe6, 0x97, 0x99, 0x57, 0xeb, 0xc5, 0x23, 0x08, 0x71, 0x19, 0x9e, 0xa0, 0x33, 0x30, 0x35, 0xbf,
+	0x41, 0x9f, 0x6b, 0x84, 0xa2, 0x3b, 0xb5, 0xf6, 0x56, 0x7d, 0x56, 0x62, 0x3f, 0x40, 0x45, 0xdc,
+	0x76, 0xa4, 0x9b, 0xbc, 0x66, 0x32, 0xad, 0xed, 0x42, 0x5c, 0xf1, 0x8e, 0xa1, 0x26, 0x5e, 0xbb,
+	0xbe, 0x8f, 0x6c, 0x0d, 0x22, 0x7f, 0xb8, 0x2b, 0x49, 0x6f, 0x94, 0x81, 0x25, 0xd6, 0xb2, 0x84,
+	0xb8, 0x97, 0x23, 0xea, 0x26, 0x24, 0x8b, 0x6d, 0xaa, 0x91, 0x24, 0xbe, 0x52, 0xb4, 0x9a, 0x56,
+	0x31, 0xc4, 0x79, 0xaf, 0xa1, 0xd9, 0x27, 0x3e, 0x79, 0x8c, 0x57, 0xa8, 0x45, 0xf6, 0xd8, 0xe0,
+	0x13, 0xfb, 0xc4, 0x5c, 0x69, 0x8d, 0x89, 0x13, 0x15, 0xcd, 0xa9, 0xb5, 0xc4, 0x74, 0xb5, 0x1a,
+	0x57, 0xf3, 0x56, 0xd7, 0xf8, 0x89, 0xb9, 0x8e, 0xc1, 0xe0, 0xe6, 0x8a, 0x74, 0xaf, 0x5b, 0x18,
+	0x7a, 0x6b, 0x2b, 0x1f, 0x56, 0xc3, 0x3f, 0x85, 0xf5, 0x8c, 0xcb, 0x64, 0xe8, 0x0b, 0x7f, 0x6e,
+	0xe5, 0xf6, 0x31, 0x67, 0x4b, 0x5c, 0x68, 0x00, 0x4d, 0xdd, 0x6a, 0x56, 0xe9, 0x3c, 0xcf, 0x86,
+	0xb3, 0xd6, 0xc4, 0x65, 0x86, 0x60, 0x65, 0xfd, 0x66, 0x95, 0xd0, 0x8b, 0x6c, 0x38, 0xef, 0x50,
+	0x5c, 0xaa, 0x27, 0x6f, 0xd4, 0xdc, 0x49, 0x56, 0xe9, 0xe4, 0x6e, 0x52, 0xc6, 0xa3, 0xf0, 0x93,
+	0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x5c, 0xbd, 0xda, 0xbb, 0x88, 0x0a, 0x00, 0x00,
 }

@@ -10,9 +10,6 @@ service Skizze {
   rpc ListAll (Empty) returns (ListReply) {}
   rpc ListDomains (Empty) returns (ListDomainsReply) {}
 
-  rpc SetDefaults (Defaults) returns (Defaults) {}
-  rpc GetDefaults (Empty) returns (Defaults) {}
-
   rpc CreateDomain (Domain) returns (Domain) {}
   rpc DeleteDomain (Domain) returns (Empty) {}
   rpc GetDomain (Domain) returns (Domain) {}
@@ -26,7 +23,7 @@ service Skizze {
   rpc GetMembership (GetRequest) returns (GetMembershipReply) {}
   rpc GetFrequency (GetRequest) returns (GetFrequencyReply) {}
   rpc GetCardinality (GetRequest) returns (GetCardinalityReply) {}
-  rpc GetRank (GetRequest) returns (GetRankReply) {}
+  rpc GetRankings (GetRequest) returns (GetRankingsReply) {}
 }
 
 
@@ -34,23 +31,17 @@ service Skizze {
 // Enums
 //
 enum SketchType {
-  UNKNOWN = 0;
-
   MEMB = 1;
   FREQ = 2;
   RANK = 3;
   CARD = 4;
 }
 
-enum DomainType {
-  STRING = 0;
-}
-
 enum SnapshotStatus {
-  PENDING     = 0;
-  IN_PROGRESS = 1;
-  SUCCESSFUL  = 2;
-  FAILED      = 3;
+  PENDING     = 1;
+  IN_PROGRESS = 2;
+  SUCCESSFUL  = 3;
+  FAILED      = 4;
 }
 
 
@@ -60,22 +51,33 @@ enum SnapshotStatus {
 message Empty {
 }
 
-message Defaults {
-  required int64 rank     = 1;
-  required int64 capacity = 2;
+message SketchProperties {
+  optional int64 maxUniqueItems = 1; // MEMB, FREQ
+  optional float errorRate      = 2; // MEMB, FREQ
+  optional int64 size           = 3; // RANK
 }
 
+message SketchState {
+  optional float fillRate     = 1;  // 0.0 -> 1.0
+  optional int64 lastSnapshot = 2;  // Age of last snapshot in seconds since epoch
+}
+
+// CreateDomain: name:required, propertiess:optional (array = nSketchTypes, order of types above)
+// DeleteDomain: name:required
+// GetDomain   : name:required
 message Domain {
-  required string     name     = 1;
-  required DomainType type     = 2;
-  repeated Sketch     sketches = 3;
-  optional Defaults   defaults = 4;
+  required string     name       = 1;
+  repeated Sketch     sketches   = 2;
 }
 
+// CreateSketch: name:required, type:required, properties:optional
+// DeleteSketch: name:required, type:required
+// GetSketch   : name:required, type:required
 message Sketch {
-  required string     name     = 1;
-  required SketchType type     = 2;
-  optional Defaults   defaults = 3;
+  required string           name       = 1;
+  required SketchType       type       = 2;
+  optional SketchProperties properties = 3;
+  optional SketchState      state      = 4;
 }
 
 message Membership {
@@ -84,7 +86,7 @@ message Membership {
 }
 
 message Frequency {
-  required string value      = 1;
+  required string value  = 1;
   required int64  count  = 2;
 }
 
@@ -92,6 +94,7 @@ message Rank {
   required string value = 1;
   required int64  count  = 2;
 }
+
 
 //
 // Request/Reply Envelopes
@@ -138,23 +141,41 @@ message AddRequest {
 message AddReply {
 }
 
+// All Sketches will be of one kind
+// All values will apply to all sketches (if card or ranking, values will be ignored)
 message GetRequest {
-  required Sketch sketch = 1;
-  repeated string values = 2;
+  repeated Sketch sketches = 1;   // MEMB:users-20151214,MEMB:users-20151214
+  repeated string values   = 2;   // "gary","michelle","ray","harpindar" // Apply to all sketches above
 }
 
-message GetMembershipReply {
+message MembershipResult {
   repeated Membership memberships = 1;
 }
 
-message GetFrequencyReply {
+message FrequencyResult {
   repeated Frequency frequencies = 2;
 }
 
-message GetCardinalityReply {
+message CardinalityResult {
   required int64 cardinality = 1;
 }
 
-message GetRankReply {
-  repeated Rank ranks = 1;
+message RankingsResult {
+  repeated Rank rankings = 1;
+}
+
+message GetMembershipReply {
+  repeated MembershipResult results = 1;
+}
+
+message GetFrequencyReply {
+  repeated FrequencyResult results = 1;
+}
+
+message GetCardinalityReply {
+  repeated CardinalityResult results = 1;
+}
+
+message GetRankingsReply {
+  repeated RankingsResult results = 1;
 }
