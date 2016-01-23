@@ -23,14 +23,21 @@ func createDomain(fields []string, in *pb.Domain) error {
 		return fmt.Errorf("Expected 3rd argument to be of type int: %q", err)
 	}
 
-	rank, err := strconv.Atoi(fields[4])
+	size, err := strconv.Atoi(fields[4])
 	if err != nil {
 		return fmt.Errorf("Expected last argument to be of type int: %q", err)
 	}
 
-	in.Defaults = &pb.Defaults{
-		Rank:     proto.Int64(int64(rank)),
-		Capacity: proto.Int64(int64(capa)),
+	types := []pb.SketchType{pb.SketchType_MEMB, pb.SketchType_FREQ, pb.SketchType_RANK, pb.SketchType_CARD}
+	for _, ty := range types {
+		sketch := &pb.Sketch{}
+		sketch.Name = proto.String("")
+		sketch.Type = &ty
+		sketch.Properties = &pb.SketchProperties{
+			Size:           proto.Int64(int64(size)),
+			MaxUniqueItems: proto.Int64(int64(capa)),
+		}
+		in.Sketches = append(in.Sketches, sketch)
 	}
 
 	_, err = client.CreateDomain(context.Background(), in)
@@ -51,10 +58,8 @@ func addToDomain(fields []string, in *pb.Domain) error {
 
 func sendDomainRequest(fields []string) error {
 	name := fields[2]
-	typ := pb.DomainType_STRING
 	in := &pb.Domain{
 		Name: proto.String(name),
-		Type: &typ,
 	}
 
 	switch strings.ToLower(fields[0]) {
@@ -90,7 +95,7 @@ func deleteDomain(fields []string, in *pb.Domain) error {
 func getDomainInfo(fields []string, in *pb.Domain) error {
 	dom, err := client.GetDomain(context.Background(), in)
 	if err == nil {
-		_, _ = fmt.Fprintln(w, fmt.Sprintf("Name: %s  Type: %s\t", dom.GetName(), dom.GetType()))
+		_, _ = fmt.Fprintln(w, fmt.Sprintf("Name: %s  Type: %s\t", dom.GetName(), ""))
 		_ = w.Flush()
 	}
 	return err

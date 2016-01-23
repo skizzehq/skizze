@@ -22,7 +22,7 @@ func TestSaveLoadInfo(t *testing.T) {
 	infos := map[string]*datamodel.Info{}
 	for i := 0; i < 10; i++ {
 		info := datamodel.NewEmptyInfo()
-		info.Properties.Capacity = 10000
+		info.Properties.MaxUniqueItems = 10000
 		info.Name = fmt.Sprintf("marvel-%d", i)
 		info.Type = datamodel.HLLPP
 		infos[info.ID()] = info
@@ -91,7 +91,7 @@ func TestOverwriteInfo(t *testing.T) {
 	infos := map[string]*datamodel.Info{}
 	for i := 0; i < 10; i++ {
 		info := datamodel.NewEmptyInfo()
-		info.Properties.Capacity = 10000
+		info.Properties.MaxUniqueItems = 10000
 		info.Name = fmt.Sprintf("marvel-%d", i)
 		info.Type = datamodel.HLLPP
 		infos[info.ID()] = info
