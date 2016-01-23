@@ -129,7 +129,7 @@ message ListReply {
 }
 
 message ListDomainsReply {
-  repeated string name = 1;
+  repeated string names = 1;
 }
 
 message AddRequest {
