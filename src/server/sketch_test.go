@@ -50,9 +50,9 @@ func TestCreateAddInvalidSketch(t *testing.T) {
 	in := &pb.Sketch{
 		Name: proto.String(name),
 		Type: &typ,
-		Defaults: &pb.Defaults{
-			Capacity: proto.Int64(1337), // FIXME: Allow default as -1
-			Rank:     proto.Int64(7),
+		Properties: &pb.SketchProperties{
+			MaxUniqueItems: proto.Int64(1337), // FIXME: Allow default as -1
+			Size:           proto.Int64(7),
 		},
 	}
 
@@ -167,15 +167,15 @@ func TestAddGetCardSketch(t *testing.T) {
 	}
 
 	getReq := &pb.GetRequest{
-		Sketch: in,
-		Values: []string{},
+		Sketches: []*pb.Sketch{in},
+		Values:   []string{},
 	}
 
 	if res, err := client.GetCardinality(context.Background(), getReq); err != nil {
 		t.Error("Did not expect error, got", err)
 
-	} else if res.GetCardinality() != 4 {
-		t.Error("Expected cardinality 4, got", res.GetCardinality())
+	} else if res.GetResults()[0].GetCardinality() != 4 {
+		t.Error("Expected cardinality 4, got", res.GetResults()[0].GetCardinality())
 	}
 }
 
@@ -213,8 +213,8 @@ func TestAddGetMembSketch(t *testing.T) {
 	}
 
 	getReq := &pb.GetRequest{
-		Sketch: in,
-		Values: []string{"a", "b", "c", "d", "e", "b"},
+		Sketches: []*pb.Sketch{in},
+		Values:   []string{"a", "b", "c", "d", "e", "b"},
 	}
 
 	expected := map[string]bool{
@@ -224,7 +224,7 @@ func TestAddGetMembSketch(t *testing.T) {
 	if res, err := client.GetMembership(context.Background(), getReq); err != nil {
 		t.Error("Did not expect error, got", err)
 	} else {
-		for _, v := range res.Memberships {
+		for _, v := range res.GetResults()[0].Memberships {
 			if expected[v.GetValue()] != v.GetIsMember() {
 				t.Errorf("Expected %s == %t, got", v.GetValue(), v.GetIsMember())
 			}
@@ -270,14 +270,14 @@ func TestAddGetFreqSketch(t *testing.T) {
 	}
 
 	getReq := &pb.GetRequest{
-		Sketch: in,
-		Values: []string{"a", "b", "c", "d", "e", "b"},
+		Sketches: []*pb.Sketch{in},
+		Values:   []string{"a", "b", "c", "d", "e", "b"},
 	}
 
 	if res, err := client.GetFrequency(context.Background(), getReq); err != nil {
 		t.Error("Did not expect error, got", err)
 	} else {
-		for _, v := range res.GetFrequencies() {
+		for _, v := range res.GetResults()[0].GetFrequencies() {
 			if expected[v.GetValue()] != v.GetCount() {
 				t.Errorf("Expected %s == %d, got", v.GetValue(), v.GetCount())
 			}
@@ -323,13 +323,13 @@ func TestAddGetRankSketch(t *testing.T) {
 	}
 
 	getReq := &pb.GetRequest{
-		Sketch: in,
+		Sketches: []*pb.Sketch{in},
 	}
 
-	if res, err := client.GetRank(context.Background(), getReq); err != nil {
+	if res, err := client.GetRankings(context.Background(), getReq); err != nil {
 		t.Error("Did not expect error, got", err)
 	} else {
-		for _, v := range res.GetRanks() {
+		for _, v := range res.GetResults()[0].GetRankings() {
 			if expected[v.GetValue()] != v.GetCount() {
 				t.Errorf("Expected %s == %d, got", v.GetValue(), v.GetCount())
 			}

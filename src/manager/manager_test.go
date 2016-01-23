@@ -27,7 +27,7 @@ func TestCreateSketch(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.HLLPP
 	if err := m.CreateSketch(info); err != nil {
@@ -41,7 +41,7 @@ func TestCreateSketch(t *testing.T) {
 
 	// Create a second Sketch
 	info = datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.TopK
 	if err := m.CreateSketch(info); err != nil {
@@ -64,7 +64,7 @@ func TestCreateAndSaveSketch(t *testing.T) {
 	m := NewManager()
 
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.HLLPP
 	if err := m.CreateSketch(info); err != nil {
@@ -83,7 +83,7 @@ func TestCreateAndSaveSketch(t *testing.T) {
 
 	// Create a second Sketch
 	info = datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.TopK
 	if err := m.CreateSketch(info); err != nil {
@@ -116,7 +116,7 @@ func TestCreateDuplicateSketch(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.HLLPP
 	if err := m.CreateSketch(info); err != nil {
@@ -139,7 +139,7 @@ func TestCreateInvalidSketch(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = "N/A"
 	if err := m.CreateSketch(info); err == nil {
@@ -157,7 +157,7 @@ func TestDeleteNonExistingSketch(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.HLLPP
 	if err := m.DeleteSketch(info.ID()); err == nil {
@@ -175,7 +175,7 @@ func TestDeleteSketch(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.HLLPP
 	if err := m.CreateSketch(info); err != nil {
@@ -202,7 +202,7 @@ func TestCardSaveLoad(t *testing.T) {
 	m := NewManager()
 
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.HLLPP
 	if err := m.CreateSketch(info); err != nil {
@@ -265,7 +265,7 @@ func TestFreqSaveLoad(t *testing.T) {
 	m := NewManager()
 
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.CML
 	if err := m.CreateSketch(info); err != nil {
@@ -327,7 +327,7 @@ func TestRankSaveLoad(t *testing.T) {
 	m := NewManager()
 
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.TopK
 	if err := m.CreateSketch(info); err != nil {
@@ -393,7 +393,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 	m := NewManager()
 
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "marvel"
 	info.Type = datamodel.Bloom
 	if err := m.CreateSketch(info); err != nil {
@@ -466,8 +466,8 @@ func TestCreateDeleteDomain(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 1000000
-	info.Properties.Rank = 100
+	info.Properties.MaxUniqueItems = 1000000
+	info.Properties.Size = 100
 	info.Name = "marvel"
 	if err := m.CreateDomain(info); err != nil {
 		t.Error("Expected no errors, got", err)
@@ -480,7 +480,7 @@ func TestCreateDeleteDomain(t *testing.T) {
 
 	// Create a second Sketch
 	info = datamodel.NewEmptyInfo()
-	info.Properties.Capacity = 10000
+	info.Properties.MaxUniqueItems = 10000
 	info.Name = "dc"
 	if err := m.CreateDomain(info); err != nil {
 		t.Error("Expected no errors, got", err)

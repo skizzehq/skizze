@@ -51,29 +51,33 @@ enum SnapshotStatus {
 message Empty {
 }
 
-
-message Config {
+message SketchProperties {
   optional int64 maxUniqueItems = 1; // MEMB, FREQ
   optional float errorRate      = 2; // MEMB, FREQ
   optional int64 size           = 3; // RANK
 }
 
-// CreateDomain: name:required, configs:optional (array = nSketchTypes, order of types above)
+message SketchState {
+  optional float fillRate     = 1;  // 0.0 -> 1.0
+  optional int64 lastSnapshot = 2;  // Age of last snapshot in seconds since epoch
+}
+
+// CreateDomain: name:required, propertiess:optional (array = nSketchTypes, order of types above)
 // DeleteDomain: name:required
 // GetDomain   : name:required
 message Domain {
-  required string name     = 1;
-  repeated Sketch sketches = 2;
-  repeated Config config   = 3;
+  required string     name       = 1;
+  repeated Sketch     sketches   = 2;
 }
 
-// CreateSketch: name:required, type:required, config:optional
+// CreateSketch: name:required, type:required, properties:optional
 // DeleteSketch: name:required, type:required
 // GetSketch   : name:required, type:required
 message Sketch {
-  required string     name     = 1;
-  required SketchType type     = 2;
-  optional Config     config   = 3;
+  required string           name       = 1;
+  required SketchType       type       = 2;
+  optional SketchProperties properties = 3;
+  optional SketchState      state      = 4;
 }
 
 message Membership {
@@ -90,6 +94,7 @@ message Rank {
   required string value = 1;
   required int64  count  = 2;
 }
+
 
 //
 // Request/Reply Envelopes
@@ -139,8 +144,8 @@ message AddReply {
 // All Sketches will be of one kind
 // All values will apply to all sketches (if card or ranking, values will be ignored)
 message GetRequest {
-  repeated Sketch sketch = 1;   // MEMB:users-20151214,MEMB:users-20151214
-  repeated string values = 2;   // "gary","michelle","ray","harpindar" // Apply to all sketches above
+  repeated Sketch sketches = 1;   // MEMB:users-20151214,MEMB:users-20151214
+  repeated string values   = 2;   // "gary","michelle","ray","harpindar" // Apply to all sketches above
 }
 
 message MembershipResult {
@@ -156,7 +161,7 @@ message CardinalityResult {
 }
 
 message RankingsResult {
-  repeated Rank ranks = 1;
+  repeated Rank rankings = 1;
 }
 
 message GetMembershipReply {

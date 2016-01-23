@@ -114,9 +114,7 @@ func (m *domainManager) get(id string) (*datamodel.Domain, error) {
 	if _, ok := m.domains[id]; !ok {
 		return nil, fmt.Errorf("Could not find domain %s", id)
 	}
-	typ := datamodel.DomainType_STRING
 	return &datamodel.Domain{
 		Name: proto.String(id),
-		Type: &typ,
 	}, nil
 }
