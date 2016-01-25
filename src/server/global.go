@@ -1,7 +1,7 @@
 package server
 
 import (
-	pb "datamodel"
+	pb "datamodel/protobuf"
 
 	"golang.org/x/net/context"
 )

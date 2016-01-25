@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	pb "datamodel"
+	pb "datamodel/protobuf"
 
 	"github.com/gogo/protobuf/proto"
 )

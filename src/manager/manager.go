@@ -9,13 +9,16 @@ import (
 
 	"config"
 	"datamodel"
+	pb "datamodel/protobuf"
 	"storage"
 	"utils"
 )
 
 func isValidType(info *datamodel.Info) bool {
-	return info.Type == datamodel.Bloom || info.Type == datamodel.CML ||
-		info.Type == datamodel.HLLPP || info.Type == datamodel.TopK
+	if info.Type == nil {
+		return false
+	}
+	return len(datamodel.GetTypeString(info.GetType())) != 0
 }
 
 // Manager is responsible for manipulating the sketches and syncing to disk
@@ -143,14 +146,14 @@ func (m *Manager) CreateSketch(info *datamodel.Info) error {
 
 // CreateDomain ...
 func (m *Manager) CreateDomain(info *datamodel.Info) error {
-	types := datamodel.GetTypes()
 	infos := make(map[string]*datamodel.Info)
-	for _, typ := range types {
-		tmpInfo := datamodel.Info(*info)
-		tmpInfo.Type = typ
-		infos[tmpInfo.ID()] = &tmpInfo
+	for _, typ := range datamodel.GetTypesPb() {
+		styp := pb.SketchType(typ)
+		tmpInfo := info.Copy()
+		tmpInfo.Type = &styp
+		infos[tmpInfo.ID()] = tmpInfo
 	}
-	return m.domains.create(info.Name, infos)
+	return m.domains.create(info.GetName(), infos)
 }
 
 // AddToSketch ...
@@ -197,7 +200,9 @@ func (slice tupleResult) Swap(i, j int) {
 func (m *Manager) GetSketches() [][2]string {
 	sketches := tupleResult{}
 	for _, v := range m.infos.info {
-		sketches = append(sketches, [2]string{v.Name, v.Type})
+		sketches = append(sketches,
+			[2]string{v.GetName(),
+				datamodel.GetTypeString(v.GetType())})
 	}
 	sort.Sort(sketches)
 	return sketches
@@ -223,7 +228,7 @@ func (m *Manager) GetSketch(id string) (*datamodel.Info, error) {
 }
 
 // GetDomain ...
-func (m *Manager) GetDomain(id string) (*datamodel.Domain, error) {
+func (m *Manager) GetDomain(id string) (*pb.Domain, error) {
 	return m.domains.get(id)
 }
 

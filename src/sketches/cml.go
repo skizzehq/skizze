@@ -14,10 +14,7 @@ type CMLSketch struct {
 
 // NewCMLSketch ...
 func NewCMLSketch(info *datamodel.Info) (*CMLSketch, error) {
-	if info.Properties.MaxUniqueItems == 0 {
-		info.Properties.MaxUniqueItems = defaultMaxUniqueItems
-	}
-	sketch, err := cml.NewForCapacity16(uint64(info.Properties.MaxUniqueItems), 0.01)
+	sketch, err := cml.NewForCapacity16(uint64(info.Properties.GetMaxUniqueItems()), 0.01)
 	d := CMLSketch{info, sketch}
 	if err != nil {
 		logger.Errorf("an error has occurred while saving CMLSketch: %s", err.Error())

@@ -1,12 +1,14 @@
 package manager
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"config"
 	"datamodel"
+	pb "datamodel/protobuf"
 	"utils"
 )
 
@@ -27,9 +29,11 @@ func TestCreateSketch(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = datamodel.HLLPP
+	typ := pb.SketchType_CARD
+	info.Properties.MaxUniqueItems = utils.Int64p(10000)
+	info.Name = utils.Stringp(fmt.Sprintf("marvel"))
+	info.Type = &typ
+
 	if err := m.CreateSketch(info); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -40,11 +44,13 @@ func TestCreateSketch(t *testing.T) {
 	}
 
 	// Create a second Sketch
-	info = datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = datamodel.TopK
-	if err := m.CreateSketch(info); err != nil {
+	info2 := datamodel.NewEmptyInfo()
+	typ2 := pb.SketchType_RANK
+	info2.Properties.Size = utils.Int64p(10)
+	info2.Name = utils.Stringp(fmt.Sprintf("marvel"))
+	info2.Type = &typ2
+
+	if err := m.CreateSketch(info2); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 	if sketches := m.GetSketches(); len(sketches) != 2 {
@@ -62,11 +68,12 @@ func TestCreateAndSaveSketch(t *testing.T) {
 	defer utils.TearDownTests()
 
 	m := NewManager()
-
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = datamodel.HLLPP
+	typ := pb.SketchType_CARD
+	info.Properties.MaxUniqueItems = utils.Int64p(10000)
+	info.Name = utils.Stringp(fmt.Sprintf("marvel"))
+	info.Type = &typ
+
 	if err := m.CreateSketch(info); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -82,11 +89,13 @@ func TestCreateAndSaveSketch(t *testing.T) {
 	}
 
 	// Create a second Sketch
-	info = datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = datamodel.TopK
-	if err := m.CreateSketch(info); err != nil {
+	info2 := datamodel.NewEmptyInfo()
+	typ2 := pb.SketchType_RANK
+	info2.Properties.MaxUniqueItems = utils.Int64p(10000)
+	info2.Name = utils.Stringp(fmt.Sprintf("marvel"))
+	info2.Type = &typ2
+
+	if err := m.CreateSketch(info2); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 	if sketches := m.GetSketches(); len(sketches) != 2 {
@@ -116,9 +125,11 @@ func TestCreateDuplicateSketch(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = datamodel.HLLPP
+	typ := pb.SketchType_CARD
+	info.Properties.MaxUniqueItems = utils.Int64p(10000)
+	info.Name = utils.Stringp(fmt.Sprintf("marvel"))
+	info.Type = &typ
+
 	if err := m.CreateSketch(info); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -139,9 +150,9 @@ func TestCreateInvalidSketch(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = "N/A"
+	info.Properties.MaxUniqueItems = utils.Int64p(10000)
+	info.Name = utils.Stringp("avengers")
+	info.Type = nil
 	if err := m.CreateSketch(info); err == nil {
 		t.Error("Expected error invalid sketch, got", err)
 	}
@@ -157,9 +168,11 @@ func TestDeleteNonExistingSketch(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = datamodel.HLLPP
+	typ := pb.SketchType_CARD
+	info.Properties.MaxUniqueItems = utils.Int64p(10000)
+	info.Name = utils.Stringp(fmt.Sprintf("marvel"))
+	info.Type = &typ
+
 	if err := m.DeleteSketch(info.ID()); err == nil {
 		t.Error("Expected errors deleting non-existing sketch, got", err)
 	}
@@ -175,9 +188,11 @@ func TestDeleteSketch(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = datamodel.HLLPP
+	typ := pb.SketchType_CARD
+	info.Properties.MaxUniqueItems = utils.Int64p(10000)
+	info.Name = utils.Stringp(fmt.Sprintf("marvel"))
+	info.Type = &typ
+
 	if err := m.CreateSketch(info); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -200,11 +215,12 @@ func TestCardSaveLoad(t *testing.T) {
 	defer utils.TearDownTests()
 
 	m := NewManager()
-
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = datamodel.HLLPP
+	typ := pb.SketchType_CARD
+	info.Properties.MaxUniqueItems = utils.Int64p(10000)
+	info.Name = utils.Stringp(fmt.Sprintf("marvel"))
+	info.Type = &typ
+
 	if err := m.CreateSketch(info); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -263,11 +279,12 @@ func TestFreqSaveLoad(t *testing.T) {
 	defer utils.TearDownTests()
 
 	m := NewManager()
-
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = datamodel.CML
+	typ := pb.SketchType_FREQ
+	info.Properties.MaxUniqueItems = utils.Int64p(10000)
+	info.Name = utils.Stringp(fmt.Sprintf("marvel"))
+	info.Type = &typ
+
 	if err := m.CreateSketch(info); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -325,11 +342,12 @@ func TestRankSaveLoad(t *testing.T) {
 	defer utils.TearDownTests()
 
 	m := NewManager()
-
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = datamodel.TopK
+	typ := pb.SketchType_RANK
+	info.Properties.Size = utils.Int64p(10)
+	info.Name = utils.Stringp(fmt.Sprintf("marvel"))
+	info.Type = &typ
+
 	if err := m.CreateSketch(info); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -391,11 +409,12 @@ func TestMembershipSaveLoad(t *testing.T) {
 	defer utils.TearDownTests()
 
 	m := NewManager()
-
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "marvel"
-	info.Type = datamodel.Bloom
+	typ := pb.SketchType_MEMB
+	info.Properties.MaxUniqueItems = utils.Int64p(1000)
+	info.Name = utils.Stringp(fmt.Sprintf("marvel"))
+	info.Type = &typ
+
 	if err := m.CreateSketch(info); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -466,9 +485,10 @@ func TestCreateDeleteDomain(t *testing.T) {
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 1000000
-	info.Properties.Size = 100
-	info.Name = "marvel"
+	info.Properties.MaxUniqueItems = utils.Int64p(10000)
+	info.Properties.Size = utils.Int64p(10000)
+	info.Name = utils.Stringp(fmt.Sprintf("marvel"))
+
 	if err := m.CreateDomain(info); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -479,10 +499,10 @@ func TestCreateDeleteDomain(t *testing.T) {
 	}
 
 	// Create a second Sketch
-	info = datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 10000
-	info.Name = "dc"
-	if err := m.CreateDomain(info); err != nil {
+	info2 := datamodel.NewEmptyInfo()
+	info2.Properties.MaxUniqueItems = utils.Int64p(10000)
+	info2.Name = utils.Stringp("dc")
+	if err := m.CreateDomain(info2); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
 	if sketches := m.GetSketches(); len(sketches) != 8 {
@@ -492,4 +512,5 @@ func TestCreateDeleteDomain(t *testing.T) {
 	} else if sketches[1][0] != "dc" || sketches[1][1] != "freq" {
 		t.Error("Expected [[dc freq]], got", sketches[1][0], sketches[1][1])
 	}
+
 }
