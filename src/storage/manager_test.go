@@ -7,6 +7,7 @@ import (
 
 	"config"
 	"datamodel"
+	pb "datamodel/protobuf"
 	"utils"
 )
 
@@ -21,10 +22,11 @@ func TestSaveLoadInfo(t *testing.T) {
 
 	infos := map[string]*datamodel.Info{}
 	for i := 0; i < 10; i++ {
+		typ := pb.SketchType_CARD
 		info := datamodel.NewEmptyInfo()
-		info.Properties.MaxUniqueItems = 10000
-		info.Name = fmt.Sprintf("marvel-%d", i)
-		info.Type = datamodel.HLLPP
+		info.Properties.MaxUniqueItems = utils.Int64p(10000)
+		info.Name = utils.Stringp(fmt.Sprintf("marvel-%d", i))
+		info.Type = &typ
 		infos[info.ID()] = info
 	}
 
@@ -90,10 +92,11 @@ func TestOverwriteInfo(t *testing.T) {
 
 	infos := map[string]*datamodel.Info{}
 	for i := 0; i < 10; i++ {
+		typ := pb.SketchType_CARD
 		info := datamodel.NewEmptyInfo()
-		info.Properties.MaxUniqueItems = 10000
-		info.Name = fmt.Sprintf("marvel-%d", i)
-		info.Type = datamodel.HLLPP
+		info.Properties.MaxUniqueItems = utils.Int64p(10000)
+		info.Name = utils.Stringp(fmt.Sprintf("marvel-%d", i))
+		info.Type = &typ
 		infos[info.ID()] = info
 	}
 
@@ -113,7 +116,7 @@ func TestOverwriteInfo(t *testing.T) {
 		t.Error("Expected 10 info in map, go", len(infoMap))
 	}
 
-	delete(infos, "marvel-0.card")
+	delete(infos, "marvel-0.CARD")
 	if err := m.SaveInfo(infos); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -128,6 +131,7 @@ func TestOverwriteInfo(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	} else if len(infoMap) != 9 {
 		t.Error("Expected 9 info in map, go", len(infoMap))
+		fmt.Println(infoMap)
 	}
 }
 

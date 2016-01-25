@@ -25,7 +25,7 @@ func (m *sketchManager) load(info *datamodel.Info) error {
 	sketch, ok := m.sketches[info.ID()]
 	if ok {
 		return fmt.Errorf(`Sketch of type "%s" with name "%s" already loaded`,
-			info.Type, info.Name)
+			info.GetType(), info.GetName())
 	}
 
 	file, err := m.storage.GetFile(info.ID())
@@ -34,11 +34,12 @@ func (m *sketchManager) load(info *datamodel.Info) error {
 
 	if err != nil {
 		return fmt.Errorf(`Could not get find file for sketch of type "%s" and name "%s", %q`,
-			info.Type, info.Name, err)
+			info.GetType(), info.GetName(), err)
 	}
 	sketch, err = sketches.LoadSketch(info, file)
 	if err != nil {
-		return fmt.Errorf(`Could not load sketch "%s" with name "%s", %q`, info.Type, info.Name, err)
+		return fmt.Errorf(`Could not load sketch "%s" with name "%s", %q`,
+			info.GetType(), info.GetName(), err)
 	}
 	m.sketches[info.ID()] = sketch
 	return nil

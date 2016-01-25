@@ -13,7 +13,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	pb "datamodel"
+	"datamodel"
+	pb "datamodel/protobuf"
 
 	"github.com/peterh/liner"
 )
@@ -23,10 +24,10 @@ var conn *grpc.ClientConn
 var historyFn = filepath.Join(os.TempDir(), ".skizze_history")
 var w = new(tabwriter.Writer)
 var typeMap = map[string]pb.SketchType{
-	pb.HLLPP: pb.SketchType_CARD,
-	pb.CML:   pb.SketchType_FREQ,
-	pb.Bloom: pb.SketchType_MEMB,
-	pb.TopK:  pb.SketchType_RANK,
+	datamodel.HLLPP: pb.SketchType_CARD,
+	datamodel.CML:   pb.SketchType_FREQ,
+	datamodel.Bloom: pb.SketchType_MEMB,
+	datamodel.TopK:  pb.SketchType_RANK,
 }
 
 func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
@@ -81,15 +82,15 @@ func evalutateQuery(query string) error {
 
 	if len(fields) > 2 {
 		switch strings.ToLower(fields[1]) {
-		case pb.HLLPP:
+		case datamodel.HLLPP:
 			return sendSketchRequest(fields, pb.SketchType_CARD)
-		case pb.CML:
+		case datamodel.CML:
 			return sendSketchRequest(fields, pb.SketchType_FREQ)
-		case pb.TopK:
+		case datamodel.TopK:
 			return sendSketchRequest(fields, pb.SketchType_RANK)
-		case pb.Bloom:
+		case datamodel.Bloom:
 			return sendSketchRequest(fields, pb.SketchType_MEMB)
-		case pb.DOM:
+		case datamodel.DOM:
 			return sendDomainRequest(fields)
 		default:
 			return fmt.Errorf("unkown field or command %s", fields[1])

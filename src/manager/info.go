@@ -30,7 +30,7 @@ func (m *infoManager) get(id string) *datamodel.Info {
 func (m *infoManager) create(info *datamodel.Info) error {
 	if _, ok := m.info[info.ID()]; ok {
 		return fmt.Errorf(`Sketch of type "%s" with name "%s" already exists`,
-			info.Type, info.Name)
+			info.GetType(), info.GetName())
 	}
 	m.info[info.ID()] = info
 	return nil

@@ -7,7 +7,7 @@ import (
 	"golang.org/x/net/context"
 
 	"config"
-	pb "datamodel"
+	pb "datamodel/protobuf"
 	"utils"
 )
 
@@ -91,6 +91,10 @@ func TestCreateAddDeleteAddSketch(t *testing.T) {
 	in := &pb.Sketch{
 		Name: proto.String(name),
 		Type: &typ,
+		Properties: &pb.SketchProperties{
+			MaxUniqueItems: proto.Int64(1337), // FIXME: Allow default as -1
+			Size:           proto.Int64(7),
+		},
 	}
 
 	addReq := &pb.AddRequest{
@@ -147,6 +151,10 @@ func TestAddGetCardSketch(t *testing.T) {
 	in := &pb.Sketch{
 		Name: proto.String(name),
 		Type: &typ,
+		Properties: &pb.SketchProperties{
+			MaxUniqueItems: proto.Int64(1337), // FIXME: Allow default as -1
+			Size:           proto.Int64(7),
+		},
 	}
 
 	if res, err := client.CreateSketch(context.Background(), in); err != nil {
@@ -193,8 +201,11 @@ func TestAddGetMembSketch(t *testing.T) {
 	in := &pb.Sketch{
 		Name: proto.String(name),
 		Type: &typ,
+		Properties: &pb.SketchProperties{
+			MaxUniqueItems: proto.Int64(1337), // FIXME: Allow default as -1
+			Size:           proto.Int64(7),
+		},
 	}
-
 	if res, err := client.CreateSketch(context.Background(), in); err != nil {
 		t.Error("Did not expect error, got", err)
 	} else if res.GetName() != in.GetName() {
@@ -246,6 +257,10 @@ func TestAddGetFreqSketch(t *testing.T) {
 	in := &pb.Sketch{
 		Name: proto.String(name),
 		Type: &typ,
+		Properties: &pb.SketchProperties{
+			MaxUniqueItems: proto.Int64(1337), // FIXME: Allow default as -1
+			Size:           proto.Int64(7),
+		},
 	}
 
 	if res, err := client.CreateSketch(context.Background(), in); err != nil {
@@ -299,6 +314,10 @@ func TestAddGetRankSketch(t *testing.T) {
 	in := &pb.Sketch{
 		Name: proto.String(name),
 		Type: &typ,
+		Properties: &pb.SketchProperties{
+			MaxUniqueItems: proto.Int64(1337), // FIXME: Allow default as -1
+			Size:           proto.Int64(7),
+		},
 	}
 
 	if res, err := client.CreateSketch(context.Background(), in); err != nil {

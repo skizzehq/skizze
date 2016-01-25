@@ -6,8 +6,6 @@ import (
 	"datamodel"
 )
 
-const defaultMaxUniqueItems = 1000000
-
 // BloomSketch is the toplevel Sketch to control the count-min-log implementation
 type BloomSketch struct {
 	*datamodel.Info
@@ -16,10 +14,8 @@ type BloomSketch struct {
 
 // NewBloomSketch ...
 func NewBloomSketch(info *datamodel.Info) (*BloomSketch, error) {
-	if info.Properties.MaxUniqueItems == 0 {
-		info.Properties.MaxUniqueItems = defaultMaxUniqueItems
-	}
-	sketch := bloom.New(uint(info.Properties.MaxUniqueItems), 4)
+	// FIXME: We are converting from int64 to uint
+	sketch := bloom.New(uint(info.Properties.GetMaxUniqueItems()), 4)
 	d := BloomSketch{info, sketch}
 	return &d, nil
 }

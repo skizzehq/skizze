@@ -9,8 +9,6 @@ import (
 	"datamodel"
 )
 
-const defaultSize = 100.0
-
 // TopKSketch is the toplevel sketch to control the HLL implementation
 type TopKSketch struct {
 	*datamodel.Info
@@ -22,11 +20,7 @@ type ResultElement topk.Element
 
 // NewTopKSketch ...
 func NewTopKSketch(info *datamodel.Info) (*TopKSketch, error) {
-	if info.Properties.Size == 0 {
-		info.Properties.Size = defaultSize
-	}
-	d := TopKSketch{info, topk.New(int(info.Properties.Size))}
-
+	d := TopKSketch{info, topk.New(int(info.Properties.GetSize()))}
 	return &d, nil
 }
 

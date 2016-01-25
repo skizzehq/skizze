@@ -1,7 +1,6 @@
 package sketches
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -30,7 +29,7 @@ func (sp *SketchProxy) Add(values [][]byte) (bool, error) {
 
 // Get ...
 func (sp *SketchProxy) Get(data interface{}) (interface{}, error) {
-	switch sp.Type {
+	switch datamodel.GetTypeString(sp.GetType()) {
 	case datamodel.HLLPP:
 		return sp.sketch.Get(nil)
 	case datamodel.CML:
@@ -40,7 +39,7 @@ func (sp *SketchProxy) Get(data interface{}) (interface{}, error) {
 	case datamodel.Bloom:
 		return sp.sketch.Get(data)
 	default:
-		return nil, errors.New("Invalid sketch type: " + sp.Type)
+		return nil, fmt.Errorf("Invalid sketch type: %s", sp.GetType())
 	}
 }
 
@@ -60,7 +59,7 @@ func CreateSketch(info *datamodel.Info) (*SketchProxy, error) {
 	var sketch datamodel.Sketcher
 	sp := &SketchProxy{info, sketch, sync.RWMutex{}}
 
-	switch info.Type {
+	switch datamodel.GetTypeString(info.GetType()) {
 	case datamodel.HLLPP:
 		sp.sketch, err = NewHLLPPSketch(info)
 	case datamodel.CML:
@@ -70,7 +69,7 @@ func CreateSketch(info *datamodel.Info) (*SketchProxy, error) {
 	case datamodel.Bloom:
 		sp.sketch, err = NewBloomSketch(info)
 	default:
-		return nil, errors.New("Invalid sketch type: " + info.Type)
+		return nil, fmt.Errorf("Invalid sketch type: %s", sp.GetType())
 	}
 
 	if err != nil {
@@ -95,7 +94,7 @@ func LoadSketch(info *datamodel.Info, file *os.File) (*SketchProxy, error) {
 		return nil, fmt.Errorf("Error loading data for sketch: %s", info.ID())
 	}
 
-	switch info.Type {
+	switch datamodel.GetTypeString(info.GetType()) {
 	case datamodel.HLLPP:
 		sp.sketch = &HLLPPSketch{}
 		err = sp.sketch.Unmarshal(info, data)
@@ -109,7 +108,7 @@ func LoadSketch(info *datamodel.Info, file *os.File) (*SketchProxy, error) {
 		sp.sketch = &BloomSketch{}
 		err = sp.sketch.Unmarshal(info, data)
 	default:
-		logger.Warningf("Invalid sketch type", info.Type)
+		return nil, fmt.Errorf("Invalid sketch type: %s", sp.GetType())
 	}
 	if err != nil {
 		return nil, err
