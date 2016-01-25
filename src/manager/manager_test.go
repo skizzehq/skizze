@@ -213,6 +213,7 @@ func TestCardSaveLoad(t *testing.T) {
 	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
+	time.Sleep(1 * time.Second)
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -249,7 +250,7 @@ func TestCardSaveLoad(t *testing.T) {
 		t.Error("Expected res = 5, got", res)
 	}
 
-	path := filepath.Join(config.GetConfig().DataDir, "marvel.card")
+	path := filepath.Join(config.GetConfig().DataDir, "marvel.CARD")
 	if exists, err := utils.Exists(path); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if !exists {
@@ -262,7 +263,7 @@ func TestCardSaveLoad(t *testing.T) {
 	if sketches := m.GetSketches(); len(sketches) != 1 {
 		t.Error("Expected 1 sketch, got", len(sketches))
 	} else if sketches[0][0] != "marvel" || sketches[0][1] != "card" {
-		t.Error("Expected [[marvel card], got", sketches)
+		t.Error("Expected [[marvel card]], got", sketches)
 	}
 
 	if res, err := m.GetFromSketch(info.ID(), nil); err != nil {
@@ -277,6 +278,7 @@ func TestFreqSaveLoad(t *testing.T) {
 	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
+	time.Sleep(1 * time.Second)
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -313,7 +315,7 @@ func TestFreqSaveLoad(t *testing.T) {
 		t.Error("Expected res = 2, got", res)
 	}
 
-	path := filepath.Join(config.GetConfig().DataDir, "marvel.freq")
+	path := filepath.Join(config.GetConfig().DataDir, "marvel.FREQ")
 	if exists, err := utils.Exists(path); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if !exists {
@@ -340,6 +342,7 @@ func TestRankSaveLoad(t *testing.T) {
 	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
+	time.Sleep(1 * time.Second)
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -378,7 +381,7 @@ func TestRankSaveLoad(t *testing.T) {
 		t.Error("Expected 'black widow', got", res.([]*datamodel.Element)[0].Key)
 	}
 
-	path := filepath.Join(config.GetConfig().DataDir, "marvel.rank")
+	path := filepath.Join(config.GetConfig().DataDir, "marvel.RANK")
 	if exists, err := utils.Exists(path); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if !exists {
@@ -407,6 +410,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
+	time.Sleep(1 * time.Second)
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -449,7 +453,7 @@ func TestMembershipSaveLoad(t *testing.T) {
 		t.Error("Expected 'captian america' == true , got", v)
 	}
 
-	path := filepath.Join(config.GetConfig().DataDir, "marvel.memb")
+	path := filepath.Join(config.GetConfig().DataDir, "marvel.MEMB")
 	if exists, err := utils.Exists(path); err != nil {
 		t.Error("Expected no errors, got", err)
 	} else if !exists {

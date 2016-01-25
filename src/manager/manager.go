@@ -35,7 +35,7 @@ func (m *Manager) saveSketch(id string) error {
 	return m.sketches.save(id)
 }
 
-func (m *Manager) saveSketches() {
+func (m *Manager) saveSketches() error {
 	var wg sync.WaitGroup
 	running := 0
 	for _, v := range m.infos.info {
@@ -45,6 +45,7 @@ func (m *Manager) saveSketches() {
 			// a) save sketch
 			if err := m.saveSketch(info.ID()); err != nil {
 				// TODO: log something here
+				fmt.Println(err)
 			}
 			// b) replay from AOF (SELECT * FROM ops WHERE sketchId = ?)
 			// TODO: Replay from AOF
@@ -58,6 +59,7 @@ func (m *Manager) saveSketches() {
 		}
 	}
 	wg.Wait()
+	return nil
 }
 
 func (m *Manager) setLockSketches(b bool) {
@@ -87,7 +89,9 @@ func (m *Manager) Save() error {
 	}
 
 	// 5) For each sketch
-	m.saveSketches()
+	if err := m.saveSketches(); err != nil {
+		return err
+	}
 
 	// 6) Unlock sketches
 	m.setLockSketches(false)
