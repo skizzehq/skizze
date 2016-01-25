@@ -4,7 +4,7 @@ package datamodel
 HLLPP	=> HyperLogLogPlusPlus
 CML		=> Count-min-log sketch
 TopK	=> Top-K
-Bloom => Bloom Filter
+Bloom 	=> Bloom Filter
 */
 const (
 	DOM   = "dom"

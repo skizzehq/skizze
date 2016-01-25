@@ -7,7 +7,7 @@ import (
 	"utils"
 )
 
-func TestAdd(t *testing.T) {
+func TestAddCML(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
