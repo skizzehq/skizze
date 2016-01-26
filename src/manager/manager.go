@@ -9,13 +9,16 @@ import (
 
 	"config"
 	"datamodel"
+	pb "datamodel/protobuf"
 	"storage"
 	"utils"
 )
 
 func isValidType(info *datamodel.Info) bool {
-	return info.Type == datamodel.Bloom || info.Type == datamodel.CML ||
-		info.Type == datamodel.HLLPP || info.Type == datamodel.TopK
+	if info.Type == nil {
+		return false
+	}
+	return len(datamodel.GetTypeString(info.GetType())) != 0
 }
 
 // Manager is responsible for manipulating the sketches and syncing to disk
@@ -32,7 +35,7 @@ func (m *Manager) saveSketch(id string) error {
 	return m.sketches.save(id)
 }
 
-func (m *Manager) saveSketches() {
+func (m *Manager) saveSketches() error {
 	var wg sync.WaitGroup
 	running := 0
 	for _, v := range m.infos.info {
@@ -42,6 +45,7 @@ func (m *Manager) saveSketches() {
 			// a) save sketch
 			if err := m.saveSketch(info.ID()); err != nil {
 				// TODO: log something here
+				fmt.Println(err)
 			}
 			// b) replay from AOF (SELECT * FROM ops WHERE sketchId = ?)
 			// TODO: Replay from AOF
@@ -55,6 +59,7 @@ func (m *Manager) saveSketches() {
 		}
 	}
 	wg.Wait()
+	return nil
 }
 
 func (m *Manager) setLockSketches(b bool) {
@@ -84,7 +89,9 @@ func (m *Manager) Save() error {
 	}
 
 	// 5) For each sketch
-	m.saveSketches()
+	if err := m.saveSketches(); err != nil {
+		return err
+	}
 
 	// 6) Unlock sketches
 	m.setLockSketches(false)
@@ -143,14 +150,14 @@ func (m *Manager) CreateSketch(info *datamodel.Info) error {
 
 // CreateDomain ...
 func (m *Manager) CreateDomain(info *datamodel.Info) error {
-	types := datamodel.GetTypes()
 	infos := make(map[string]*datamodel.Info)
-	for _, typ := range types {
-		tmpInfo := datamodel.Info(*info)
-		tmpInfo.Type = typ
-		infos[tmpInfo.ID()] = &tmpInfo
+	for _, typ := range datamodel.GetTypesPb() {
+		styp := pb.SketchType(typ)
+		tmpInfo := info.Copy()
+		tmpInfo.Type = &styp
+		infos[tmpInfo.ID()] = tmpInfo
 	}
-	return m.domains.create(info.Name, infos)
+	return m.domains.create(info.GetName(), infos)
 }
 
 // AddToSketch ...
@@ -197,7 +204,9 @@ func (slice tupleResult) Swap(i, j int) {
 func (m *Manager) GetSketches() [][2]string {
 	sketches := tupleResult{}
 	for _, v := range m.infos.info {
-		sketches = append(sketches, [2]string{v.Name, v.Type})
+		sketches = append(sketches,
+			[2]string{v.GetName(),
+				datamodel.GetTypeString(v.GetType())})
 	}
 	sort.Sort(sketches)
 	return sketches
@@ -223,7 +232,7 @@ func (m *Manager) GetSketch(id string) (*datamodel.Info, error) {
 }
 
 // GetDomain ...
-func (m *Manager) GetDomain(id string) (*datamodel.Domain, error) {
+func (m *Manager) GetDomain(id string) (*pb.Domain, error) {
 	return m.domains.get(id)
 }
 

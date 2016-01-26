@@ -6,7 +6,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	pb "datamodel"
+	pb "datamodel/protobuf"
 	"manager"
 )
 

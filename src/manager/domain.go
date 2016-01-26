@@ -6,6 +6,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 
 	"datamodel"
+	pb "datamodel/protobuf"
 	"storage"
 	"utils"
 )
@@ -110,11 +111,11 @@ func (m *domainManager) add(id string, values []string) error {
 }
 
 // FIXME: return all sketches with domain
-func (m *domainManager) get(id string) (*datamodel.Domain, error) {
+func (m *domainManager) get(id string) (*pb.Domain, error) {
 	if _, ok := m.domains[id]; !ok {
 		return nil, fmt.Errorf("Could not find domain %s", id)
 	}
-	return &datamodel.Domain{
+	return &pb.Domain{
 		Name: proto.String(id),
 	}, nil
 }

@@ -1,19 +1,21 @@
 package server
 
 import (
-	pb "datamodel"
+	"datamodel"
+	pb "datamodel/protobuf"
 
 	"golang.org/x/net/context"
 )
 
 func (s *serverStruct) CreateDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
-	info := pb.NewEmptyInfo()
-	info.Name = in.GetName()
+	info := datamodel.NewEmptyInfo()
+	info.Name = in.Name
 	// FIXME: A Domain's info should have an array of properties for each Sketch (or just an array
 	// of Sketches, like what the proto has). This is just a hack to choose the first Sketch and
 	// use it's info for now
-	info.Properties.MaxUniqueItems = uint(in.GetSketches()[0].GetProperties().GetMaxUniqueItems())
-	info.Properties.Size = uint(in.GetSketches()[0].GetProperties().GetSize())
+	info.Properties.MaxUniqueItems = in.GetSketches()[0].GetProperties().MaxUniqueItems
+	info.Properties.Size = in.GetSketches()[0].GetProperties().Size
+	// FIXME: We should be passing a pb.Domain and not a datamodel.Info to manager.CreateDomain
 	err := s.manager.CreateDomain(info)
 	if err != nil {
 		return nil, err
@@ -28,7 +30,7 @@ func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListD
 		names[i] = n[0]
 	}
 	doms := &pb.ListDomainsReply{
-		Name: names,
+		Names: names,
 	}
 	return doms, nil
 }

@@ -1,20 +1,16 @@
 package server
 
 import (
-	"strings"
-
-	pb "datamodel"
+	"datamodel"
+	pb "datamodel/protobuf"
+	"utils"
 
 	"github.com/gogo/protobuf/proto"
 	"golang.org/x/net/context"
 )
 
 func (s *serverStruct) CreateSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
-	info := pb.NewEmptyInfo()
-	info.Name = in.GetName()
-	info.Type = strings.ToLower(in.GetType().String())
-	info.Properties.Size = uint(in.Properties.GetSize())
-	info.Properties.MaxUniqueItems = uint(in.Properties.GetMaxUniqueItems())
+	info := &datamodel.Info{Sketch: in}
 	if err := s.manager.CreateSketch(info); err != nil {
 		return nil, err
 	}
@@ -22,17 +18,16 @@ func (s *serverStruct) CreateSketch(ctx context.Context, in *pb.Sketch) (*pb.Ske
 }
 
 func (s *serverStruct) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddReply, error) {
-	info := pb.NewEmptyInfo()
+	info := datamodel.NewEmptyInfo()
+	// FIXME: use domain or sketch directly and stop casting to Info
 	if dom := in.GetDomain(); dom != nil {
-		info.Name = dom.GetName()
-		info.Type = pb.DOM
-		err := s.manager.AddToDomain(info.Name, in.GetValues())
+		info.Name = dom.Name
+		err := s.manager.AddToDomain(info.GetName(), in.GetValues())
 		if err != nil {
 			return nil, err
 		}
 	} else if sketch := in.GetSketch(); sketch != nil {
-		info.Name = sketch.GetName()
-		info.Type = strings.ToLower(sketch.GetType().String())
+		info := &datamodel.Info{Sketch: sketch}
 		err := s.manager.AddToSketch(info.ID(), in.GetValues())
 		if err != nil {
 			return nil, err
@@ -45,20 +40,18 @@ func (s *serverStruct) GetMembership(ctx context.Context, in *pb.GetRequest) (*p
 	reply := &pb.GetMembershipReply{}
 
 	for _, sketch := range in.GetSketches() {
-		info := pb.NewEmptyInfo()
-		info.Name = sketch.GetName()
-		info.Type = strings.ToLower(pb.SketchType_MEMB.String())
+		info := &datamodel.Info{Sketch: sketch}
 		res, err := s.manager.GetFromSketch(info.ID(), in.GetValues())
 		if err != nil {
 			return nil, err
 		}
 		result := &pb.MembershipResult{}
-		values := res.([]*pb.Member)
+		values := res.([]*datamodel.Member)
 		// FIXME: return in same order
 		for _, v := range values {
 			result.Memberships = append(result.Memberships, &pb.Membership{
-				Value:    proto.String(v.Key),
-				IsMember: proto.Bool(v.Member),
+				Value:    utils.Stringp(v.Key),
+				IsMember: utils.Boolp(v.Member),
 			})
 		}
 		reply.Results = append(reply.Results, result)
@@ -70,9 +63,7 @@ func (s *serverStruct) GetFrequency(ctx context.Context, in *pb.GetRequest) (*pb
 	reply := &pb.GetFrequencyReply{}
 
 	for _, sketch := range in.GetSketches() {
-		info := pb.NewEmptyInfo()
-		info.Name = sketch.GetName()
-		info.Type = strings.ToLower(pb.SketchType_FREQ.String())
+		info := &datamodel.Info{Sketch: sketch}
 		res, err := s.manager.GetFromSketch(info.ID(), in.GetValues())
 		if err != nil {
 			return nil, err
@@ -94,9 +85,7 @@ func (s *serverStruct) GetCardinality(ctx context.Context, in *pb.GetRequest) (*
 	reply := &pb.GetCardinalityReply{}
 
 	for _, sketch := range in.GetSketches() {
-		info := pb.NewEmptyInfo()
-		info.Name = sketch.GetName()
-		info.Type = strings.ToLower(pb.SketchType_CARD.String())
+		info := &datamodel.Info{Sketch: sketch}
 		res, err := s.manager.GetFromSketch(info.ID(), in.GetValues())
 		if err != nil {
 			return nil, err
@@ -113,15 +102,14 @@ func (s *serverStruct) GetRankings(ctx context.Context, in *pb.GetRequest) (*pb.
 	reply := &pb.GetRankingsReply{}
 
 	for _, sketch := range in.GetSketches() {
-		info := pb.NewEmptyInfo()
-		info.Name = sketch.GetName()
-		info.Type = strings.ToLower(pb.SketchType_RANK.String())
+		info := &datamodel.Info{Sketch: sketch}
+
 		res, err := s.manager.GetFromSketch(info.ID(), in.GetValues())
 		if err != nil {
 			return nil, err
 		}
 		result := &pb.RankingsResult{}
-		for _, v := range res.([]*pb.Element) {
+		for _, v := range res.([]*datamodel.Element) {
 			result.Rankings = append(result.Rankings, &pb.Rank{
 				Value: proto.String(v.Key),
 				Count: proto.Int64(int64(v.Count)),
@@ -133,9 +121,7 @@ func (s *serverStruct) GetRankings(ctx context.Context, in *pb.GetRequest) (*pb.
 }
 
 func (s *serverStruct) DeleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Empty, error) {
-	info := pb.NewEmptyInfo()
-	info.Name = in.GetName()
-	info.Type = strings.ToLower(in.GetType().String())
+	info := &datamodel.Info{Sketch: in}
 	return &pb.Empty{}, s.manager.DeleteSketch(info.ID())
 }
 
@@ -145,13 +131,13 @@ func (s *serverStruct) ListAll(ctx context.Context, in *pb.Empty) (*pb.ListReply
 	for _, v := range sketches {
 		var typ pb.SketchType
 		switch v[1] {
-		case pb.CML:
+		case datamodel.CML:
 			typ = pb.SketchType_FREQ
-		case pb.TopK:
+		case datamodel.TopK:
 			typ = pb.SketchType_RANK
-		case pb.HLLPP:
+		case datamodel.HLLPP:
 			typ = pb.SketchType_CARD
-		case pb.Bloom:
+		case datamodel.Bloom:
 			typ = pb.SketchType_MEMB
 		default:
 			continue
@@ -163,15 +149,9 @@ func (s *serverStruct) ListAll(ctx context.Context, in *pb.Empty) (*pb.ListReply
 
 func (s *serverStruct) GetSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
 	var err error
-	info := pb.NewEmptyInfo()
-	info.Name = in.GetName()
-	info.Type = strings.ToLower(in.GetType().String())
+	info := &datamodel.Info{Sketch: in}
 	if info, err = s.manager.GetSketch(info.ID()); err != nil {
 		return in, err
-	}
-	in.Properties = &pb.SketchProperties{
-		MaxUniqueItems: proto.Int64(int64(info.Properties.MaxUniqueItems)),
-		Size:           proto.Int64(int64(info.Properties.Size)),
 	}
 	return in, nil
 }
@@ -182,13 +162,13 @@ func (s *serverStruct) List(ctx context.Context, in *pb.ListRequest) (*pb.ListRe
 	for _, v := range sketches {
 		var typ pb.SketchType
 		switch v[1] {
-		case pb.CML:
+		case datamodel.CML:
 			typ = pb.SketchType_FREQ
-		case pb.TopK:
+		case datamodel.TopK:
 			typ = pb.SketchType_RANK
-		case pb.HLLPP:
+		case datamodel.HLLPP:
 			typ = pb.SketchType_CARD
-		case pb.Bloom:
+		case datamodel.Bloom:
 			typ = pb.SketchType_MEMB
 		default:
 			continue

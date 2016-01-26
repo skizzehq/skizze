@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package datamodel;
+package protobuf;
 
 service Skizze {
   rpc CreateSnapshot (CreateSnapshotRequest) returns (CreateSnapshotReply) {}
@@ -129,7 +129,7 @@ message ListReply {
 }
 
 message ListDomainsReply {
-  repeated string name = 1;
+  repeated string names = 1;
 }
 
 message AddRequest {

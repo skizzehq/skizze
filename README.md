@@ -130,3 +130,13 @@ ADD CARD demostream zod joker grod zod zod grod
   * [x] SAVE 										# Explicityly save state of all domains and sketches
 * [ ] New Docs
 * [x] Clean up
+
+
+
+### License
+Skizze is available under the Apache License, Version 2.0.
+
+
+### Authors
+- [Seif Lotfy](https://twitter.com/seiflotfy)
+- [Neil Jagdish Patel](https://twitter.com/njpatel)

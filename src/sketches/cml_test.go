@@ -12,9 +12,8 @@ func TestAdd(t *testing.T) {
 	defer utils.TearDownTests()
 
 	info := datamodel.NewEmptyInfo()
-	info.Properties.MaxUniqueItems = 1000000000
-	info.Name = "marvel"
-	info.Type = datamodel.HLLPP
+	info.Properties.MaxUniqueItems = utils.Int64p(1000000)
+	info.Name = utils.Stringp("marvel")
 	sketch, err := NewCMLSketch(info)
 
 	if err != nil {

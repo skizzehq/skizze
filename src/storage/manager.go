@@ -55,16 +55,17 @@ func (m *Manager) saveToBoltDB(tx *bolt.Tx, bucketID string, info map[string]int
 	b := tx.Bucket([]byte(bucketID))
 
 	// Remove deleted keys
-	err := b.ForEach(func(k, v []byte) error {
+	if err := b.ForEach(func(k, v []byte) error {
 		if _, ok := info[string(k)]; !ok {
 			if err := b.Delete(k); err != nil {
 				return err
 			}
 		}
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		// TODO: print something here
+		fmt.Println(err)
+		return err
 	}
 
 	for k, v := range info {
