@@ -1,12 +1,16 @@
 language: go
 go:
- - 1.5
+ - 1.5.3
 
 install:
  - go get github.com/constabulary/gb/...
+ - go get github.com/alecthomas/gometalinter
 
-# before_script:
+before_script:
  - make dist
+ - gometalinter --install --update
+ - export GOPATH=$HOME/gopath:$HOME/gopath/src/github.com/skizzehq/skizze/:$HOME/gopath/src/github.com/skizzehq/skizze/vendor
 
 script:
+ - gometalinter ./src/* -D gocyclo -D gotype -D interfacer -D dupl -D errcheck --deadline=60s
  - gb test -v
