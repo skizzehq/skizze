@@ -24,6 +24,6 @@ func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 }
 
 func tearDownClient(conn *grpc.ClientConn) {
-	conn.Close()
+	_ = conn.Close()
 	Stop()
 }

@@ -32,7 +32,8 @@ var typeMap = map[string]pb.SketchType{
 
 func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 	// Connect to the server.
-	conn, err := grpc.Dial("127.0.0.1:3596", grpc.WithInsecure())
+	var err error
+	conn, err = grpc.Dial("127.0.0.1:3596", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
