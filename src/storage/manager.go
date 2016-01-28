@@ -32,10 +32,10 @@ func NewManager() *Manager {
 	db, err := bolt.Open(infoPath, 0777, nil)
 	utils.PanicOnError(err)
 	err = db.Update(func(tx *bolt.Tx) error {
-		if _, err := tx.CreateBucketIfNotExists([]byte("info")); err != nil {
+		if _, err = tx.CreateBucketIfNotExists([]byte("info")); err != nil {
 			return err
 		}
-		_, err := tx.CreateBucketIfNotExists([]byte("domain"))
+		_, err = tx.CreateBucketIfNotExists([]byte("domain"))
 		return err
 	})
 	utils.PanicOnError(err)
