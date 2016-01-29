@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"io"
 	"os"
 
 	"github.com/njpatel/loggo"
@@ -29,7 +30,7 @@ func Exists(path string) (bool, error) {
 }
 
 // CloseFile ...
-func CloseFile(file *os.File) {
+func CloseFile(file io.Closer) {
 	err := file.Close()
 	PanicOnError(err)
 }

@@ -2,6 +2,7 @@ package sketches
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"sync"
 
@@ -44,11 +45,12 @@ func (sp *SketchProxy) Get(data interface{}) (interface{}, error) {
 }
 
 // Save ...
-func (sp *SketchProxy) Save(file *os.File) error {
+func (sp *SketchProxy) Save(file io.Writer) error {
 	data, err := sp.sketch.Marshal()
 	if err != nil {
 		return err
 	}
+
 	_, err = file.Write(data)
 	return err
 }
