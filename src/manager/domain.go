@@ -35,7 +35,7 @@ func (m *domainManager) create(id string, infos map[string]*datamodel.Info) erro
 	}
 
 	var err error
-	ids := make([]string, len(infos), len(infos))
+	var ids []string
 	tmpInfos := make(map[string]*datamodel.Info)
 	tmpSketches := make(map[string]*datamodel.Info)
 	for id, info := range infos {
@@ -112,10 +112,20 @@ func (m *domainManager) add(id string, values []string) error {
 
 // FIXME: return all sketches with domain
 func (m *domainManager) get(id string) (*pb.Domain, error) {
-	if _, ok := m.domains[id]; !ok {
+	sketchIds, ok := m.domains[id]
+	if !ok {
 		return nil, fmt.Errorf("Could not find domain %s", id)
 	}
-	return &pb.Domain{
-		Name: proto.String(id),
-	}, nil
+	var sketches []*pb.Sketch
+	for _, id := range sketchIds {
+		s := m.info.get(id)
+		if s != nil {
+			sketches = append(sketches, s.Sketch)
+		}
+	}
+	domain := &pb.Domain{
+		Name:     proto.String(id),
+		Sketches: sketches,
+	}
+	return domain, nil
 }

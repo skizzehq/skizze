@@ -3,6 +3,7 @@ package bridge
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -40,7 +41,7 @@ func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 	return pb.NewSkizzeClient(conn), conn
 }
 
-func tearDownClient(conn *grpc.ClientConn) {
+func tearDownClient(conn io.Closer) {
 	_ = conn.Close()
 }
 

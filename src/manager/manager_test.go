@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"config"
 	"datamodel"
@@ -213,7 +212,6 @@ func TestCardSaveLoad(t *testing.T) {
 	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
-	time.Sleep(1 * time.Second)
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -246,8 +244,8 @@ func TestCardSaveLoad(t *testing.T) {
 
 	if res, err := m.GetFromSketch(info.ID(), nil); err != nil {
 		t.Error("Expected no errors, got", err)
-	} else if res.(uint) != 5 {
-		t.Error("Expected res = 5, got", res)
+	} else if res.(*pb.CardinalityResult).GetCardinality() != 5 {
+		t.Error("Expected res = 5, got", res.(*pb.CardinalityResult).GetCardinality())
 	}
 
 	path := filepath.Join(config.GetConfig().DataDir, "marvel.CARD")
@@ -268,17 +266,15 @@ func TestCardSaveLoad(t *testing.T) {
 
 	if res, err := m.GetFromSketch(info.ID(), nil); err != nil {
 		t.Error("Expected no errors, got", err)
-	} else if res.(uint) != 4 {
-		t.Error("Expected res = 4, got", res)
+	} else if res.(*pb.CardinalityResult).GetCardinality() != 4 {
+		t.Error("Expected res = 4, got", res.(*pb.CardinalityResult).GetCardinality())
 	}
-	time.Sleep(time.Second * 2)
 }
 
 func TestFreqSaveLoad(t *testing.T) {
 	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
-	time.Sleep(1 * time.Second)
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -311,9 +307,10 @@ func TestFreqSaveLoad(t *testing.T) {
 
 	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
 		t.Error("Expected no errors, got", err)
-	} else if res.(map[string]uint)["hulk"] != 2 {
-		t.Error("Expected res = 2, got", res)
+	} else if res.(*pb.FrequencyResult).GetFrequencies()[0].GetCount() != 2 {
+		t.Error("Expected res = 2, got", res.(*pb.FrequencyResult).GetFrequencies()[0].GetCount())
 	}
+	// TODO: Add test to check if its hulk
 
 	path := filepath.Join(config.GetConfig().DataDir, "marvel.FREQ")
 	if exists, err := utils.Exists(path); err != nil {
@@ -333,8 +330,8 @@ func TestFreqSaveLoad(t *testing.T) {
 
 	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
 		t.Error("Expected no errors, got", err)
-	} else if res.(map[string]uint)["hulk"] != 1 {
-		t.Error("Expected res = 1, got", res)
+	} else if res.(*pb.FrequencyResult).GetFrequencies()[0].GetCount() != 1 {
+		t.Error("Expected res = 1, got", res.(*pb.FrequencyResult).GetFrequencies()[0].GetCount())
 	}
 }
 
@@ -342,7 +339,6 @@ func TestRankSaveLoad(t *testing.T) {
 	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
-	time.Sleep(1 * time.Second)
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -375,10 +371,10 @@ func TestRankSaveLoad(t *testing.T) {
 
 	if res, err := m.GetFromSketch(info.ID(), nil); err != nil {
 		t.Error("Expected no errors, got", err)
-	} else if len(res.([]*datamodel.Element)) != 5 {
-		t.Error("Expected len(res) = 5, got", len(res.([]*datamodel.Element)))
-	} else if res.([]*datamodel.Element)[0].Key != "black widow" {
-		t.Error("Expected 'black widow', got", res.([]*datamodel.Element)[0].Key)
+	} else if len(res.(*pb.RankingsResult).GetRankings()) != 5 {
+		t.Error("Expected len(res) = 5, got", len(res.(*pb.RankingsResult).GetRankings()))
+	} else if res.(*pb.RankingsResult).GetRankings()[0].GetValue() != "black widow" {
+		t.Error("Expected 'black widow', got", res.(*pb.RankingsResult).GetRankings()[0].GetValue())
 	}
 
 	path := filepath.Join(config.GetConfig().DataDir, "marvel.RANK")
@@ -399,10 +395,10 @@ func TestRankSaveLoad(t *testing.T) {
 
 	if res, err := m.GetFromSketch(info.ID(), nil); err != nil {
 		t.Error("Expected no errors, got", err)
-	} else if len(res.([]*datamodel.Element)) != 4 {
-		t.Error("Expected len(res) = 4, got", len(res.([]*datamodel.Element)))
-	} else if res.([]*datamodel.Element)[0].Key != "hulk" {
-		t.Error("Expected 'hulk', got", res.([]*datamodel.Element)[0].Key)
+	} else if len(res.(*pb.RankingsResult).GetRankings()) != 4 {
+		t.Error("Expected len(res) = 4, got", len(res.(*pb.RankingsResult).GetRankings()))
+	} else if res.(*pb.RankingsResult).GetRankings()[0].GetValue() != "hulk" {
+		t.Error("Expected 'hulk', got", res.(*pb.RankingsResult).GetRankings()[0].GetValue())
 	}
 }
 
@@ -410,7 +406,6 @@ func TestMembershipSaveLoad(t *testing.T) {
 	config.Reset()
 	utils.SetupTests()
 	defer utils.TearDownTests()
-	time.Sleep(1 * time.Second)
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -443,13 +438,13 @@ func TestMembershipSaveLoad(t *testing.T) {
 
 	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "captian america", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
-	} else if len(res.([]*datamodel.Member)) != 3 {
-		t.Error("Expected len(res) = 3, got", len(res.(map[string]bool)))
-	} else if v := res.([]*datamodel.Member)[0].Member; !v {
+	} else if len(res.(*pb.MembershipResult).GetMemberships()) != 3 {
+		t.Error("Expected len(res) = 3, got", len(res.(*pb.MembershipResult).GetMemberships()))
+	} else if v := res.(*pb.MembershipResult).GetMemberships()[0].GetIsMember(); !v {
 		t.Error("Expected 'hulk' == true , got", v)
-	} else if v := res.([]*datamodel.Member)[1].Member; v {
+	} else if v := res.(*pb.MembershipResult).GetMemberships()[1].GetIsMember(); v {
 		t.Error("Expected 'captian america' == false , got", v)
-	} else if v := res.([]*datamodel.Member)[2].Member; !v {
+	} else if v := res.(*pb.MembershipResult).GetMemberships()[2].GetIsMember(); !v {
 		t.Error("Expected 'captian america' == true , got", v)
 	}
 
@@ -471,13 +466,13 @@ func TestMembershipSaveLoad(t *testing.T) {
 
 	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "captian america", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
-	} else if len(res.([]*datamodel.Member)) != 3 {
-		t.Error("Expected len(res) = 3, got", len(res.(map[string]bool)))
-	} else if v := res.([]*datamodel.Member)[0].Member; !v {
+	} else if len(res.(*pb.MembershipResult).GetMemberships()) != 3 {
+		t.Error("Expected len(res) = 3, got", len(res.(*pb.MembershipResult).GetMemberships()))
+	} else if v := res.(*pb.MembershipResult).GetMemberships()[0].GetIsMember(); !v {
 		t.Error("Expected 'hulk' == true , got", v)
-	} else if v := res.([]*datamodel.Member)[1].Member; v {
+	} else if v := res.(*pb.MembershipResult).GetMemberships()[1].GetIsMember(); v {
 		t.Error("Expected 'captian america' == false , got", v)
-	} else if v := res.([]*datamodel.Member)[2].Member; v {
+	} else if v := res.(*pb.MembershipResult).GetMemberships()[2].GetIsMember(); v {
 		t.Error("Expected 'captian america' == true , got", v)
 	}
 }

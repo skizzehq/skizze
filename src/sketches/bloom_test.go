@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"datamodel"
+	pb "datamodel/protobuf"
 	"utils"
 )
 
@@ -47,11 +48,13 @@ func TestAddBloom(t *testing.T) {
 	if res, err := sketch.Get(values); err != nil {
 		t.Error("expected no errors, got", err)
 	} else {
+		tmp := res.(*pb.MembershipResult)
+		mres := tmp.GetMemberships()
 		for key := range check {
-			for i := 0; i < len(res.([]*datamodel.Member)); i++ {
-				if res.([]*datamodel.Member)[i].Key == key &&
-					res.([]*datamodel.Member)[i].Member != check[key] {
-					t.Error("expected member == "+strconv.FormatBool(check[key])+", got", res.([]*datamodel.Member)[i].Member)
+			for i := 0; i < len(mres); i++ {
+				if mres[i].GetValue() == key &&
+					mres[i].GetIsMember() != check[key] {
+					t.Error("expected member == "+strconv.FormatBool(check[key])+", got", mres[i].GetIsMember())
 				}
 			}
 		}

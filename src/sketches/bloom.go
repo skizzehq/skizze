@@ -4,6 +4,8 @@ import (
 	"github.com/willf/bloom"
 
 	"datamodel"
+	pb "datamodel/protobuf"
+	"utils"
 )
 
 // BloomSketch is the toplevel Sketch to control the count-min-log implementation
@@ -36,12 +38,20 @@ func (d *BloomSketch) Marshal() ([]byte, error) {
 // Get ...
 func (d *BloomSketch) Get(data interface{}) (interface{}, error) {
 	values := data.([][]byte)
-	res := make([]*datamodel.Member, len(values), len(values))
+	tmpRes := make(map[string]*pb.Membership)
+	res := &pb.MembershipResult{
+		Memberships: make([]*pb.Membership, len(values), len(values)),
+	}
 	for i, v := range values {
-		res[i] = &datamodel.Member{
-			Key:    string(v),
-			Member: d.impl.Test(v),
+		if r, ok := tmpRes[string(v)]; ok {
+			res.Memberships[i] = r
+			continue
 		}
+		res.Memberships[i] = &pb.Membership{
+			Value:    utils.Stringp(string(v)),
+			IsMember: utils.Boolp(d.impl.Test(v)),
+		}
+		tmpRes[string(v)] = res.Memberships[i]
 	}
 	return res, nil
 }

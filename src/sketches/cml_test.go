@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"datamodel"
+	pb "datamodel/protobuf"
 	"utils"
 )
 
@@ -35,7 +36,7 @@ func TestAdd(t *testing.T) {
 
 	if res, err := sketch.Get([][]byte{[]byte("cyclops")}); err != nil {
 		t.Error("expected no errors, got", err)
-	} else if res.(map[string]uint)["cyclops"] != 3 {
-		t.Error("expected 'cyclops' count == 3, got", res.(map[string]uint)["cyclops"])
+	} else if res.(*pb.FrequencyResult).Frequencies[0].GetCount() != 3 {
+		t.Error("expected 'cyclops' count == 3, got", res.(*pb.FrequencyResult).Frequencies[0].GetCount())
 	}
 }

@@ -7,6 +7,9 @@ import (
 	"github.com/dgryski/go-topk"
 
 	"datamodel"
+	pb "datamodel/protobuf"
+
+	"utils"
 )
 
 // TopKSketch is the toplevel sketch to control the HLL implementation
@@ -37,12 +40,13 @@ func (d *TopKSketch) Add(values [][]byte) (bool, error) {
 // Get ...
 func (d *TopKSketch) Get(interface{}) (interface{}, error) {
 	keys := d.impl.Keys()
-	result := make([]*datamodel.Element, len(keys), len(keys))
+	result := &pb.RankingsResult{
+		Rankings: make([]*pb.Rank, len(keys), len(keys)),
+	}
 	for i, k := range keys {
-		result[i] = &datamodel.Element{
-			Key:   k.Key,
-			Count: k.Count,
-			Error: k.Error,
+		result.Rankings[i] = &pb.Rank{
+			Value: utils.Stringp(k.Key),
+			Count: utils.Int64p(int64(k.Count)),
 		}
 	}
 	return result, nil

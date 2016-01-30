@@ -3,7 +3,6 @@ package server
 import (
 	"datamodel"
 	pb "datamodel/protobuf"
-	"utils"
 
 	"github.com/gogo/protobuf/proto"
 	"golang.org/x/net/context"
@@ -45,16 +44,7 @@ func (s *serverStruct) GetMembership(ctx context.Context, in *pb.GetRequest) (*p
 		if err != nil {
 			return nil, err
 		}
-		result := &pb.MembershipResult{}
-		values := res.([]*datamodel.Member)
-		// FIXME: return in same order
-		for _, v := range values {
-			result.Memberships = append(result.Memberships, &pb.Membership{
-				Value:    utils.Stringp(v.Key),
-				IsMember: utils.Boolp(v.Member),
-			})
-		}
-		reply.Results = append(reply.Results, result)
+		reply.Results = append(reply.Results, res.(*pb.MembershipResult))
 	}
 	return reply, nil
 }
@@ -68,15 +58,7 @@ func (s *serverStruct) GetFrequency(ctx context.Context, in *pb.GetRequest) (*pb
 		if err != nil {
 			return nil, err
 		}
-		result := &pb.FrequencyResult{}
-		// FIXME: return in same order
-		for k, v := range res.(map[string]uint) {
-			result.Frequencies = append(result.Frequencies, &pb.Frequency{
-				Value: proto.String(k),
-				Count: proto.Int64(int64(v)),
-			})
-		}
-		reply.Results = append(reply.Results, result)
+		reply.Results = append(reply.Results, res.(*pb.FrequencyResult))
 	}
 	return reply, nil
 }
@@ -90,10 +72,7 @@ func (s *serverStruct) GetCardinality(ctx context.Context, in *pb.GetRequest) (*
 		if err != nil {
 			return nil, err
 		}
-		result := &pb.CardinalityResult{
-			Cardinality: proto.Int64(int64(res.(uint))),
-		}
-		reply.Results = append(reply.Results, result)
+		reply.Results = append(reply.Results, res.(*pb.CardinalityResult))
 	}
 	return reply, nil
 }
@@ -108,14 +87,7 @@ func (s *serverStruct) GetRankings(ctx context.Context, in *pb.GetRequest) (*pb.
 		if err != nil {
 			return nil, err
 		}
-		result := &pb.RankingsResult{}
-		for _, v := range res.([]*datamodel.Element) {
-			result.Rankings = append(result.Rankings, &pb.Rank{
-				Value: proto.String(v.Key),
-				Count: proto.Int64(int64(v.Count)),
-			})
-		}
-		reply.Results = append(reply.Results, result)
+		reply.Results = append(reply.Results, res.(*pb.RankingsResult))
 	}
 	return reply, nil
 }
