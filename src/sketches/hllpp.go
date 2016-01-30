@@ -4,6 +4,8 @@ import (
 	"github.com/retailnext/hllpp"
 
 	"datamodel"
+	pb "datamodel/protobuf"
+	"utils"
 )
 
 // HLLPPSketch is the toplevel sketch to control the HLL implementation
@@ -28,7 +30,9 @@ func (d *HLLPPSketch) Add(values [][]byte) (bool, error) {
 
 // Get ...
 func (d *HLLPPSketch) Get(interface{}) (interface{}, error) {
-	return uint(d.impl.Count()), nil
+	return &pb.CardinalityResult{
+		Cardinality: utils.Int64p(int64(d.impl.Count())),
+	}, nil
 }
 
 // Marshal ...

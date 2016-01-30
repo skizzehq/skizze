@@ -4,6 +4,8 @@ import (
 	"github.com/seiflotfy/count-min-log"
 
 	"datamodel"
+	pb "datamodel/protobuf"
+	"utils"
 )
 
 // CMLSketch is the toplevel Sketch to control the count-min-log implementation
@@ -36,10 +38,20 @@ func (d *CMLSketch) Add(values [][]byte) (bool, error) {
 // Get ...
 func (d *CMLSketch) Get(data interface{}) (interface{}, error) {
 	values := data.([][]byte)
-	res := make(map[string]uint)
-	for _, value := range values {
-		count := d.impl.Frequency(value)
-		res[string(value)] = uint(count)
+	res := &pb.FrequencyResult{
+		Frequencies: make([]*pb.Frequency, len(values), len(values)),
+	}
+	tmpRes := make(map[string]*pb.Frequency)
+	for i, v := range values {
+		if r, ok := tmpRes[string(v)]; ok {
+			res.Frequencies[i] = r
+			continue
+		}
+		res.Frequencies[i] = &pb.Frequency{
+			Value: utils.Stringp(string(v)),
+			Count: utils.Int64p(int64(d.impl.Frequency(v))),
+		}
+		tmpRes[string(v)] = res.Frequencies[i]
 	}
 	return res, nil
 }
