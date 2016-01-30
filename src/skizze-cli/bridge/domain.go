@@ -94,9 +94,14 @@ func deleteDomain(fields []string, in *pb.Domain) error {
 
 func getDomainInfo(fields []string, in *pb.Domain) error {
 	dom, err := client.GetDomain(context.Background(), in)
-	if err == nil {
-		_, _ = fmt.Fprintln(w, fmt.Sprintf("Name: %s  Type: %s\t", dom.GetName(), ""))
-		_ = w.Flush()
+	if err != nil {
+		return err
 	}
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("Name: %s  Type: %s\t", dom.GetName(), ""))
+	_, _ = fmt.Fprintln(w, fmt.Sprintf("%d Sketches attached:", len(dom.GetSketches())))
+	for i, v := range dom.GetSketches() {
+		_, _ = fmt.Fprintln(w, fmt.Sprintf("  %d.  Name: %s  Type: %s\t", i+1, v.GetName(), v.GetType()))
+	}
+	_ = w.Flush()
 	return err
 }
