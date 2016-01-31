@@ -15,6 +15,10 @@ func (s *serverStruct) CreateDomain(ctx context.Context, in *pb.Domain) (*pb.Dom
 	// use it's info for now
 	info.Properties.MaxUniqueItems = in.GetSketches()[0].GetProperties().MaxUniqueItems
 	info.Properties.Size = in.GetSketches()[0].GetProperties().Size
+	if info.Properties.Size == nil || *info.Properties.Size == 0 {
+		var defaultSize int64 = 100
+		info.Properties.Size = &defaultSize
+	}
 	// FIXME: We should be passing a pb.Domain and not a datamodel.Info to manager.CreateDomain
 	err := s.manager.CreateDomain(info)
 	if err != nil {
