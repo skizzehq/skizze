@@ -7,25 +7,19 @@ import (
 
 	"datamodel"
 	pb "datamodel/protobuf"
-	"storage"
-	"utils"
 )
 
 type domainManager struct {
 	domains  map[string][]string
 	sketches *sketchManager
 	info     *infoManager
-	storage  *storage.Manager
 }
 
-func newDomainManager(info *infoManager, sketches *sketchManager, storage *storage.Manager) *domainManager {
-	domains, err := storage.LoadAllDomains()
-	utils.PanicOnError(err)
+func newDomainManager(info *infoManager, sketches *sketchManager) *domainManager {
 	return &domainManager{
-		domains:  domains,
+		domains:  make(map[string][]string),
 		info:     info,
 		sketches: sketches,
-		storage:  storage,
 	}
 }
 
@@ -92,10 +86,6 @@ func (m *domainManager) delete(id string) error {
 	delete(m.domains, id)
 	// FIXME: return error if not exist ?
 	return lastErr
-}
-
-func (m *domainManager) save() error {
-	return m.storage.SaveDomains(m.domains)
 }
 
 func (m *domainManager) add(id string, values []string) error {
