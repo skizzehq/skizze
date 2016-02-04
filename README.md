@@ -119,7 +119,7 @@ ADD CARD demostream zod joker grod zod zod grod
 * [x] Redesign data-structures main interface
 * [x] Add new domains model
 * [x] Add snapshotting
-* [ ] Add AOF
+* [x] Add AOF
 * [x] Add gRPC API
 * [x] Add REPL
   * [x] DELETE DOM $name 							# delete domain and all its sketches
