@@ -4,14 +4,9 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
-	"sync"
-	"time"
 
-	"config"
 	"datamodel"
 	pb "datamodel/protobuf"
-	"storage"
-	"utils"
 )
 
 func isValidType(info *datamodel.Info) bool {
@@ -26,107 +21,20 @@ type Manager struct {
 	infos    *infoManager
 	sketches *sketchManager
 	domains  *domainManager
-	lock     sync.RWMutex
-	ticker   *time.Ticker
-	storage  *storage.Manager
-}
-
-func (m *Manager) saveSketch(id string) error {
-	return m.sketches.save(id)
-}
-
-func (m *Manager) saveSketches() error {
-	var wg sync.WaitGroup
-	running := 0
-	for _, v := range m.infos.info {
-		wg.Add(1)
-		running++
-		go func(info *datamodel.Info) {
-			// a) save sketch
-			if err := m.saveSketch(info.ID()); err != nil {
-				// TODO: log something here
-				fmt.Println(err)
-			}
-			// b) replay from AOF (SELECT * FROM ops WHERE sketchId = ?)
-			// TODO: Replay from AOF
-			// c) unlock sketch
-
-			wg.Done()
-		}(v)
-		// Just 4 at a time
-		if running%4 == 0 {
-			wg.Wait()
-		}
-	}
-	wg.Wait()
-	return nil
-}
-
-func (m *Manager) setLockSketches(b bool) {
-	m.sketches.setLockAll(b)
-}
-
-// Save ...
-func (m *Manager) Save() error {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-
-	// 1) save DEFAULT SETTINGS
-	// TODO: save defaut settings
-
-	// 2) lock all sketches from being allowed to do ADD
-	m.setLockSketches(true)
-
-	// 3) Clear AOF
-	// TODO: clear AOF
-
-	// 4) Save deep copied sketches info from previously
-	if err := m.infos.save(); err != nil {
-		// TODO: Do somthing here?
-	}
-	if err := m.domains.save(); err != nil {
-		// TODO: Do somthing here?
-	}
-
-	// 5) For each sketch
-	if err := m.saveSketches(); err != nil {
-		return err
-	}
-
-	// 6) Unlock sketches
-	m.setLockSketches(false)
-
-	return nil
 }
 
 // NewManager ...
 func NewManager() *Manager {
-	storage := storage.NewManager()
-	sketches := newSketchManager(storage)
-	infos := newInfoManager(storage)
-	domains := newDomainManager(infos, sketches, storage)
+	sketches := newSketchManager()
+	infos := newInfoManager()
+	domains := newDomainManager(infos, sketches)
 
 	m := &Manager{
 		sketches: sketches,
 		infos:    infos,
 		domains:  domains,
-		lock:     sync.RWMutex{},
-		ticker:   time.NewTicker(time.Second * time.Duration(config.GetConfig().SaveThresholdSeconds)),
-		storage:  storage,
 	}
 
-	for _, info := range infos.info {
-		utils.PanicOnError(sketches.load(info))
-	}
-
-	// Set up saving on intervals
-	go func() {
-		for _ = range m.ticker.C {
-			if m.Save() != nil {
-				// FIXME: print out something
-			}
-		}
-	}()
 	return m
 }
 
@@ -243,6 +151,4 @@ func (m *Manager) GetFromSketch(id string, data interface{}) (interface{}, error
 
 // Destroy ...
 func (m *Manager) Destroy() {
-	m.ticker.Stop()
-	_ = m.storage.Close()
 }

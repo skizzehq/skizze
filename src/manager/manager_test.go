@@ -2,7 +2,6 @@ package manager
 
 import (
 	"fmt"
-	"path/filepath"
 	"testing"
 
 	"config"
@@ -82,11 +81,6 @@ func TestCreateAndSaveSketch(t *testing.T) {
 		t.Error("Expected [[marvel card]], got", sketches)
 	}
 
-	// Save state
-	if err := m.Save(); err != nil {
-		t.Error("Expected no errors, got", err)
-	}
-
 	// Create a second Sketch
 	info2 := datamodel.NewEmptyInfo()
 	typ2 := pb.SketchType_RANK
@@ -103,16 +97,6 @@ func TestCreateAndSaveSketch(t *testing.T) {
 		t.Error("Expected [[marvel card]], got", sketches[0][0], sketches[0][1])
 	} else if sketches[1][0] != "marvel" || sketches[1][1] != "rank" {
 		t.Error("Expected [[marvel rank]], got", sketches[1][0], sketches[1][1])
-	}
-
-	m.Destroy()
-
-	// State should be equal before save
-	m = NewManager()
-	if sketches := m.GetSketches(); len(sketches) != 1 {
-		t.Error("Expected 1 sketches, got", len(sketches))
-	} else if sketches[0][0] != "marvel" || sketches[0][1] != "card" {
-		t.Error("Expected [[marvel card]], got", sketches)
 	}
 
 }
@@ -234,10 +218,6 @@ func TestCardSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.Save(); err != nil {
-		t.Error("Expected no errors, got", err)
-	}
-
 	if err := m.AddToSketch(info.ID(), []string{"hulk", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -246,28 +226,6 @@ func TestCardSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	} else if res.(*pb.CardinalityResult).GetCardinality() != 5 {
 		t.Error("Expected res = 5, got", res.(*pb.CardinalityResult).GetCardinality())
-	}
-
-	path := filepath.Join(config.GetConfig().DataDir, "marvel.CARD")
-	if exists, err := utils.Exists(path); err != nil {
-		t.Error("Expected no errors, got", err)
-	} else if !exists {
-		t.Errorf("Expected file dump %s to exists, but apparently it doesn't", path)
-	}
-
-	m.Destroy()
-
-	m = NewManager()
-	if sketches := m.GetSketches(); len(sketches) != 1 {
-		t.Error("Expected 1 sketch, got", len(sketches))
-	} else if sketches[0][0] != "marvel" || sketches[0][1] != "card" {
-		t.Error("Expected [[marvel card]], got", sketches)
-	}
-
-	if res, err := m.GetFromSketch(info.ID(), nil); err != nil {
-		t.Error("Expected no errors, got", err)
-	} else if res.(*pb.CardinalityResult).GetCardinality() != 4 {
-		t.Error("Expected res = 4, got", res.(*pb.CardinalityResult).GetCardinality())
 	}
 }
 
@@ -297,10 +255,6 @@ func TestFreqSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.Save(); err != nil {
-		t.Error("Expected no errors, got", err)
-	}
-
 	if err := m.AddToSketch(info.ID(), []string{"hulk", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -309,29 +263,6 @@ func TestFreqSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	} else if res.(*pb.FrequencyResult).GetFrequencies()[0].GetCount() != 2 {
 		t.Error("Expected res = 2, got", res.(*pb.FrequencyResult).GetFrequencies()[0].GetCount())
-	}
-	// TODO: Add test to check if its hulk
-
-	path := filepath.Join(config.GetConfig().DataDir, "marvel.FREQ")
-	if exists, err := utils.Exists(path); err != nil {
-		t.Error("Expected no errors, got", err)
-	} else if !exists {
-		t.Errorf("Expected file dump %s to exists, but apparently it doesn't", path)
-	}
-
-	m.Destroy()
-
-	m = NewManager()
-	if sketches := m.GetSketches(); len(sketches) != 1 {
-		t.Error("Expected 1 sketch, got", len(sketches))
-	} else if sketches[0][0] != "marvel" || sketches[0][1] != "freq" {
-		t.Error("Expected [[marvel freq], got", sketches)
-	}
-
-	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "thor", "iron man", "hawk-eye"}); err != nil {
-		t.Error("Expected no errors, got", err)
-	} else if res.(*pb.FrequencyResult).GetFrequencies()[0].GetCount() != 1 {
-		t.Error("Expected res = 1, got", res.(*pb.FrequencyResult).GetFrequencies()[0].GetCount())
 	}
 }
 
@@ -361,10 +292,6 @@ func TestRankSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.Save(); err != nil {
-		t.Error("Expected no errors, got", err)
-	}
-
 	if err := m.AddToSketch(info.ID(), []string{"hulk", "black widow", "black widow", "black widow", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -375,30 +302,6 @@ func TestRankSaveLoad(t *testing.T) {
 		t.Error("Expected len(res) = 5, got", len(res.(*pb.RankingsResult).GetRankings()))
 	} else if res.(*pb.RankingsResult).GetRankings()[0].GetValue() != "black widow" {
 		t.Error("Expected 'black widow', got", res.(*pb.RankingsResult).GetRankings()[0].GetValue())
-	}
-
-	path := filepath.Join(config.GetConfig().DataDir, "marvel.RANK")
-	if exists, err := utils.Exists(path); err != nil {
-		t.Error("Expected no errors, got", err)
-	} else if !exists {
-		t.Errorf("Expected file dump %s to exists, but apparently it doesn't", path)
-	}
-
-	m.Destroy()
-
-	m = NewManager()
-	if sketches := m.GetSketches(); len(sketches) != 1 {
-		t.Error("Expected 1 sketch, got", len(sketches))
-	} else if sketches[0][0] != "marvel" || sketches[0][1] != "rank" {
-		t.Error("Expected [[marvel rank], got", sketches)
-	}
-
-	if res, err := m.GetFromSketch(info.ID(), nil); err != nil {
-		t.Error("Expected no errors, got", err)
-	} else if len(res.(*pb.RankingsResult).GetRankings()) != 4 {
-		t.Error("Expected len(res) = 4, got", len(res.(*pb.RankingsResult).GetRankings()))
-	} else if res.(*pb.RankingsResult).GetRankings()[0].GetValue() != "hulk" {
-		t.Error("Expected 'hulk', got", res.(*pb.RankingsResult).GetRankings()[0].GetValue())
 	}
 }
 
@@ -428,10 +331,6 @@ func TestMembershipSaveLoad(t *testing.T) {
 		t.Error("Expected no errors, got", err)
 	}
 
-	if err := m.Save(); err != nil {
-		t.Error("Expected no errors, got", err)
-	}
-
 	if err := m.AddToSketch(info.ID(), []string{"hulk", "black widow", "black widow", "black widow", "black widow"}); err != nil {
 		t.Error("Expected no errors, got", err)
 	}
@@ -445,34 +344,6 @@ func TestMembershipSaveLoad(t *testing.T) {
 	} else if v := res.(*pb.MembershipResult).GetMemberships()[1].GetIsMember(); v {
 		t.Error("Expected 'captian america' == false , got", v)
 	} else if v := res.(*pb.MembershipResult).GetMemberships()[2].GetIsMember(); !v {
-		t.Error("Expected 'captian america' == true , got", v)
-	}
-
-	path := filepath.Join(config.GetConfig().DataDir, "marvel.MEMB")
-	if exists, err := utils.Exists(path); err != nil {
-		t.Error("Expected no errors, got", err)
-	} else if !exists {
-		t.Errorf("Expected file dump %s to exists, but apparently it doesn't", path)
-	}
-
-	m.Destroy()
-
-	m = NewManager()
-	if sketches := m.GetSketches(); len(sketches) != 1 {
-		t.Error("Expected 1 sketch, got", len(sketches))
-	} else if sketches[0][0] != "marvel" || sketches[0][1] != "memb" {
-		t.Error("Expected [[marvel memb], got", sketches)
-	}
-
-	if res, err := m.GetFromSketch(info.ID(), []string{"hulk", "captian america", "black widow"}); err != nil {
-		t.Error("Expected no errors, got", err)
-	} else if len(res.(*pb.MembershipResult).GetMemberships()) != 3 {
-		t.Error("Expected len(res) = 3, got", len(res.(*pb.MembershipResult).GetMemberships()))
-	} else if v := res.(*pb.MembershipResult).GetMemberships()[0].GetIsMember(); !v {
-		t.Error("Expected 'hulk' == true , got", v)
-	} else if v := res.(*pb.MembershipResult).GetMemberships()[1].GetIsMember(); v {
-		t.Error("Expected 'captian america' == false , got", v)
-	} else if v := res.(*pb.MembershipResult).GetMemberships()[2].GetIsMember(); v {
 		t.Error("Expected 'captian america' == true , got", v)
 	}
 }
@@ -511,5 +382,4 @@ func TestCreateDeleteDomain(t *testing.T) {
 	} else if sketches[1][0] != "dc" || sketches[1][1] != "freq" {
 		t.Error("Expected [[dc freq]], got", sketches[1][0], sketches[1][1])
 	}
-
 }

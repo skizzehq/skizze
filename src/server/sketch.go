@@ -3,12 +3,14 @@ package server
 import (
 	"datamodel"
 	pb "datamodel/protobuf"
+	"fmt"
+	"storage"
 
 	"github.com/gogo/protobuf/proto"
 	"golang.org/x/net/context"
 )
 
-func (s *serverStruct) CreateSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
+func (s *serverStruct) createSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
 	info := &datamodel.Info{Sketch: in}
 	if err := s.manager.CreateSketch(info); err != nil {
 		return nil, err
@@ -16,7 +18,14 @@ func (s *serverStruct) CreateSketch(ctx context.Context, in *pb.Sketch) (*pb.Ske
 	return in, nil
 }
 
-func (s *serverStruct) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddReply, error) {
+func (s *serverStruct) CreateSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
+	if err := s.storage.AppendSketchOp(storage.CreateSketch, in); err != nil {
+		fmt.Println(err)
+	}
+	return s.createSketch(ctx, in)
+}
+
+func (s *serverStruct) add(ctx context.Context, in *pb.AddRequest) (*pb.AddReply, error) {
 	info := datamodel.NewEmptyInfo()
 	// FIXME: use domain or sketch directly and stop casting to Info
 	if dom := in.GetDomain(); dom != nil {
@@ -33,6 +42,13 @@ func (s *serverStruct) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddReply
 		}
 	}
 	return &pb.AddReply{}, nil
+}
+
+func (s *serverStruct) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddReply, error) {
+	if err := s.storage.AppendAddOp(in); err != nil {
+		fmt.Println(err)
+	}
+	return s.add(ctx, in)
 }
 
 func (s *serverStruct) GetMembership(ctx context.Context, in *pb.GetRequest) (*pb.GetMembershipReply, error) {
@@ -92,9 +108,16 @@ func (s *serverStruct) GetRankings(ctx context.Context, in *pb.GetRequest) (*pb.
 	return reply, nil
 }
 
-func (s *serverStruct) DeleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Empty, error) {
+func (s *serverStruct) deleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Empty, error) {
 	info := &datamodel.Info{Sketch: in}
 	return &pb.Empty{}, s.manager.DeleteSketch(info.ID())
+}
+
+func (s *serverStruct) DeleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Empty, error) {
+	if err := s.storage.AppendSketchOp(storage.DeleteSketch, in); err != nil {
+		fmt.Println(err)
+	}
+	return s.deleteSketch(ctx, in)
 }
 
 func (s *serverStruct) ListAll(ctx context.Context, in *pb.Empty) (*pb.ListReply, error) {

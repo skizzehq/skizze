@@ -3,11 +3,14 @@ package server
 import (
 	"datamodel"
 	pb "datamodel/protobuf"
+	"fmt"
+
+	"storage"
 
 	"golang.org/x/net/context"
 )
 
-func (s *serverStruct) CreateDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
+func (s *serverStruct) createDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
 	info := datamodel.NewEmptyInfo()
 	info.Name = in.Name
 	// FIXME: A Domain's info should have an array of properties for each Sketch (or just an array
@@ -27,6 +30,13 @@ func (s *serverStruct) CreateDomain(ctx context.Context, in *pb.Domain) (*pb.Dom
 	return in, nil
 }
 
+func (s *serverStruct) CreateDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
+	if err := s.storage.AppendDomOp(storage.CreateDom, in); err != nil {
+		fmt.Println(err)
+	}
+	return s.createDomain(ctx, in)
+}
+
 func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListDomainsReply, error) {
 	res := s.manager.GetDomains()
 	names := make([]string, len(res), len(res))
@@ -39,8 +49,15 @@ func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListD
 	return doms, nil
 }
 
-func (s *serverStruct) DeleteDomain(ctx context.Context, in *pb.Domain) (*pb.Empty, error) {
+func (s *serverStruct) deleteDomain(ctx context.Context, in *pb.Domain) (*pb.Empty, error) {
 	return &pb.Empty{}, s.manager.DeleteDomain(in.GetName())
+}
+
+func (s *serverStruct) DeleteDomain(ctx context.Context, in *pb.Domain) (*pb.Empty, error) {
+	if err := s.storage.AppendDomOp(storage.DeleteDom, in); err != nil {
+		fmt.Println(err)
+	}
+	return s.deleteDomain(ctx, in)
 }
 
 func (s *serverStruct) GetDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {

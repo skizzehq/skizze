@@ -4,21 +4,15 @@ import (
 	"fmt"
 
 	"datamodel"
-	"storage"
-	"utils"
 )
 
 type infoManager struct {
-	storage *storage.Manager
-	info    map[string]*datamodel.Info
+	info map[string]*datamodel.Info
 }
 
-func newInfoManager(storage *storage.Manager) *infoManager {
-	info, err := storage.LoadAllInfo()
-	utils.PanicOnError(err)
+func newInfoManager() *infoManager {
 	return &infoManager{
-		info:    info,
-		storage: storage,
+		info: make(map[string]*datamodel.Info),
 	}
 }
 
@@ -44,10 +38,6 @@ func (m *infoManager) delete(id string) error {
 	// FIXME: return error if not exist
 	delete(m.info, id)
 	return nil
-}
-
-func (m *infoManager) save() error {
-	return m.storage.SaveInfo(m.info)
 }
 
 func (m *infoManager) getCopy() map[string]*datamodel.Info {
