@@ -114,23 +114,6 @@ CREATE CARD demosketch
 ADD CARD demostream zod joker grod zod zod grod
 ```
 
-## In Progress:
-### More REPL
-* [x] Redesign data-structures main interface
-* [x] Add new domains model
-* [x] Add snapshotting
-* [x] Add AOF
-* [x] Add gRPC API
-* [x] Add REPL
-  * [x] DELETE DOM $name 							# delete domain and all its sketches
-  * [x] DELETE $type $name 							# delete a sketch of $type CARD, MEMB, FREQ, RANK and $name
-  * [x] LIST DOM 									# list all domains
-  * [x] SAVE 										# Explicityly save state of all domains and sketches
-* [ ] New Docs
-* [x] Clean up
-
-
-
 ### License
 Skizze is available under the Apache License, Version 2.0.
 
