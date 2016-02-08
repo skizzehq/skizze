@@ -28,3 +28,4 @@ _testmain.go
 bin
 pkg
 vendor/src
+test.log

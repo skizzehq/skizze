@@ -40,7 +40,22 @@ func Run(manager *manager.Manager, port uint) {
 	server = &serverStruct{manager, g, storage}
 	pb.RegisterSkizzeServer(g, server)
 	server.replay()
+	go server.storage.Run()
+	go server.listenExec()
 	_ = g.Serve(lis)
+}
+
+func (s *serverStruct) listenExec() {
+	wc := server.storage.WrittenChan()
+	for {
+		if e, more := <-wc; more {
+			if err := s.exec(e); err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			break
+		}
+	}
 }
 
 func unmarshalSketch(e *storage.Entry) *pb.Sketch {
@@ -67,41 +82,43 @@ func (server *serverStruct) replay() {
 			utils.PanicOnError(err)
 		}
 
-		switch e.Op() {
-		case storage.Add:
-			req := &pb.AddRequest{}
-			err = proto.Unmarshal(e.Args(), req)
-			utils.PanicOnError(err)
-			if _, err := server.add(context.Background(), req); err != nil {
-				fmt.Println(err)
-			}
-		case storage.CreateSketch:
-			sketch := unmarshalSketch(e)
-			if _, err := server.createSketch(context.Background(), sketch); err != nil {
-				fmt.Println(err)
-			}
-		case storage.DeleteSketch:
-			sketch := unmarshalSketch(e)
-			if _, err := server.deleteSketch(context.Background(), sketch); err != nil {
-				fmt.Println(err)
-			}
-		case storage.CreateDom:
-			dom := unmarshalDom(e)
-			if _, err := server.createDomain(context.Background(), dom); err != nil {
-				fmt.Println(err)
-			}
-		case storage.DeleteDom:
-			dom := unmarshalDom(e)
-			if _, err := server.deleteDomain(context.Background(), dom); err != nil {
-				fmt.Println(err)
-			}
-		default:
-			continue
+		if err := server.exec(e); err != nil {
+			fmt.Println(err)
 		}
 	}
 }
 
+func (server *serverStruct) exec(e *storage.Entry) error {
+	var err error
+	switch e.Op() {
+	case storage.Add:
+		req := &pb.AddRequest{}
+		utils.PanicOnError(proto.Unmarshal(e.Args(), req))
+		_, err = server.add(context.Background(), req)
+		return err
+	case storage.CreateSketch:
+		sketch := unmarshalSketch(e)
+		_, err = server.createSketch(context.Background(), sketch)
+		return err
+	case storage.DeleteSketch:
+		sketch := unmarshalSketch(e)
+		_, err = server.deleteSketch(context.Background(), sketch)
+		return err
+	case storage.CreateDom:
+		dom := unmarshalDom(e)
+		_, err = server.createDomain(context.Background(), dom)
+		return err
+	case storage.DeleteDom:
+		dom := unmarshalDom(e)
+		_, err = server.deleteDomain(context.Background(), dom)
+		return err
+	}
+
+	return fmt.Errorf("Unknown op '%s'", e.Op())
+}
+
 // Stop ...
 func Stop() {
+	server.storage.Stop()
 	server.g.Stop()
 }

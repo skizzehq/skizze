@@ -48,21 +48,19 @@ func TestCreateDeleteDom(t *testing.T) {
 	_ = os.Remove("test.log")
 
 	aof := NewAOF("test.log")
+	go aof.Run()
 
 	dom := createDom("test1")
-	err := aof.AppendDomOp(CreateDom, dom)
-	if err != nil {
-		t.Error("Expected no error, got", err)
-	}
+	aof.AppendDomOp(CreateDom, dom)
 
 	dom = createDom("test2")
-	err = aof.AppendDomOp(CreateDom, dom)
-	if err != nil {
-		t.Error("Expected no error, got", err)
-	}
+	aof.AppendDomOp(CreateDom, dom)
+
+	aof.Stop()
 
 	// Create new AOF
 	aof = NewAOF("test.log")
+	go aof.Run()
 	for {
 		e, err2 := aof.Read()
 		if err2 != nil {
@@ -72,7 +70,7 @@ func TestCreateDeleteDom(t *testing.T) {
 			break
 		}
 		dom := &pb.Domain{}
-		err = proto.Unmarshal(e.args, dom)
+		err := proto.Unmarshal(e.args, dom)
 		if err != nil {
 			t.Error("Expected no error, got", err)
 		}
@@ -80,18 +78,17 @@ func TestCreateDeleteDom(t *testing.T) {
 
 	dom = createDom("test3")
 
-	if err = aof.AppendDomOp(CreateDom, dom); err != nil {
-		t.Error("Expected no error, got", err)
-	}
+	aof.AppendDomOp(CreateDom, dom)
 
 	dom = new(pb.Domain)
 	dom.Name = utils.Stringp("test1")
 
-	if err = aof.AppendDomOp(DeleteDom, dom); err != nil {
-		t.Error("Expected no error, got", err)
-	}
+	aof.AppendDomOp(DeleteDom, dom)
+
+	aof.Stop()
 
 	aof = NewAOF("test.log")
+	go aof.Run()
 	for {
 		e, err := aof.Read()
 		if err != nil {
@@ -116,24 +113,19 @@ func TestCreateDeleteSketch(t *testing.T) {
 	_ = os.Remove("test.log")
 
 	aof := NewAOF("test.log")
+	go aof.Run()
 
 	sketch := createSketch("skz1", pb.SketchType_CARD)
-	err := aof.AppendDomOp(CreateDom, sketch)
-	if err != nil {
-		t.Error("Expected no error, got", err)
-	}
+	aof.AppendDomOp(CreateDom, sketch)
 
 	sketch = createSketch("skz2", pb.SketchType_FREQ)
-	err = aof.AppendDomOp(CreateDom, sketch)
-	if err != nil {
-		t.Error("Expected no error, got", err)
-	}
+	aof.AppendDomOp(CreateDom, sketch)
+
+	aof.Stop()
 
 	// Create new AOF
 	aof = NewAOF("test.log")
-	if err != nil {
-		t.Error("Expected no error, got", err)
-	}
+	go aof.Run()
 
 	for {
 		e, err2 := aof.Read()
@@ -144,32 +136,28 @@ func TestCreateDeleteSketch(t *testing.T) {
 			break
 		}
 		sketch := &pb.Sketch{}
-		err = proto.Unmarshal(e.args, sketch)
+		err := proto.Unmarshal(e.args, sketch)
 		if err != nil {
 			t.Error("Expected no error, got", err)
 		}
 	}
 
 	sketch = createSketch("skz3", pb.SketchType_RANK)
-	err = aof.AppendDomOp(CreateDom, sketch)
-	if err != nil {
-		t.Error("Expected no error, got", err)
-	}
+	aof.AppendDomOp(CreateDom, sketch)
 
 	sketch = createSketch("skz1", pb.SketchType_RANK)
-	if err = aof.AppendDomOp(DeleteDom, sketch); err != nil {
-		t.Error("Expected no error, got", err)
-	}
+	aof.AppendDomOp(DeleteDom, sketch)
 
 	addReq := &pb.AddRequest{
 		Sketch: sketch,
 		Values: []string{"foo", "bar", "hello", "world"},
 	}
-	if err = aof.AppendAddOp(addReq); err != nil {
-		t.Error("Expected no error, got", err)
-	}
+	aof.AppendAddOp(addReq)
+
+	aof.Stop()
 
 	aof = NewAOF("test.log")
+	go aof.Run()
 	for {
 		e, err := aof.Read()
 		if err != nil {
@@ -189,4 +177,23 @@ func TestCreateDeleteSketch(t *testing.T) {
 			t.Error("Expected no error, got", err)
 		}
 	}
+}
+
+func TestStop(t *testing.T) {
+	config.Reset()
+	utils.SetupTests()
+	defer utils.TearDownTests()
+
+	_ = os.Remove("test.log")
+
+	aof := NewAOF("test.log")
+	go aof.Run()
+
+	sketch := createSketch("skz1", pb.SketchType_CARD)
+	aof.AppendDomOp(CreateDom, sketch)
+
+	aof.Stop()
+
+	sketch = createSketch("skz2", pb.SketchType_FREQ)
+	aof.AppendDomOp(CreateDom, sketch)
 }

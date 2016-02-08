@@ -3,7 +3,6 @@ package server
 import (
 	"datamodel"
 	pb "datamodel/protobuf"
-	"fmt"
 	"storage"
 
 	"github.com/gogo/protobuf/proto"
@@ -19,10 +18,8 @@ func (s *serverStruct) createSketch(ctx context.Context, in *pb.Sketch) (*pb.Ske
 }
 
 func (s *serverStruct) CreateSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
-	if err := s.storage.AppendSketchOp(storage.CreateSketch, in); err != nil {
-		fmt.Println(err)
-	}
-	return s.createSketch(ctx, in)
+	s.storage.AppendSketchOp(storage.CreateSketch, in)
+	return &pb.Sketch{}, nil
 }
 
 func (s *serverStruct) add(ctx context.Context, in *pb.AddRequest) (*pb.AddReply, error) {
@@ -45,10 +42,8 @@ func (s *serverStruct) add(ctx context.Context, in *pb.AddRequest) (*pb.AddReply
 }
 
 func (s *serverStruct) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddReply, error) {
-	if err := s.storage.AppendAddOp(in); err != nil {
-		fmt.Println(err)
-	}
-	return s.add(ctx, in)
+	s.storage.AppendAddOp(in)
+	return &pb.AddReply{}, nil
 }
 
 func (s *serverStruct) GetMembership(ctx context.Context, in *pb.GetRequest) (*pb.GetMembershipReply, error) {
@@ -114,10 +109,8 @@ func (s *serverStruct) deleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Emp
 }
 
 func (s *serverStruct) DeleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Empty, error) {
-	if err := s.storage.AppendSketchOp(storage.DeleteSketch, in); err != nil {
-		fmt.Println(err)
-	}
-	return s.deleteSketch(ctx, in)
+	s.storage.AppendSketchOp(storage.DeleteSketch, in)
+	return &pb.Empty{}, nil
 }
 
 func (s *serverStruct) ListAll(ctx context.Context, in *pb.Empty) (*pb.ListReply, error) {
