@@ -3,7 +3,6 @@ package server
 import (
 	"datamodel"
 	pb "datamodel/protobuf"
-	"fmt"
 
 	"storage"
 
@@ -31,10 +30,8 @@ func (s *serverStruct) createDomain(ctx context.Context, in *pb.Domain) (*pb.Dom
 }
 
 func (s *serverStruct) CreateDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
-	if err := s.storage.AppendDomOp(storage.CreateDom, in); err != nil {
-		fmt.Println(err)
-	}
-	return s.createDomain(ctx, in)
+	s.storage.AppendDomOp(storage.CreateDom, in)
+	return &pb.Domain{}, nil
 }
 
 func (s *serverStruct) ListDomains(ctx context.Context, in *pb.Empty) (*pb.ListDomainsReply, error) {
@@ -54,10 +51,8 @@ func (s *serverStruct) deleteDomain(ctx context.Context, in *pb.Domain) (*pb.Emp
 }
 
 func (s *serverStruct) DeleteDomain(ctx context.Context, in *pb.Domain) (*pb.Empty, error) {
-	if err := s.storage.AppendDomOp(storage.DeleteDom, in); err != nil {
-		fmt.Println(err)
-	}
-	return s.deleteDomain(ctx, in)
+	s.storage.AppendDomOp(storage.DeleteDom, in)
+	return &pb.Empty{}, nil
 }
 
 func (s *serverStruct) GetDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
