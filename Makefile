@@ -1,5 +1,10 @@
+GOPATH=$(CURDIR):$(CURDIR)/vendor
+
 all:
-	@gb build
+	@GOPATH=$(GOPATH) && \
+	  go build -a -v -ldflags '-w' -o ./bin/skizze ./src/skizze
+	@GOPATH=$(GOPATH) && \
+	  go build -a -v -ldflags '-w' -o ./bin/skizze ./src/skizze-cli
 
 build-dep:
 	@go get github.com/constabulary/gb/...
@@ -8,7 +13,7 @@ vendor:
 	@gb vendor restore
 
 test:
-	@gb test -v
+	@GOPATH=$(GOPATH) && go test -v -race -cover ./src/...
 
 dist: build-dep vendor all
 
