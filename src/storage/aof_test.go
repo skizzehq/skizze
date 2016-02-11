@@ -2,6 +2,7 @@ package storage
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"config"
@@ -45,9 +46,8 @@ func TestCreateDeleteDom(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	_ = os.Remove("test.log")
-
-	aof := NewAOF("test.log")
+	path := filepath.Join(config.GetConfig().DataDir, "skizze.aof")
+	aof := NewAOF(path)
 
 	dom := createDom("test1")
 	err := aof.AppendDomOp(CreateDom, dom)
@@ -62,7 +62,7 @@ func TestCreateDeleteDom(t *testing.T) {
 	}
 
 	// Create new AOF
-	aof = NewAOF("test.log")
+	aof = NewAOF(path)
 	for {
 		e, err2 := aof.Read()
 		if err2 != nil {
@@ -91,7 +91,7 @@ func TestCreateDeleteDom(t *testing.T) {
 		t.Error("Expected no error, got", err)
 	}
 
-	aof = NewAOF("test.log")
+	aof = NewAOF(path)
 	for {
 		e, err := aof.Read()
 		if err != nil {
