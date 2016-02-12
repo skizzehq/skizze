@@ -18,17 +18,17 @@ type Entry struct {
 	raw []byte
 }
 
-// Op ...
-func (entry *Entry) Op() uint8 {
+// OpType ...
+func (entry *Entry) OpType() uint8 {
 	return entry.op
 }
 
-// Args ...
+// Msg ...
 func (entry *Entry) Msg() proto.Message {
 	return entry.msg
 }
 
-// Args ...
-func (entry *Entry) Raw() []byte {
+// RawMsg ...
+func (entry *Entry) RawMsg() []byte {
 	return entry.raw
 }

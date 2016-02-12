@@ -46,14 +46,14 @@ func Run(manager *manager.Manager, port uint) {
 
 func unmarshalSketch(e *storage.Entry) *pb.Sketch {
 	sketch := &pb.Sketch{}
-	err := proto.Unmarshal(e.Raw(), sketch)
+	err := proto.Unmarshal(e.RawMsg(), sketch)
 	utils.PanicOnError(err)
 	return sketch
 }
 
 func unmarshalDom(e *storage.Entry) *pb.Domain {
 	dom := &pb.Domain{}
-	err := proto.Unmarshal(e.Raw(), dom)
+	err := proto.Unmarshal(e.RawMsg(), dom)
 	utils.PanicOnError(err)
 	return dom
 }
@@ -68,10 +68,10 @@ func (server *serverStruct) replay() {
 			utils.PanicOnError(err)
 		}
 
-		switch e.Op() {
+		switch e.OpType() {
 		case storage.Add:
 			req := &pb.AddRequest{}
-			err = proto.Unmarshal(e.Raw(), req)
+			err = proto.Unmarshal(e.RawMsg(), req)
 			utils.PanicOnError(err)
 			if _, err := server.add(context.Background(), req); err != nil {
 				fmt.Println(err)

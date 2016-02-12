@@ -53,7 +53,7 @@ func (aof *AOF) write(e *Entry) {
 	}
 }
 
-// AppendAddOp ...
+// Append ...
 func (aof *AOF) Append(op uint8, msg proto.Message) error {
 	raw, err := proto.Marshal(msg)
 	if err != nil {

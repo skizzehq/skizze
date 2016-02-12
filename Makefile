@@ -1,4 +1,4 @@
-GOPATH=$(CURDIR):$(CURDIR)/vendor
+GOPATH=$(CURDIR)/vendor:$(CURDIR)
 
 all:
 	@GOPATH=$(GOPATH) && \
@@ -13,7 +13,7 @@ vendor:
 	@gb vendor restore
 
 test:
-	@GOPATH=$(GOPATH) && go test -v -race -cover ./src/...
+	@GOPATH=$(GOPATH) && go test -race -cover ./src/...
 
 dist: build-dep vendor all
 

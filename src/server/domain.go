@@ -30,7 +30,9 @@ func (s *serverStruct) createDomain(ctx context.Context, in *pb.Domain) (*pb.Dom
 }
 
 func (s *serverStruct) CreateDomain(ctx context.Context, in *pb.Domain) (*pb.Domain, error) {
-	s.storage.Append(storage.CreateDom, in)
+	if err := s.storage.Append(storage.CreateDom, in); err != nil {
+		return nil, err
+	}
 	return s.createDomain(ctx, in)
 }
 
@@ -51,7 +53,9 @@ func (s *serverStruct) deleteDomain(ctx context.Context, in *pb.Domain) (*pb.Emp
 }
 
 func (s *serverStruct) DeleteDomain(ctx context.Context, in *pb.Domain) (*pb.Empty, error) {
-	s.storage.Append(storage.DeleteDom, in)
+	if err := s.storage.Append(storage.DeleteDom, in); err != nil {
+		return nil, err
+	}
 	return s.deleteDomain(ctx, in)
 }
 
