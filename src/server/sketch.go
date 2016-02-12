@@ -19,9 +19,7 @@ func (s *serverStruct) createSketch(ctx context.Context, in *pb.Sketch) (*pb.Ske
 }
 
 func (s *serverStruct) CreateSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
-	if err := s.storage.AppendSketchOp(storage.CreateSketch, in); err != nil {
-		fmt.Println(err)
-	}
+	s.storage.Append(storage.CreateSketch, in)
 	return s.createSketch(ctx, in)
 }
 
@@ -45,9 +43,7 @@ func (s *serverStruct) add(ctx context.Context, in *pb.AddRequest) (*pb.AddReply
 }
 
 func (s *serverStruct) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddReply, error) {
-	if err := s.storage.AppendAddOp(in); err != nil {
-		fmt.Println(err)
-	}
+	s.storage.Append(storage.Add, in)
 	return s.add(ctx, in)
 }
 
@@ -114,7 +110,7 @@ func (s *serverStruct) deleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Emp
 }
 
 func (s *serverStruct) DeleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Empty, error) {
-	if err := s.storage.AppendSketchOp(storage.DeleteSketch, in); err != nil {
+	if err := s.storage.Append(storage.DeleteSketch, in); err != nil {
 		fmt.Println(err)
 	}
 	return s.deleteSketch(ctx, in)

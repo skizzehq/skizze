@@ -29,7 +29,7 @@ var server *serverStruct
 // Run ...
 func Run(manager *manager.Manager, port uint) {
 	path := filepath.Join(config.GetConfig().DataDir, "skizze.aof")
-	storage := storage.NewAOF(path)
+	aof := storage.NewAOF(path)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port)) // RPC port
 	if err != nil {
@@ -37,22 +37,23 @@ func Run(manager *manager.Manager, port uint) {
 	}
 	g := grpc.NewServer()
 
-	server = &serverStruct{manager, g, storage}
+	server = &serverStruct{manager, g, aof}
 	pb.RegisterSkizzeServer(g, server)
 	server.replay()
+	aof.Run()
 	_ = g.Serve(lis)
 }
 
 func unmarshalSketch(e *storage.Entry) *pb.Sketch {
 	sketch := &pb.Sketch{}
-	err := proto.Unmarshal(e.Args(), sketch)
+	err := proto.Unmarshal(e.Raw(), sketch)
 	utils.PanicOnError(err)
 	return sketch
 }
 
 func unmarshalDom(e *storage.Entry) *pb.Domain {
 	dom := &pb.Domain{}
-	err := proto.Unmarshal(e.Args(), dom)
+	err := proto.Unmarshal(e.Raw(), dom)
 	utils.PanicOnError(err)
 	return dom
 }
@@ -70,7 +71,7 @@ func (server *serverStruct) replay() {
 		switch e.Op() {
 		case storage.Add:
 			req := &pb.AddRequest{}
-			err = proto.Unmarshal(e.Args(), req)
+			err = proto.Unmarshal(e.Raw(), req)
 			utils.PanicOnError(err)
 			if _, err := server.add(context.Background(), req); err != nil {
 				fmt.Println(err)

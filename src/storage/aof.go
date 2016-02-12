@@ -18,6 +18,7 @@ type AOF struct {
 	file   *os.File
 	buffer *bufio.ReadWriter
 	lock   sync.RWMutex
+	in     chan *Entry
 }
 
 // NewAOF ...
@@ -26,70 +27,41 @@ func NewAOF(path string) *AOF {
 	utils.PanicOnError(err)
 	rdr := bufio.NewReader(file)
 	wtr := bufio.NewWriter(file)
-	return &AOF{file, bufio.NewReadWriter(rdr, wtr), sync.RWMutex{}}
+	in := make(chan *Entry)
+	return &AOF{file, bufio.NewReadWriter(rdr, wtr), sync.RWMutex{}, in}
 }
 
-func (aof *AOF) write(e *Entry) error {
-	line := fmt.Sprintf("%d|%s/", e.op, string(e.args))
-	_, err := aof.buffer.WriteString(line)
-	if err != nil {
-		return err
-	}
-	err = aof.buffer.Flush()
-	if err != nil {
-		return err
-	}
-	return nil
+// Run ...
+func (aof *AOF) Run() {
+	go func() {
+		for {
+			select {
+			case e := <-aof.in:
+				aof.write(e)
+			}
+		}
+	}()
 }
 
-func createEntry(dom proto.Message) (*Entry, error) {
-	args, err := proto.Marshal(dom)
-	if err != nil {
-		return nil, err
+func (aof *AOF) write(e *Entry) {
+	line := fmt.Sprintf("%d|%s/", e.op, string(e.raw))
+	if _, err := aof.buffer.WriteString(line); err != nil {
+		fmt.Println(err)
 	}
-	return &Entry{args: args}, nil
-}
-
-// AppendDomOp ...
-func (aof *AOF) AppendDomOp(op uint8, dom proto.Message) error {
-	aof.lock.Lock()
-	defer aof.lock.Unlock()
-	e, err := createEntry(dom)
-	if err != nil {
-		return err
+	if err := aof.buffer.Flush(); err != nil {
+		fmt.Println(err)
 	}
-	if op != CreateDom && op != DeleteDom {
-		return fmt.Errorf("No such op %d", op)
-	}
-	e.op = op
-	return aof.write(e)
-}
-
-// AppendSketchOp ...
-func (aof *AOF) AppendSketchOp(op uint8, sketch proto.Message) error {
-	aof.lock.Lock()
-	defer aof.lock.Unlock()
-	e, err := createEntry(sketch)
-	if err != nil {
-		return err
-	}
-	e.op = op
-	if op != CreateSketch && op != DeleteSketch {
-		return fmt.Errorf("No such op %d", op)
-	}
-	return aof.write(e)
 }
 
 // AppendAddOp ...
-func (aof *AOF) AppendAddOp(add proto.Message) error {
-	aof.lock.Lock()
-	defer aof.lock.Unlock()
-	args, err := proto.Marshal(add)
+func (aof *AOF) Append(op uint8, msg proto.Message) error {
+	raw, err := proto.Marshal(msg)
 	if err != nil {
 		return err
 	}
-	e := &Entry{Add, args}
-	return aof.write(e)
+	e := &Entry{op, msg, raw}
+	aof.in <- e
+	return nil
 }
 
 // Read ...
@@ -105,6 +77,6 @@ func (aof *AOF) Read() (*Entry, error) {
 	if err != nil {
 		return nil, err
 	}
-	e := &Entry{uint8(op), []byte(msg)}
+	e := &Entry{uint8(op), nil, []byte(msg)}
 	return e, nil
 }
