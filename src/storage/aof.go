@@ -27,7 +27,7 @@ func NewAOF(path string) *AOF {
 	utils.PanicOnError(err)
 	rdr := bufio.NewReader(file)
 	wtr := bufio.NewWriter(file)
-	in := make(chan *Entry)
+	in := make(chan *Entry, 100)
 	return &AOF{file, bufio.NewReadWriter(rdr, wtr), sync.RWMutex{}, in}
 }
 
