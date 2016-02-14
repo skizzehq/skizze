@@ -81,6 +81,10 @@ func GetConfig() *Config {
 			saveThresholdSeconds = 3
 		}
 
+		if err := os.MkdirAll(dataDir, os.ModePerm); err != nil {
+			panic(err)
+		}
+
 		config = &Config{
 			infoDir,
 			dataDir,
