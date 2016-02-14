@@ -1,5 +1,7 @@
 package storage
 
+import "github.com/golang/protobuf/proto"
+
 // CreateDom ...
 const (
 	CreateDom    = uint8(0)
@@ -11,16 +13,22 @@ const (
 
 // Entry ...
 type Entry struct {
-	op   uint8
-	args []byte
+	op  uint8
+	msg proto.Message
+	raw []byte
 }
 
-// Op ...
-func (entry *Entry) Op() uint8 {
+// OpType ...
+func (entry *Entry) OpType() uint8 {
 	return entry.op
 }
 
-// Args ...
-func (entry *Entry) Args() []byte {
-	return entry.args
+// Msg ...
+func (entry *Entry) Msg() proto.Message {
+	return entry.msg
+}
+
+// RawMsg ...
+func (entry *Entry) RawMsg() []byte {
+	return entry.raw
 }

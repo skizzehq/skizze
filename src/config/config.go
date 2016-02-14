@@ -16,9 +16,6 @@ import (
 type Config struct {
 	InfoDir              string `toml:"info_dir"`
 	DataDir              string `toml:"data_dir"`
-	SliceSize            uint   `toml:"slice_size"`
-	CacheSize            uint   `toml:"cache_size"`
-	SliceCacheSize       uint   `toml:"slice_cache_size"`
 	Port                 uint   `toml:"port"`
 	SaveThresholdSeconds uint   `toml:"save_threshold_seconds"`
 }
@@ -84,12 +81,13 @@ func GetConfig() *Config {
 			saveThresholdSeconds = 3
 		}
 
+		if err := os.MkdirAll(dataDir, os.ModePerm); err != nil {
+			panic(err)
+		}
+
 		config = &Config{
 			infoDir,
 			dataDir,
-			config.SliceSize,
-			config.CacheSize,
-			config.SliceCacheSize,
 			port,
 			saveThresholdSeconds,
 		}
