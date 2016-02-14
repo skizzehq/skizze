@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"utils"
 
@@ -15,10 +16,11 @@ import (
 
 // AOF ...
 type AOF struct {
-	file   *os.File
-	buffer *bufio.ReadWriter
-	lock   sync.RWMutex
-	in     chan *Entry
+	file     *os.File
+	buffer   *bufio.ReadWriter
+	lock     sync.RWMutex
+	inChan   chan *Entry
+	tickChan <-chan time.Time
 }
 
 // NewAOF ...
@@ -27,8 +29,15 @@ func NewAOF(path string) *AOF {
 	utils.PanicOnError(err)
 	rdr := bufio.NewReader(file)
 	wtr := bufio.NewWriter(file)
-	in := make(chan *Entry, 100)
-	return &AOF{file, bufio.NewReadWriter(rdr, wtr), sync.RWMutex{}, in}
+	inChan := make(chan *Entry, 100)
+	tickChan := time.NewTicker(time.Second).C
+	return &AOF{
+		file:     file,
+		buffer:   bufio.NewReadWriter(rdr, wtr),
+		lock:     sync.RWMutex{},
+		inChan:   inChan,
+		tickChan: tickChan,
+	}
 }
 
 // Run ...
@@ -36,8 +45,12 @@ func (aof *AOF) Run() {
 	go func() {
 		for {
 			select {
-			case e := <-aof.in:
+			case e := <-aof.inChan:
 				aof.write(e)
+			case <-aof.tickChan:
+				if err := aof.buffer.Flush(); err != nil {
+					fmt.Println(err)
+				}
 			}
 		}
 	}()
@@ -46,9 +59,6 @@ func (aof *AOF) Run() {
 func (aof *AOF) write(e *Entry) {
 	line := fmt.Sprintf("%d|%s/", e.op, string(e.raw))
 	if _, err := aof.buffer.WriteString(line); err != nil {
-		fmt.Println(err)
-	}
-	if err := aof.buffer.Flush(); err != nil {
 		fmt.Println(err)
 	}
 }
@@ -60,7 +70,7 @@ func (aof *AOF) Append(op uint8, msg proto.Message) error {
 		return err
 	}
 	e := &Entry{op, msg, raw}
-	aof.in <- e
+	aof.inChan <- e
 	return nil
 }
 
