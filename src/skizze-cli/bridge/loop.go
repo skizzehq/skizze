@@ -57,7 +57,7 @@ func getFields(query string) []string {
 
 func evalutateQuery(query string) error {
 	fields := getFields(query)
-	if len(fields) <= 2 {
+	if len(fields) != 0 && len(fields) <= 2 {
 		//TODO: global stuff might be set
 		switch strings.ToLower(fields[0]) {
 		case "list":
