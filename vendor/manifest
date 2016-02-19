@@ -120,9 +120,9 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "github.com/willf/bloom",
-			"repository": "https://github.com/willf/bloom",
-			"revision": "73320a6e73f3e139842058d7e4886e09ca83ac9b",
+			"importpath": "github.com/AndreasBriese/bbloom",
+			"repository": "https://github.com/AndreasBriese/bbloom",
+			"revision": "0320de81a58b973b5187098f4815608711c70f3b",
 			"branch": "master"
 		},
 		{
