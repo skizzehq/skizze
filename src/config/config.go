@@ -32,7 +32,11 @@ func parseConfigTOML() *Config {
 		utils.PanicOnError(err)
 		path, err = filepath.Abs(path)
 		utils.PanicOnError(err)
-		configPath = filepath.Join(path, "src/config/default.toml")
+        if strings.Contains(path, "/bin") {
+            path = strings.Replace(path, "/bin", "", 1)
+        }
+		defaultPath := "src/config/default.toml"
+		configPath = filepath.Join(path, defaultPath)
 	}
 	_, err := os.Open(configPath)
 	utils.PanicOnError(err)
