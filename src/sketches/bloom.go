@@ -6,7 +6,6 @@ import (
 	"datamodel"
 	pb "datamodel/protobuf"
 	"utils"
-    "errors"
 )
 
 // BloomSketch is the toplevel Sketch to control the count-min-log implementation
@@ -31,11 +30,6 @@ func (d *BloomSketch) Add(values [][]byte) (bool, error) {
 	return true, nil
 }
 
-// Marshal ...
-func (d *BloomSketch) Marshal() ([]byte, error) {
-	return make([]byte, 0), errors.New("Method not supported")
-}
-
 // Get ...
 func (d *BloomSketch) Get(data interface{}) (interface{}, error) {
 	values := data.([][]byte)
@@ -55,9 +49,4 @@ func (d *BloomSketch) Get(data interface{}) (interface{}, error) {
 		tmpRes[string(v)] = res.Memberships[i]
 	}
 	return res, nil
-}
-
-// Unmarshal ...
-func (d *BloomSketch) Unmarshal(info *datamodel.Info, data []byte) error {
-	return errors.New("Method not supported")
 }

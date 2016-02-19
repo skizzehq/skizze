@@ -2,7 +2,6 @@ package sketches
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"sync"
 
@@ -42,17 +41,6 @@ func (sp *SketchProxy) Get(data interface{}) (interface{}, error) {
 	default:
 		return nil, fmt.Errorf("Invalid sketch type: %s", sp.GetType())
 	}
-}
-
-// Save ...
-func (sp *SketchProxy) Save(file io.Writer) error {
-	data, err := sp.sketch.Marshal()
-	if err != nil {
-		return err
-	}
-
-	_, err = file.Write(data)
-	return err
 }
 
 // CreateSketch ...
@@ -99,21 +87,15 @@ func LoadSketch(info *datamodel.Info, file *os.File) (*SketchProxy, error) {
 	switch datamodel.GetTypeString(info.GetType()) {
 	case datamodel.HLLPP:
 		sp.sketch = &HLLPPSketch{}
-		err = sp.sketch.Unmarshal(info, data)
 	case datamodel.CML:
 		sp.sketch = &CMLSketch{}
-		err = sp.sketch.Unmarshal(info, data)
 	case datamodel.TopK:
 		sp.sketch = &TopKSketch{}
-		err = sp.sketch.Unmarshal(info, data)
 	case datamodel.Bloom:
 		sp.sketch = &BloomSketch{}
-		err = sp.sketch.Unmarshal(info, data)
 	default:
 		return nil, fmt.Errorf("Invalid sketch type: %s", sp.GetType())
 	}
-	if err != nil {
-		return nil, err
-	}
+	
 	return sp, nil
 }

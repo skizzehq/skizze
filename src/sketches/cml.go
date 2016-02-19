@@ -55,18 +55,3 @@ func (d *CMLSketch) Get(data interface{}) (interface{}, error) {
 	}
 	return res, nil
 }
-
-// Marshal ...
-func (d *CMLSketch) Marshal() ([]byte, error) {
-	return d.impl.Marshal()
-}
-
-// Unmarshal ...
-func (d *CMLSketch) Unmarshal(info *datamodel.Info, data []byte) error {
-	impl, err := cml.Unmarshal(data)
-	if err != nil {
-		return err
-	}
-	d.impl = impl
-	return nil
-}
