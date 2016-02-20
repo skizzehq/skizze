@@ -1,8 +1,6 @@
 package sketches
 
 import (
-	"bytes"
-	"encoding/gob"
 
 	"github.com/dgryski/go-topk"
 
@@ -50,36 +48,4 @@ func (d *TopKSketch) Get(interface{}) (interface{}, error) {
 		}
 	}
 	return result, nil
-}
-
-// Marshal ...
-func (d *TopKSketch) Marshal() ([]byte, error) {
-	var network bytes.Buffer        // Stand-in for a network connection
-	enc := gob.NewEncoder(&network) // Will write to network.
-	//  Encode (send) the value.
-	err := enc.Encode(d.impl)
-	if err != nil {
-		return nil, err
-	}
-	return network.Bytes(), nil
-}
-
-// Unmarshal ...
-func (d *TopKSketch) Unmarshal(info *datamodel.Info, data []byte) error {
-	var network bytes.Buffer //  Stand-in for a network connection
-	_, err := network.Write(data)
-	if err != nil {
-		logger.Errorf("an error has occurred while loading sketch from data: " + err.Error())
-		return err
-	}
-	dec := gob.NewDecoder(&network) //  Will read from network.
-
-	var counter topk.Stream
-	err = dec.Decode(&counter)
-	if err != nil {
-		return err
-	}
-	d.Info = info
-	d.impl = &counter
-	return nil
 }
