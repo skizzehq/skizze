@@ -1,7 +1,7 @@
 package sketches
 
 import (
-	"github.com/seiflotfy/count-min-log"
+	"github.com/skizzehq/count-min-log"
 
 	"datamodel"
 	pb "datamodel/protobuf"
@@ -27,8 +27,13 @@ func NewCMLSketch(info *datamodel.Info) (*CMLSketch, error) {
 // Add ...
 func (d *CMLSketch) Add(values [][]byte) (bool, error) {
 	success := true
+
+	dict := make(map[string]uint)
 	for _, v := range values {
-		if b := d.impl.IncreaseCount([]byte(v)); !b {
+		dict[string(v)]++
+	}
+	for v, count := range dict {
+		if b := d.impl.BulkUpdate([]byte(v), count); !b {
 			success = false
 		}
 	}
@@ -49,7 +54,7 @@ func (d *CMLSketch) Get(data interface{}) (interface{}, error) {
 		}
 		res.Frequencies[i] = &pb.Frequency{
 			Value: utils.Stringp(string(v)),
-			Count: utils.Int64p(int64(d.impl.Frequency(v))),
+			Count: utils.Int64p(int64(d.impl.Query(v))),
 		}
 		tmpRes[string(v)] = res.Frequencies[i]
 	}

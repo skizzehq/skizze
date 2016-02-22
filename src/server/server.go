@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"path/filepath"
+	"runtime"
 
 	"github.com/golang/protobuf/proto"
 	"google.golang.org/grpc"
@@ -28,6 +29,8 @@ var server *serverStruct
 
 // Run ...
 func Run(manager *manager.Manager, port uint) {
+	nCpu := runtime.NumCPU()
+	runtime.GOMAXPROCS(nCpu)
 	path := filepath.Join(config.GetConfig().DataDir, "skizze.aof")
 	aof := storage.NewAOF(path)
 
