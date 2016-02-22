@@ -13,4 +13,4 @@ before_script:
 
 script:
  - gometalinter ./src/* -D gocyclo -D gotype -D dupl --deadline=120s
- - gb test -v
+ - make test
