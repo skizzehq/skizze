@@ -125,20 +125,19 @@ func Run() {
 	for {
 		if query, err := line.Prompt("skizze> "); err == nil {
 			if err := evalutateQuery(query); err != nil {
-				fmt.Println(err)
+				log.Printf("Error evaluating query: %s", err.Error())
 			}
-			fmt.Println("")
 			line.AppendHistory(query)
 		} else if err == liner.ErrPromptAborted {
-			log.Print("Aborted")
+			log.Printf("Aborted")
 			tearDownClient(conn)
 			return
 		} else {
-			log.Print("Error reading line: ", err)
+			log.Printf("Error reading line: %s", err.Error())
 		}
 
 		if f, err := os.Create(historyFn); err != nil {
-			log.Print("Error writing history file: ", err)
+			log.Fatalf("Error writing history file: %s", err.Error())
 		} else {
 			if _, err := line.WriteHistory(f); err != nil {
 				_ = f.Close()
