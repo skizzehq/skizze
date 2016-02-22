@@ -29,8 +29,8 @@ var server *serverStruct
 
 // Run ...
 func Run(manager *manager.Manager, port uint) {
-	nCpu := runtime.NumCPU()
-	runtime.GOMAXPROCS(nCpu)
+	nCPU := runtime.NumCPU()
+	runtime.GOMAXPROCS(nCPU)
 	path := filepath.Join(config.GetConfig().DataDir, "skizze.aof")
 	aof := storage.NewAOF(path)
 

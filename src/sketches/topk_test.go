@@ -25,6 +25,8 @@ func TestAddTopK(t *testing.T) {
 	values := [][]byte{
 		[]byte("sabertooth"),
 		[]byte("thunderbolt"),
+		[]byte("cyclops"),
+		[]byte("thunderbolt"),
 		[]byte("thunderbolt"),
 		[]byte("havoc"),
 		[]byte("cyclops"),
@@ -45,13 +47,13 @@ func TestAddTopK(t *testing.T) {
 
 	expectedRankings[0] = &RankingsStruct{
 		Value:    "cyclops",
-		Count:    3,
+		Count:    4,
 		Position: 1,
 	}
 
 	expectedRankings[1] = &RankingsStruct{
 		Value:    "thunderbolt",
-		Count:    2,
+		Count:    3,
 		Position: 2,
 	}
 

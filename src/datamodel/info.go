@@ -38,7 +38,7 @@ func (info *Info) Unlock() {
 
 // Copy sketch
 func (info *Info) Copy() *Info {
-	typ := pb.SketchType(info.GetType())
+	typ := info.GetType()
 	return &Info{
 		Sketch: &pb.Sketch{
 			Properties: &pb.SketchProperties{

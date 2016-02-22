@@ -60,7 +60,7 @@ func (m *Manager) CreateSketch(info *datamodel.Info) error {
 func (m *Manager) CreateDomain(info *datamodel.Info) error {
 	infos := make(map[string]*datamodel.Info)
 	for _, typ := range datamodel.GetTypesPb() {
-		styp := pb.SketchType(typ)
+		styp := typ
 		tmpInfo := info.Copy()
 		tmpInfo.Type = &styp
 		infos[tmpInfo.ID()] = tmpInfo
