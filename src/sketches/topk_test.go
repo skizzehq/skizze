@@ -75,12 +75,8 @@ func TestAddTopK(t *testing.T) {
 		tmp := res.(*pb.RankingsResult)
 		rres := tmp.GetRankings()
 		for i := 0; i < len(rres); i++ {
-			count := rres[i].GetCount()
-			value := rres[i].GetValue()
-			for j := 0; j < len(expectedRankings); j++ {
-				if expectedRankings[j].Value == value && expectedRankings[j].Count != count && expectedRankings[j].Position != int64(i) {
-					t.Error("expected ranking == "+strconv.FormatInt(expectedRankings[j].Position, 10)+", got", count)
-				}
+			if expectedRankings[i].Value != rres[i].GetValue() {
+				t.Errorf("expected ranking == %d, got %d", expectedRankings[i].Position, rres[i].GetValue())
 			}
 		}
 	}
