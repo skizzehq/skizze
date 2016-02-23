@@ -48,29 +48,25 @@ func TestAddHLLPP(t *testing.T) {
 	}
 }
 
-func TestStressHLLPP(t *testing.T) {
-	utils.SetupTests()
-	defer utils.TearDownTests()
-
+func BenchmarkHLLPP(b *testing.B) {
 	values := make([][]byte, 10)
 	for i := 0; i < 1024; i++ {
 		avenger := "avenger" + strconv.Itoa(i)
 		values = append(values, []byte(avenger))
 	}
 
-	for i := 0; i < 1024; i++ {
+	for n := 0; n < b.N; n++ {
 		info := datamodel.NewEmptyInfo()
-		info.Properties.MaxUniqueItems = utils.Int64p(1024)
-		info.Name = utils.Stringp("marvel" + strconv.Itoa(i))
-
+		info.Properties.Size = utils.Int64p(1000)
+		info.Name = utils.Stringp("marvel3")
 		sketch, err := NewHLLPPSketch(info)
-
 		if err != nil {
-			t.Error("expected avengers to have no error, got", err)
+			b.Error("expected no errors, got", err)
 		}
-
-		if _, err := sketch.Add(values); err != nil {
-			t.Error("expected no errors, got", err)
+		for i := 0; i < 1000; i++ {
+			if _, err := sketch.Add(values); err != nil {
+				b.Error("expected no errors, got", err)
+			}
 		}
 	}
 }
