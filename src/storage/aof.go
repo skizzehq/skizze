@@ -12,7 +12,10 @@ import (
 	"utils"
 
 	"github.com/golang/protobuf/proto"
+    "github.com/njpatel/loggo"
 )
+
+var logger = loggo.GetLogger("storage")
 
 // AOF ...
 type AOF struct {
@@ -49,7 +52,7 @@ func (aof *AOF) Run() {
 				aof.write(e)
 			case <-aof.tickChan:
 				if err := aof.buffer.Flush(); err != nil {
-					fmt.Println(err)
+					logger.Errorf("an error has occurred while flushing AOF: %s", err.Error())
 				}
 			}
 		}
@@ -59,7 +62,7 @@ func (aof *AOF) Run() {
 func (aof *AOF) write(e *Entry) {
 	line := fmt.Sprintf("%d|%s/", e.op, string(e.raw))
 	if _, err := aof.buffer.WriteString(line); err != nil {
-		fmt.Println(err)
+		logger.Errorf("an error has ocurred while writing AOF: %s", err.Error())
 	}
 }
 

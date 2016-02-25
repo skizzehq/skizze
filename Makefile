@@ -15,6 +15,9 @@ vendor:
 test:
 	@GOPATH=$(GOPATH) && go test -race -cover ./src/...
 
+bench:
+	@GOPATH=$(GOPATH) && go test -bench=. ./src/...
+
 dist: build-dep vendor all
 
 clean:

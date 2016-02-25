@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"time"
 
 	"google.golang.org/grpc"
@@ -18,7 +17,7 @@ func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 	// Connect to the server.
 	conn, err := grpc.Dial("127.0.0.1:7777", grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
+		logger.Criticalf("fail to dial: %v", err)
 	}
 	return pb.NewSkizzeClient(conn), conn
 }

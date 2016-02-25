@@ -2,13 +2,11 @@ package sketches
 
 import (
 	"fmt"
-	"os"
 	"sync"
 
 	"github.com/njpatel/loggo"
 
 	"datamodel"
-	"utils"
 )
 
 var logger = loggo.GetLogger("sketches")
@@ -65,37 +63,5 @@ func CreateSketch(info *datamodel.Info) (*SketchProxy, error) {
 	if err != nil {
 		return nil, err
 	}
-	return sp, nil
-}
-
-// LoadSketch ...
-func LoadSketch(info *datamodel.Info, file *os.File) (*SketchProxy, error) {
-	var sketch datamodel.Sketcher
-	sp := &SketchProxy{info, sketch, sync.RWMutex{}}
-
-	size, err := utils.GetFileSize(file)
-	if err != nil {
-		return nil, err
-	}
-
-	data := make([]byte, size, size)
-	_, err = file.Read(data)
-	if err != nil {
-		return nil, fmt.Errorf("Error loading data for sketch: %s", info.ID())
-	}
-
-	switch datamodel.GetTypeString(info.GetType()) {
-	case datamodel.HLLPP:
-		sp.sketch = &HLLPPSketch{}
-	case datamodel.CML:
-		sp.sketch = &CMLSketch{}
-	case datamodel.TopK:
-		sp.sketch = &TopKSketch{}
-	case datamodel.Bloom:
-		sp.sketch = &BloomSketch{}
-	default:
-		return nil, fmt.Errorf("Invalid sketch type: %s", sp.GetType())
-	}
-	
 	return sp, nil
 }

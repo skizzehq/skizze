@@ -3,12 +3,14 @@ package server
 import (
 	"datamodel"
 	pb "datamodel/protobuf"
-	"fmt"
 	"storage"
 
 	"github.com/gogo/protobuf/proto"
+    "github.com/njpatel/loggo"
 	"golang.org/x/net/context"
 )
+
+var logger = loggo.GetLogger("server")
 
 func (s *serverStruct) createSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
 	info := &datamodel.Info{Sketch: in}
@@ -115,7 +117,7 @@ func (s *serverStruct) deleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Emp
 
 func (s *serverStruct) DeleteSketch(ctx context.Context, in *pb.Sketch) (*pb.Empty, error) {
 	if err := s.storage.Append(storage.DeleteSketch, in); err != nil {
-		fmt.Println(err)
+		logger.Errorf("an error has occurred while deleting a sketch: %s", err.Error())
 	}
 	return s.deleteSketch(ctx, in)
 }

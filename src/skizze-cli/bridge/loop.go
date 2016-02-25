@@ -2,7 +2,7 @@ package bridge
 
 import (
 	"errors"
-	"fmt"
+    "fmt"
 	"io"
 	"log"
 	"os"
@@ -18,7 +18,10 @@ import (
 	pb "datamodel/protobuf"
 
 	"github.com/peterh/liner"
+    "github.com/njpatel/loggo"    
 )
+
+var logger = loggo.GetLogger("bridge")
 
 var client pb.SkizzeClient
 var conn *grpc.ClientConn
@@ -122,23 +125,26 @@ func Run() {
 		}
 	}
 
+    // make skizze-cli a little nicer
+	_, _ = loggo.ReplaceDefaultWriter(loggo.NewSimpleWriter(os.Stderr, &loggo.ColorFormatter{}))
+
 	for {
 		if query, err := line.Prompt("skizze> "); err == nil {
 			if err := evalutateQuery(query); err != nil {
-				fmt.Println(err)
+				logger.Errorf("Error evaluating query: %s", err.Error())
 			}
-			fmt.Println("")
+			logger.Infof("")
 			line.AppendHistory(query)
 		} else if err == liner.ErrPromptAborted {
-			log.Print("Aborted")
+			logger.Infof("Aborted")
 			tearDownClient(conn)
 			return
 		} else {
-			log.Print("Error reading line: ", err)
+			logger.Errorf("Error reading line: %s", err.Error())
 		}
 
 		if f, err := os.Create(historyFn); err != nil {
-			log.Print("Error writing history file: ", err)
+			logger.Errorf("Error writing history file: %s", err.Error())
 		} else {
 			if _, err := line.WriteHistory(f); err != nil {
 				_ = f.Close()

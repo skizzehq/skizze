@@ -24,10 +24,16 @@ func NewBloomSketch(info *datamodel.Info) (*BloomSketch, error) {
 
 // Add ...
 func (d *BloomSketch) Add(values [][]byte) (bool, error) {
-	for _, value := range values {
-		d.impl.Add(value)
+	success := true
+	dict := make(map[string]uint)
+	for _, v := range values {
+		dict[string(v)]++
 	}
-	return true, nil
+	for v := range dict {
+		d.impl.Add([]byte(v))
+	}
+	// Fixme: return what was added and what not
+	return success, nil
 }
 
 // Get ...

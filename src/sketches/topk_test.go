@@ -25,6 +25,8 @@ func TestAddTopK(t *testing.T) {
 	values := [][]byte{
 		[]byte("sabertooth"),
 		[]byte("thunderbolt"),
+		[]byte("cyclops"),
+		[]byte("thunderbolt"),
 		[]byte("thunderbolt"),
 		[]byte("havoc"),
 		[]byte("cyclops"),
@@ -45,13 +47,13 @@ func TestAddTopK(t *testing.T) {
 
 	expectedRankings[0] = &RankingsStruct{
 		Value:    "cyclops",
-		Count:    3,
+		Count:    4,
 		Position: 1,
 	}
 
 	expectedRankings[1] = &RankingsStruct{
 		Value:    "thunderbolt",
-		Count:    2,
+		Count:    3,
 		Position: 2,
 	}
 
@@ -73,40 +75,32 @@ func TestAddTopK(t *testing.T) {
 		tmp := res.(*pb.RankingsResult)
 		rres := tmp.GetRankings()
 		for i := 0; i < len(rres); i++ {
-			count := rres[i].GetCount()
-			value := rres[i].GetValue()
-			for j := 0; j < len(expectedRankings); j++ {
-				if expectedRankings[j].Value == value && expectedRankings[j].Count != count && expectedRankings[j].Position != int64(i) {
-					t.Error("expected ranking == "+strconv.FormatInt(expectedRankings[j].Position, 10)+", got", count)
-				}
+			if expectedRankings[i].Value != rres[i].GetValue() {
+				t.Errorf("expected rank of %d := %s, got %s", expectedRankings[i].Position, expectedRankings[i].Value, rres[i].GetValue())
 			}
 		}
 	}
 }
 
-func TestStressTopK(t *testing.T) {
-	utils.SetupTests()
-	defer utils.TearDownTests()
-
+func BenchmarkTopK(b *testing.B) {
 	values := make([][]byte, 10)
 	for i := 0; i < 1024; i++ {
 		avenger := "avenger" + strconv.Itoa(i)
 		values = append(values, []byte(avenger))
 	}
 
-	for i := 0; i < 1024; i++ {
+	for n := 0; n < b.N; n++ {
 		info := datamodel.NewEmptyInfo()
-		info.Properties.Size = utils.Int64p(1024)
-		info.Name = utils.Stringp("marvel" + strconv.Itoa(i))
-
+		info.Properties.Size = utils.Int64p(1000)
+		info.Name = utils.Stringp("marvel3")
 		sketch, err := NewTopKSketch(info)
-
 		if err != nil {
-			t.Error("expected avengers to have no error, got", err)
+			b.Error("expected no errors, got", err)
 		}
-
-		if _, err := sketch.Add(values); err != nil {
-			t.Error("expected no errors, got", err)
+		for i := 0; i < 1000; i++ {
+			if _, err := sketch.Add(values); err != nil {
+				b.Error("expected no errors, got", err)
+			}
 		}
 	}
 }

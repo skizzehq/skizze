@@ -22,8 +22,12 @@ func NewHLLPPSketch(info *datamodel.Info) (*HLLPPSketch, error) {
 
 // Add ...
 func (d *HLLPPSketch) Add(values [][]byte) (bool, error) {
-	for _, value := range values {
-		d.impl.Add(value)
+	dict := make(map[string]uint)
+	for _, v := range values {
+		dict[string(v)]++
+	}
+	for v := range dict {
+		d.impl.Add([]byte(v))
 	}
 	return true, nil
 }

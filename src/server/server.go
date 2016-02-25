@@ -3,9 +3,9 @@ package server
 import (
 	"config"
 	"fmt"
-	"log"
 	"net"
 	"path/filepath"
+	"runtime"
 
 	"github.com/golang/protobuf/proto"
 	"google.golang.org/grpc"
@@ -28,12 +28,14 @@ var server *serverStruct
 
 // Run ...
 func Run(manager *manager.Manager, port uint) {
+	nCPU := runtime.NumCPU()
+	runtime.GOMAXPROCS(nCPU)
 	path := filepath.Join(config.GetConfig().DataDir, "skizze.aof")
 	aof := storage.NewAOF(path)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port)) // RPC port
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		logger.Criticalf("failed to listen: %v", err)
 	}
 	g := grpc.NewServer()
 
@@ -59,7 +61,7 @@ func unmarshalDom(e *storage.Entry) *pb.Domain {
 }
 
 func (server *serverStruct) replay() {
-	fmt.Println("Replaying ...")
+	logger.Infof("Replaying ...")
 	for {
 		e, err := server.storage.Read()
 		if err != nil && err.Error() == "EOF" {
@@ -74,27 +76,27 @@ func (server *serverStruct) replay() {
 			err = proto.Unmarshal(e.RawMsg(), req)
 			utils.PanicOnError(err)
 			if _, err := server.add(context.Background(), req); err != nil {
-				fmt.Println(err)
+				logger.Errorf("an error has occurred while replaying: %s", err.Error())
 			}
 		case storage.CreateSketch:
 			sketch := unmarshalSketch(e)
 			if _, err := server.createSketch(context.Background(), sketch); err != nil {
-				fmt.Println(err)
+				logger.Errorf("an error has occurred while replaying: %s", err.Error())
 			}
 		case storage.DeleteSketch:
 			sketch := unmarshalSketch(e)
 			if _, err := server.deleteSketch(context.Background(), sketch); err != nil {
-				fmt.Println(err)
+				logger.Errorf("an error has occurred while replaying: %s", err.Error())
 			}
 		case storage.CreateDom:
 			dom := unmarshalDom(e)
 			if _, err := server.createDomain(context.Background(), dom); err != nil {
-				fmt.Println(err)
+				logger.Errorf("an error has occurred while replaying: %s", err.Error())
 			}
 		case storage.DeleteDom:
 			dom := unmarshalDom(e)
 			if _, err := server.deleteDomain(context.Background(), dom); err != nil {
-				fmt.Println(err)
+				logger.Errorf("an error has occurred while replaying: %s", err.Error())
 			}
 		default:
 			continue
