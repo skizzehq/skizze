@@ -7,7 +7,11 @@ import (
 
 	"datamodel"
 	pb "datamodel/protobuf"
+
+	"github.com/njpatel/loggo"
 )
+
+var logger = loggo.GetLogger("manager")
 
 func isValidType(info *datamodel.Info) bool {
 	if info.Type == nil {

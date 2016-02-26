@@ -101,10 +101,10 @@ func (m *domainManager) add(id string, values []string) error {
 
 	for _, sketch := range sketches {
 		go func(sk string) {
-			defer wg.Done()
 			if err := m.sketches.add(sk, values); err != nil {
-				fmt.Println(err)
+				logger.Errorf("%q\n", err)
 			}
+			wg.Done()
 		}(sketch)
 	}
 

@@ -381,6 +381,5 @@ func TestCreateDeleteDomain(t *testing.T) {
 		t.Error("Expected [[dc card]], got", sketches[0][0], sketches[0][1])
 	} else if sketches[1][0] != "dc" || sketches[1][1] != "freq" {
 		t.Error("Expected [[dc freq]], got", sketches[1][0], sketches[1][1])
-		fmt.Println(sketches)
 	}
 }
