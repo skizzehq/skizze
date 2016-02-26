@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/gogo/protobuf/proto"
 
@@ -90,13 +91,24 @@ func (m *domainManager) delete(id string) error {
 
 func (m *domainManager) add(id string, values []string) error {
 	sketches, ok := m.domains[id]
+
 	if !ok {
 		return fmt.Errorf(`Domain "%s" does not exists`, id)
 	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(sketches))
+
 	for _, sketch := range sketches {
-		_ = m.sketches.add(sketch, values)
-		// fmt.Println(err)
+		go func(sk string) {
+			if err := m.sketches.add(sk, values); err != nil {
+				logger.Errorf("%q\n", err)
+			}
+			wg.Done()
+		}(sketch)
 	}
+
+	wg.Wait()
 	return nil
 }
 

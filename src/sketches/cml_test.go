@@ -1,6 +1,7 @@
 package sketches
 
 import (
+	"strconv"
 	"testing"
 
 	"datamodel"
@@ -38,5 +39,28 @@ func TestAdd(t *testing.T) {
 		t.Error("expected no errors, got", err)
 	} else if res.(*pb.FrequencyResult).Frequencies[0].GetCount() != 3 {
 		t.Error("expected 'cyclops' count == 3, got", res.(*pb.FrequencyResult).Frequencies[0].GetCount())
+	}
+}
+
+func BenchmarkCML(b *testing.B) {
+	values := make([][]byte, 10)
+	for i := 0; i < 1024; i++ {
+		avenger := "avenger" + strconv.Itoa(i)
+		values = append(values, []byte(avenger))
+	}
+
+	for n := 0; n < b.N; n++ {
+		info := datamodel.NewEmptyInfo()
+		info.Properties.MaxUniqueItems = utils.Int64p(1000)
+		info.Name = utils.Stringp("marvel2")
+		sketch, err := NewCMLSketch(info)
+		if err != nil {
+			b.Error("expected no errors, got", err)
+		}
+		for i := 0; i < 1000; i++ {
+			if _, err := sketch.Add(values); err != nil {
+				b.Error("expected no errors, got", err)
+			}
+		}
 	}
 }

@@ -1,7 +1,6 @@
 package sketches
 
 import (
-
 	"github.com/dgryski/go-topk"
 
 	"datamodel"
@@ -27,10 +26,12 @@ func NewTopKSketch(info *datamodel.Info) (*TopKSketch, error) {
 
 // Add ...
 func (d *TopKSketch) Add(values [][]byte) (bool, error) {
-	for _, value := range values {
-		str := string(value)
-		d.impl.Insert(str, 1)
-
+	dict := make(map[string]int)
+	for _, v := range values {
+		dict[string(v)]++
+	}
+	for v, count := range dict {
+		d.impl.Insert(v, count)
 	}
 	return true, nil
 }

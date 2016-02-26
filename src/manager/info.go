@@ -39,7 +39,3 @@ func (m *infoManager) delete(id string) error {
 	delete(m.info, id)
 	return nil
 }
-
-func (m *infoManager) getCopy() map[string]*datamodel.Info {
-	return (map[string]*datamodel.Info)(m.info)
-}
