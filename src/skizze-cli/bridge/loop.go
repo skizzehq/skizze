@@ -17,7 +17,7 @@ import (
 	"datamodel"
 	pb "datamodel/protobuf"
 
-	"github.com/peterh/liner"
+	"github.com/martinpinto/liner"
 )
 
 var client pb.SkizzeClient
@@ -55,7 +55,7 @@ func getFields(query string) []string {
 	return fields
 }
 
-func evalutateQuery(query string) error {
+func evaluateQuery(query string) error {
 	fields := getFields(query)
 	if len(fields) != 0 && len(fields) <= 2 {
 		//TODO: global stuff might be set
@@ -124,14 +124,16 @@ func Run() {
 
 	for {
 		if query, err := line.Prompt("skizze> "); err == nil {
-			if err := evalutateQuery(query); err != nil {
+			if err := evaluateQuery(query); err != nil {
 				log.Printf("Error evaluating query: %s", err.Error())
 			}
 			line.AppendHistory(query)
-		} else if err == liner.ErrPromptAborted {
-			log.Printf("Aborted")
+		} else if err == io.EOF {
+			log.Print("Aborted")
 			tearDownClient(conn)
 			return
+		} else if err == liner.ErrPromptAborted {
+			fmt.Println("")
 		} else {
 			log.Printf("Error reading line: %s", err.Error())
 		}

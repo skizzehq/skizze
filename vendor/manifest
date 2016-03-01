@@ -96,9 +96,9 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "github.com/peterh/liner",
-			"repository": "https://github.com/peterh/liner",
-			"revision": "d5e5aeeb67ca5aeeddeb0b6c3af05421ff63a0b6",
+			"importpath": "github.com/martinpinto/liner",
+			"repository": "https://github.com/martinpinto/liner",
+			"revision": "488c6d3e1cd42b7f917c1eab570360f744fa508b",
 			"branch": "master"
 		},
 		{
