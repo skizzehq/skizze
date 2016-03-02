@@ -2,6 +2,7 @@ package bridge
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -96,7 +97,7 @@ func getSketchInfo(in *pb.Sketch) error {
 		Size:           proto.Int64(0),
 	}
 	reply, err := client.GetSketch(context.Background(), in)
-	fmt.Println(reply)
+	log.Printf("%s", reply)
 	return err
 }
 
@@ -114,9 +115,10 @@ func getFromSketch(fields []string, in *pb.Sketch) error {
 		reply, err := client.GetCardinality(context.Background(), getRequest)
 		if err == nil {
 			if len(reply.GetResults()) == 0 {
-				fmt.Println(in.GetName(), "does not exist")
+				log.Printf("%s does not exist", in.GetName())
 			} else {
-				fmt.Println("Cardinality:", reply.GetResults()[0].GetCardinality())
+				fmt.Printf("Cardinality: %d", reply.GetResults()[0].GetCardinality())
+				fmt.Println("")
 			}
 		}
 		return err
@@ -124,7 +126,7 @@ func getFromSketch(fields []string, in *pb.Sketch) error {
 		reply, err := client.GetFrequency(context.Background(), getRequest)
 		if err == nil {
 			if len(reply.GetResults()) == 0 {
-				fmt.Println(in.GetName(), "does not exist")
+				log.Printf("%s does not exist", in.GetName())
 			} else {
 				for _, v := range reply.GetResults()[0].GetFrequencies() {
 					line := fmt.Sprintf("Value: %s\t  Hits: %d", v.GetValue(), v.GetCount())
@@ -138,7 +140,7 @@ func getFromSketch(fields []string, in *pb.Sketch) error {
 		reply, err := client.GetMembership(context.Background(), getRequest)
 		if err == nil {
 			if len(reply.GetResults()) == 0 {
-				fmt.Println(in.GetName(), "does not exist")
+				log.Printf("%s does not exist", in.GetName())
 			} else {
 				for _, v := range reply.GetResults()[0].GetMemberships() {
 					line := fmt.Sprintf("Value: %s\t  Member: %t", v.GetValue(), v.GetIsMember())
@@ -152,7 +154,7 @@ func getFromSketch(fields []string, in *pb.Sketch) error {
 		reply, err := client.GetRankings(context.Background(), getRequest)
 		if err == nil {
 			if len(reply.GetResults()) == 0 {
-				fmt.Println(in.GetName(), "does not exist")
+				log.Printf("%s does not exist", in.GetName())
 			} else {
 				for i, v := range reply.GetResults()[0].GetRankings() {
 					line := fmt.Sprintf("Rank: %d\t  Value: %s\t  Hits: %d", i+1, v.GetValue(), v.GetCount())
