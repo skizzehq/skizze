@@ -20,7 +20,8 @@ type ResultElement topk.Element
 
 // NewTopKSketch ...
 func NewTopKSketch(info *datamodel.Info) (*TopKSketch, error) {
-	d := TopKSketch{info, topk.New(int(info.Properties.GetSize()))}
+	size := int(info.Properties.GetSize()) * 2 // For higher precision
+	d := TopKSketch{info, topk.New(size)}
 	return &d, nil
 }
 
@@ -39,10 +40,15 @@ func (d *TopKSketch) Add(values [][]byte) (bool, error) {
 // Get ...
 func (d *TopKSketch) Get(interface{}) (interface{}, error) {
 	keys := d.impl.Keys()
-	result := &pb.RankingsResult{
-		Rankings: make([]*pb.Rank, len(keys), len(keys)),
+	size := len(keys)
+	if size > int(d.Info.Properties.GetSize())/2 {
+		size = int(d.Info.Properties.GetSize()) / 2
 	}
-	for i, k := range keys {
+	result := &pb.RankingsResult{
+		Rankings: make([]*pb.Rank, size, size),
+	}
+	for i := range result.Rankings {
+		k := keys[i]
 		result.Rankings[i] = &pb.Rank{
 			Value: utils.Stringp(k.Key),
 			Count: utils.Int64p(int64(k.Count)),
