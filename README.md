@@ -15,26 +15,39 @@ Statistical analysis and mining of huge multi-terabyte data sets is a common tas
 
 Skizze is a (fire and forget) service that provides a probabilistic data structures (sketches) storage that allows estimation of these and many other metrics, with a trade off in precision of the estimations for the memory consumption. These data structures can be used both as temporary data accumulators in query processing procedures and, perhaps more important, as a compact – sometimes astonishingly compact – replacement of raw data in stream-based computing.
 
-## Example use cases (queries)?
+## Example use cases (queries)
 * How many distinct elements are in the data set (i.e. what is the cardinality of the data set)?
 * What are the most frequent elements (the terms “heavy hitters” and “top-k elements” are also used)?
 * What are the frequencies of the most frequent elements?
-* How many elements belong to the specified range (range query, in SQL it looks like `SELECT count(v) WHERE v >= c1 AND v < c2)?`
+* How many elements belong to the specified range (range query, in SQL it looks like `SELECT count(v) WHERE v >= c1 AND v < c2)`?
 * Does the data set contain a particular element (membership query)?
 
-## How to build and install
-
+## How to build and run
 ```
 make dist
 ./bin/skizze
 ```
 
+## Bindings
+
+Two bindings are currently available:
+
+ * [Go](https://github.com/skizzehq/goskizze) 
+   * `go get github.com/skizzehq/goskizze/skizze` [Documentation](https://godoc.org/github.com/skizzehq/goskizze/skizze)
+   
+ * [Node.js](http://github.com/skizzehq/node-skizze)
+   * `npm install --save skizze` [Documentation](https://github.com/skizzehq/node-skizze#documentation)
+ 
+
 ## Example usage:
+
+Skizze comes with a CLI to help test and explore the server. It can be run via
 
 ```
 ./bin/skizze-cli
 ```
 
+### Commands
 **Create** a new Domain (Collection of Sketches):
 ```{r, engine='bash', count_lines}
 #CREATE DOM $name $estCardinality $topk

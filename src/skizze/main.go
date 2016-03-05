@@ -1,46 +1,63 @@
 package main
 
 import (
-	"flag"
 	"os"
-	"strconv"
 
 	_ "net/http/pprof"
 
+	"github.com/codegangsta/cli"
 	"github.com/njpatel/loggo"
 	"golang.org/x/crypto/ssh/terminal"
 
 	"config"
 	"manager"
 	"server"
-	"utils"
 )
 
-var logger = loggo.GetLogger("skizze")
+var (
+	host    string
+	logger  = loggo.GetLogger("skizze")
+	port    int
+	version string
+)
 
 func init() {
 	setupLoggers()
 }
 
 func main() {
-	var port uint
-	flag.UintVar(&port, "p", 3596, "specifies the port for Skizze to run on")
-	flag.Parse()
+	app := cli.NewApp()
+	app.Name = "Skizze"
+	app.Usage = "A sketch data store for counting and sketching using probabilistic data-structures"
+	app.Version = version
 
-	//TODO: Add arguments for dataDir and infoDir
-
-	err := os.Setenv("SKIZZE_PORT", strconv.Itoa(int(port)))
-	utils.PanicOnError(err)
-
-	logger.Infof("Starting Skizze...")
-	logger.Infof("Using data dir: %s", config.GetConfig().DataDir)
-	//server, err := server.New()
-	//utils.PanicOnError(err)
-	//server.Run()
-	mngr := manager.NewManager()
-	if p, err := strconv.Atoi(os.Getenv("SKIZZE_PORT")); err == nil {
-		server.Run(mngr, uint(p))
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:        "host",
+			Value:       "localhost",
+			Usage:       "The host to bind to",
+			Destination: &host,
+			EnvVar:      "SKIZZE_HOST",
+		},
+		cli.IntFlag{
+			Name:        "port, p",
+			Value:       3596,
+			Usage:       "The port to bind to",
+			Destination: &port,
+			EnvVar:      "SKIZZE_PORT",
+		},
 	}
+
+	app.Action = func(*cli.Context) {
+		// FIXME: Allow specifying datadir and infodir
+		logger.Infof("Starting Skizze...")
+		logger.Infof("Using data dir: %s", config.GetConfig().DataDir)
+
+		mngr := manager.NewManager()
+		server.Run(mngr, host, uint(port))
+	}
+
+	app.Run(os.Args)
 }
 
 func setupLoggers() {
