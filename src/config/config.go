@@ -2,9 +2,6 @@ package config
 
 import (
 	"os"
-	"os/user"
-	"strconv"
-	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/njpatel/loggo"
@@ -78,56 +75,12 @@ func parseConfigTOML() *Config {
 // GetConfig returns a singleton Configuration
 func GetConfig() *Config {
 	if config == nil {
-		config = parseConfigTOML()
-		usr, err := user.Current()
-		utils.PanicOnError(err)
-		dir := usr.HomeDir
+		config = &parseConfigTOML()
 
-		infoDir := strings.TrimSpace(os.Getenv("SKZ_INFO_DIR"))
-		if len(infoDir) == 0 {
-			if config.InfoDir[:2] == "~/" {
-				infoDir = strings.Replace(config.InfoDir, "~", dir, 1)
-			}
-		}
-
-		dataDir := strings.TrimSpace(os.Getenv("SKZ_DATA_DIR"))
-		if len(dataDir) == 0 {
-			if config.DataDir[:2] == "~/" {
-				dataDir = strings.Replace(config.DataDir, "~", dir, 1)
-			}
-		}
-
-		host := strings.TrimSpace(os.Getenv("SKZ_HOST"))
-		if len(host) == 0 {
-			host = config.Host
-		}
-
-		port, err := strconv.Atoi(strings.TrimSpace(os.Getenv("SKZ_PORT")))
-		if err != nil {
-			port = config.Port
-		}
-
-		saveThresholdSecondsInt, err := strconv.Atoi(strings.TrimSpace(os.Getenv("SKZ_SAVE_TRESHOLD_SECS")))
-		saveThresholdSeconds := uint(saveThresholdSecondsInt)
-		if err != nil {
-			saveThresholdSeconds = config.SaveThresholdSeconds
-		}
-
-		if saveThresholdSeconds < 3 {
-			saveThresholdSeconds = 3
-		}
-
-		if err := os.MkdirAll(dataDir, os.ModePerm); err != nil {
+		if err := os.MkdirAll(config.DataDir, os.ModePerm); err != nil {
 			panic(err)
 		}
 
-		config = &Config{
-			infoDir,
-			dataDir,
-			host,
-			port,
-			saveThresholdSeconds,
-		}
 		InfoDir = config.InfoDir
 		DataDir = config.DataDir
 		Host = config.Host
