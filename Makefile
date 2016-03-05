@@ -1,10 +1,16 @@
 GOPATH=$(CURDIR)/vendor:$(CURDIR)
 
-all:
+VERSION = 0.0.1
+
+all: skizze skizze-cli
+
+skizze:
 	@GOPATH=$(GOPATH) && \
-	  go build -a -v -ldflags '-w' -o ./bin/skizze ./src/skizze
+	  go build -a -v -ldflags "-w -X skizze/main.version=${VERSION}" -o ./bin/skizze ./src/skizze
+
+skizze-cli:
 	@GOPATH=$(GOPATH) && \
-	  go build -a -v -ldflags '-w' -o ./bin/skizze-cli ./src/skizze-cli
+	  go build -a -v -ldflags "-w -X skizze-cli/bridge.version=${VERSION}"  -o ./bin/skizze-cli ./src/skizze-cli
 
 build-dep:
 	@go get github.com/constabulary/gb/...
