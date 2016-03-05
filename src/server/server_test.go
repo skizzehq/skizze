@@ -11,7 +11,7 @@ import (
 
 func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 	m := manager.NewManager()
-	go Run(m, 7777)
+	go Run(m, "127.0.0.1", 7777)
 	time.Sleep(time.Millisecond * 50)
 
 	// Connect to the server.
