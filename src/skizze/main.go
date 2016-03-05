@@ -36,7 +36,7 @@ func main() {
 		cli.StringFlag{
 			Name:        "datadir, d",
 			Value:       config.DataDir,
-			Usage:       "the host interface to bind to",
+			Usage:       "the data directory",
 			Destination: &datadir,
 			EnvVar:      "SKIZZE_DATA_DIR",
 		},
