@@ -12,7 +12,7 @@ import (
 
 func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 	m := manager.NewManager()
-	datadir := config.GetConfig().DataDir
+	datadir := config.DataDir
 	go Run(m, "127.0.0.1", 7777, datadir)
 	time.Sleep(time.Millisecond * 50)
 

@@ -45,6 +45,11 @@ type Config struct {
 }
 
 var config *Config
+var InfoDir              string
+var DataDir              string
+var Host                 string
+var Port                 int
+var SaveThresholdSeconds uint
 
 // MaxKeySize ...
 const MaxKeySize int = 32768 // max key size BoltDB in bytes
@@ -123,11 +128,21 @@ func GetConfig() *Config {
 			port,
 			saveThresholdSeconds,
 		}
+		InfoDir = config.InfoDir
+		DataDir = config.DataDir
+		Host = config.Host
+		Port = config.Port
+		SaveThresholdSeconds = config.SaveThresholdSeconds
 	}
 	return config
 }
 
+// init initializes a singleton Configuration
+func init() {
+	GetConfig()
+}
+
 // Reset ...
 func Reset() {
-	config = nil
+	GetConfig()
 }

@@ -35,21 +35,21 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:        "datadir, d",
-			Value:       config.GetConfig().DataDir,
+			Value:       config.DataDir,
 			Usage:       "the host interface to bind to",
 			Destination: &datadir,
 			EnvVar:      "SKIZZE_DATA_DIR",
 		},
 		cli.StringFlag{
 			Name:        "host",
-			Value:       config.GetConfig().Host,
+			Value:       config.Host,
 			Usage:       "the host interface to bind to",
 			Destination: &host,
 			EnvVar:      "SKIZZE_HOST",
 		},
 		cli.IntFlag{
 			Name:        "port, p",
-			Value:       config.GetConfig().Port,
+			Value:       config.Port,
 			Usage:       "the port to bind to",
 			Destination: &port,
 			EnvVar:      "SKIZZE_PORT",
