@@ -24,6 +24,9 @@ test:
 bench:
 	@GOPATH=$(GOPATH) && go test -bench=. ./src/...
 
+proto:
+	@protoc --go_out=plugins=grpc:. ./src/datamodel/protobuf/skizze.proto
+
 dist: build-dep vendor all
 
 clean:
