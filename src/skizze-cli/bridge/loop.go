@@ -10,6 +10,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/codegangsta/cli"
+
 	"golang.org/x/net/context"
 
 	"google.golang.org/grpc"
@@ -21,13 +23,6 @@ import (
 )
 
 const helpString = `
-skizze-cli %s
-
-An interactive client to the Skizze database
-
-Usage: skizze-cli [help]
-
-Commands: (case insensitive)
   CREATE DOM  <name> <size> <maxUniqueItems>  Create a new Domain with options
   DESTROY DOM <name>                          Destroy a Domain
 
@@ -55,19 +50,19 @@ Commands: (case insensitive)
 
   QUIT                                        Exit skizze-cli
 
-Shortcuts:
+SHORTCUTS:
   Ctrl+d                                      Exit skizze-cli
 
-Examples:
+EXAMPLES:
   CREATE DOM users 100 100000
   ADD DOM users neil seif martin conor neil conor seif seif seif
   GET FREQ users neil
   GET RANK users      
   GET CARD users
-
 `
 
 var (
+	address    string
 	client     pb.SkizzeClient
 	completion = []string{
 		"create dom", "destroy dom",
@@ -93,7 +88,7 @@ var (
 func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 	// Connect to the server.
 	var err error
-	conn, err = grpc.Dial("127.0.0.1:3596", grpc.WithInsecure())
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
@@ -173,61 +168,86 @@ func save() error {
 }
 
 func printHelp() {
-	fmt.Printf(helpString, version)
+	fmt.Printf("USAGE:\n  %s", helpString)
 }
 
 // Run ...
 func Run() {
-	// Print help
-	if len(os.Args) > 2 && (strings.HasSuffix(os.Args[1], "h") || strings.HasSuffix(os.Args[1], "help")) {
-		printHelp()
-		return
+	app := cli.NewApp()
+	app.Name = "skizze-cli"
+	app.Usage = "A Skizze CLI client"
+	app.Version = version
+	app.UsageText = helpString
+
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:        "address, a",
+			Value:       "localhost:3596",
+			Usage:       "the Skizze server address to bind to",
+			Destination: &address,
+			EnvVar:      "SKIZZE_ADDRESS",
+		},
 	}
 
-	client, conn = setupClient()
-	line := liner.NewLiner()
-	w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-
-	defer func() { _ = line.Close() }()
-
-	line.SetCtrlCAborts(true)
-
-	line.SetCompleter(func(line string) (c []string) {
-		for _, n := range completion {
-			if strings.HasPrefix(n, strings.ToLower(line)) {
-				c = append(c, n)
-			}
-		}
-		return
-	})
-
-	if f, err := os.Open(historyFn); err == nil {
-		if _, err := line.ReadHistory(f); err == nil {
-			_ = f.Close()
-		}
+	app.Commands = []cli.Command{
+		{
+			Name:  "help, h",
+			Usage: "print help",
+			Action: func(*cli.Context) {
+				printHelp()
+				os.Exit(0)
+			},
+		},
 	}
 
-	for {
-		if query, err := line.Prompt("skizze> "); err == nil {
-			if err := evaluateQuery(query); err != nil {
-				log.Printf("Error evaluating query: %s", err.Error())
+	app.Action = func(*cli.Context) {
+		client, conn = setupClient()
+		line := liner.NewLiner()
+		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
+
+		defer func() { _ = line.Close() }()
+
+		line.SetCtrlCAborts(true)
+
+		line.SetCompleter(func(line string) (c []string) {
+			for _, n := range completion {
+				if strings.HasPrefix(n, strings.ToLower(line)) {
+					c = append(c, n)
+				}
 			}
-			line.AppendHistory(query)
-		} else if err == io.EOF {
-			tearDownClient(conn)
 			return
-		} else if err == liner.ErrPromptAborted {
-			fmt.Println("")
-		} else {
-			log.Printf("Error reading line: %s", err.Error())
-		}
+		})
 
-		if f, err := os.Create(historyFn); err != nil {
-			log.Fatalf("Error writing history file: %s", err.Error())
-		} else {
-			if _, err := line.WriteHistory(f); err != nil {
+		if f, err := os.Open(historyFn); err == nil {
+			if _, err := line.ReadHistory(f); err == nil {
 				_ = f.Close()
 			}
 		}
+
+		for {
+			if query, err := line.Prompt("skizze> "); err == nil {
+				if err := evaluateQuery(query); err != nil {
+					log.Printf("Error evaluating query: %s", err.Error())
+				}
+				line.AppendHistory(query)
+			} else if err == io.EOF {
+				tearDownClient(conn)
+				return
+			} else if err == liner.ErrPromptAborted {
+				fmt.Println("")
+			} else {
+				log.Printf("Error reading line: %s", err.Error())
+			}
+
+			if f, err := os.Create(historyFn); err != nil {
+				log.Fatalf("Error writing history file: %s", err.Error())
+			} else {
+				if _, err := line.WriteHistory(f); err != nil {
+					_ = f.Close()
+				}
+			}
+		}
 	}
+
+	app.Run(os.Args)
 }

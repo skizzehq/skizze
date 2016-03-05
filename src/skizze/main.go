@@ -35,14 +35,14 @@ func main() {
 		cli.StringFlag{
 			Name:        "host",
 			Value:       "localhost",
-			Usage:       "The host to bind to",
+			Usage:       "the host interface to bind to",
 			Destination: &host,
 			EnvVar:      "SKIZZE_HOST",
 		},
 		cli.IntFlag{
 			Name:        "port, p",
 			Value:       3596,
-			Usage:       "The port to bind to",
+			Usage:       "the port to bind to",
 			Destination: &port,
 			EnvVar:      "SKIZZE_PORT",
 		},
