@@ -53,7 +53,7 @@ Commands: (case insensitive)
   GET RANK <name>                             Get the top ranking values in a RANK Sketch
   GET CARD <name>                             Get the cardinality of a CARD Sketch
 
-	QUIT                                        Exit skizze-cli
+  QUIT                                        Exit skizze-cli
 
 Shortcuts:
   Ctrl+d                                      Exit skizze-cli
