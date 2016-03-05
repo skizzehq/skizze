@@ -27,13 +27,13 @@ type serverStruct struct {
 var server *serverStruct
 
 // Run ...
-func Run(manager *manager.Manager, port uint) {
+func Run(manager *manager.Manager, host string, port uint) {
 	nCPU := runtime.NumCPU()
 	runtime.GOMAXPROCS(nCPU)
 	path := filepath.Join(config.GetConfig().DataDir, "skizze.aof")
 	aof := storage.NewAOF(path)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port)) // RPC port
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port)) // RPC port
 	if err != nil {
 		logger.Criticalf("failed to listen: %v", err)
 	}
