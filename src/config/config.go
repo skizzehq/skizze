@@ -52,8 +52,8 @@ var SaveThresholdSeconds uint
 const MaxKeySize int = 32768 // max key size BoltDB in bytes
 
 func parseConfigTOML() *Config {
-	config = &Config{}
-	if _, err := toml.Decode(defaultTomlConfig, &config); err != nil {
+	cfg := &Config{}
+	if _, err := toml.Decode(defaultTomlConfig, &cfg); err != nil {
 		utils.PanicOnError(err)
 	}
 
@@ -62,20 +62,20 @@ func parseConfigTOML() *Config {
 		_, err := os.Open(configPath)
 		if err != nil {
 			logger.Warningf("Unable to find config file, using defaults")
-			return config
+			return cfg
 		}
-		if _, err := toml.DecodeFile(configPath, &config); err != nil {
+		if _, err := toml.DecodeFile(configPath, &cfg); err != nil {
 			logger.Warningf("Error parsing config file, using defaults")
 		}
 	}
 
-	return config
+	return cfg
 }
 
 // GetConfig returns a singleton Configuration
 func GetConfig() *Config {
 	if config == nil {
-		config = &parseConfigTOML()
+		config = parseConfigTOML()
 
 		if err := os.MkdirAll(config.DataDir, os.ModePerm); err != nil {
 			panic(err)
