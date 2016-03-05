@@ -77,6 +77,10 @@ func GetConfig() *Config {
 	if config == nil {
 		config = parseConfigTOML()
 
+		if err := os.MkdirAll(config.InfoDir, os.ModePerm); err != nil {
+			panic(err)
+		}
+
 		if err := os.MkdirAll(config.DataDir, os.ModePerm); err != nil {
 			panic(err)
 		}
