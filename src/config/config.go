@@ -42,10 +42,15 @@ type Config struct {
 }
 
 var config *Config
+// InfoDir initialized from config file
 var InfoDir              string
+// DataDir initialized from config file
 var DataDir              string
+// Host initialized from config file
 var Host                 string
+// Port initialized from config file
 var Port                 int
+// SaveThresholdSeconds initialized from config file
 var SaveThresholdSeconds uint
 
 // MaxKeySize ...
