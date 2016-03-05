@@ -53,8 +53,8 @@ var Port                 int
 // SaveThresholdSeconds initialized from config file
 var SaveThresholdSeconds uint
 
-// MaxKeySize ...
-const MaxKeySize int = 32768 // max key size BoltDB in bytes
+// MaxKeySize for BoltDB keys in bytes
+const MaxKeySize int = 32768
 
 func parseConfigTOML() *Config {
 	cfg := &Config{}
