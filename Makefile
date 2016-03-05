@@ -6,6 +6,9 @@ all: skizze skizze-cli
 
 skizze:
 	@GOPATH=$(GOPATH) && \
+	  go generate src/config/config.go > src/config/config.go.tmp
+	@mv src/config/config.go.tmp src/config/config.go
+	@GOPATH=$(GOPATH) && \
 	  go build -a -v -ldflags "-w -X main.version=${VERSION}" -o ./bin/skizze ./src/skizze
 
 skizze-cli:

@@ -3,7 +3,6 @@ package config
 import (
 	"os"
 	"os/user"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -13,13 +12,35 @@ import (
 	"utils"
 )
 
+//go:generate bash bake_default_config.sh
+const defaultTomlConfig = `
+# This is where top level info is stored for the counter manager we
+# could also use a boltDB in the DataDir but this would make it harder
+# to sync over replicas since not all replicas will hold the all the
+# counters.
+info_dir = "~/.skizze"
+
+# This is where the data is stored either as json or .count (pure bytes)
+data_dir = "~/.skizze/data"
+
+# The host interface for the server
+host = "localhost"
+
+# The port number for the server
+port = 3596
+
+# Treshold for saving a sketch to disk
+save_threshold_seconds = 1
+`
+
 var logger = loggo.GetLogger("config")
 
 // Config stores all configuration parameters for Go
 type Config struct {
 	InfoDir              string `toml:"info_dir"`
 	DataDir              string `toml:"data_dir"`
-	Port                 uint   `toml:"port"`
+	Host                 string `toml:"host"`
+	Port                 int    `toml:"port"`
 	SaveThresholdSeconds uint   `toml:"save_threshold_seconds"`
 }
 
@@ -29,29 +50,23 @@ var config *Config
 const MaxKeySize int = 32768 // max key size BoltDB in bytes
 
 func parseConfigTOML() *Config {
-	configPath := os.Getenv("SKZ_CONFIG")
-	if configPath == "" {
-		path, err := os.Getwd()
+	config = &Config{}
+	if _, err := toml.Decode(defaultTomlConfig, &config); err != nil {
 		utils.PanicOnError(err)
-		path, err = filepath.Abs(path)
-		utils.PanicOnError(err)
-		configPath = filepath.Join(path, "src/config/default.toml")
 	}
 
-	config = &Config{
-		InfoDir:              "~/.skizze",
-		DataDir:              "~/.skizze/data",
-		Port:                 3956,
-		SaveThresholdSeconds: 1,
+	configPath := os.Getenv("SKIZZE_CONFIG")
+	if configPath != "" {
+		_, err := os.Open(configPath)
+		if err != nil {
+			logger.Warningf("Unable to find config file, using defaults")
+			return config
+		}
+		if _, err := toml.DecodeFile(configPath, &config); err != nil {
+			logger.Warningf("Error parsing config file, using defaults")
+		}
 	}
-	_, err := os.Open(configPath)
-	if err != nil {
-		logger.Warningf("Unable to find config file, using defaults")
-		return config
-	}
-	if _, err := toml.DecodeFile(configPath, &config); err != nil {
-		utils.PanicOnError(err)
-	}
+
 	return config
 }
 
@@ -77,8 +92,12 @@ func GetConfig() *Config {
 			}
 		}
 
-		portInt, err := strconv.Atoi(strings.TrimSpace(os.Getenv("SKZ_PORT")))
-		port := uint(portInt)
+		host := strings.TrimSpace(os.Getenv("SKZ_HOST"))
+		if len(host) == 0 {
+			host = config.Host
+		}
+
+		port, err := strconv.Atoi(strings.TrimSpace(os.Getenv("SKZ_PORT")))
 		if err != nil {
 			port = config.Port
 		}
@@ -100,6 +119,7 @@ func GetConfig() *Config {
 		config = &Config{
 			infoDir,
 			dataDir,
+			host,
 			port,
 			saveThresholdSeconds,
 		}

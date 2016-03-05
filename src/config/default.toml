@@ -1,10 +1,16 @@
-# this is where top level info is stored for the counter manager we could also use a boltDB in the DataDir but this would make it harder to sync over replicas since not all replicas will hold the all the counters.
+# This is where top level info is stored for the counter manager we
+# could also use a boltDB in the DataDir but this would make it harder
+# to sync over replicas since not all replicas will hold the all the
+# counters.
 info_dir = "~/.skizze"
 
-# this is where the data is stored either as json or .count (pure bytes)
+# This is where the data is stored either as json or .count (pure bytes)
 data_dir = "~/.skizze/data"
 
-# the port number for the server
+# The host interface for the server
+host = "localhost"
+
+# The port number for the server
 port = 3596
 
 # Treshold for saving a sketch to disk
