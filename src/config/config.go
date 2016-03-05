@@ -8,9 +8,12 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/njpatel/loggo"
 
 	"utils"
 )
+
+var logger = loggo.GetLogger("config")
 
 // Config stores all configuration parameters for Go
 type Config struct {
@@ -34,9 +37,18 @@ func parseConfigTOML() *Config {
 		utils.PanicOnError(err)
 		configPath = filepath.Join(path, "src/config/default.toml")
 	}
+
+	config = &Config{
+		InfoDir:              "~/.skizze",
+		DataDir:              "~/.skizze/data",
+		Port:                 3956,
+		SaveThresholdSeconds: 1,
+	}
 	_, err := os.Open(configPath)
-	utils.PanicOnError(err)
-	config = &Config{}
+	if err != nil {
+		logger.Warningf("Unable to find config file, using defaults")
+		return config
+	}
 	if _, err := toml.DecodeFile(configPath, &config); err != nil {
 		utils.PanicOnError(err)
 	}
