@@ -57,7 +57,9 @@ func main() {
 		server.Run(mngr, host, uint(port))
 	}
 
-	app.Run(os.Args)
+	if err := app.Run(os.Args); err != nil {
+		logger.Criticalf(err.Error())
+	}
 }
 
 func setupLoggers() {
