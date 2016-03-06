@@ -7,7 +7,7 @@ Skizze ([ˈskɪt͡sə]: german for sketch) is a sketch data store to deal with a
 
 Unlike a Key-Value store, Skizze does not store values, but rather appends values to defined sketches, allowing one to solve frequency and cardinality queries in near O(1) time, with minimal memory footprint.
 
-<b> Current status ==> pre-Alpha </b>
+<b> Current status ==> Alpha (tagged v0.0.2) </b>
 
 ## Motivation
 
