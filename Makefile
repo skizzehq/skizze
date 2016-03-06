@@ -2,7 +2,12 @@ GOPATH=$(CURDIR)/vendor:$(CURDIR)
 
 VERSION = 0.0.1
 
-all: skizze skizze-cli
+all: bake-config skizze skizze-cli
+
+bake-config:
+	@GOPATH=$(GOPATH) && \
+	  go generate src/config/config.go > src/config/config.go.tmp
+	@mv src/config/config.go.tmp src/config/config.go
 
 skizze:
 	@GOPATH=$(GOPATH) && \

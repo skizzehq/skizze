@@ -2,6 +2,7 @@ package server
 
 import (
 	"time"
+	"config"
 
 	"google.golang.org/grpc"
 
@@ -11,7 +12,8 @@ import (
 
 func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 	m := manager.NewManager()
-	go Run(m, "127.0.0.1", 7777)
+	datadir := config.DataDir
+	go Run(m, "127.0.0.1", 7777, datadir)
 	time.Sleep(time.Millisecond * 50)
 
 	// Connect to the server.

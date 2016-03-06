@@ -15,9 +15,10 @@ import (
 )
 
 var (
+	datadir string
 	host    string
-	logger  = loggo.GetLogger("skizze")
 	port    int
+	logger  = loggo.GetLogger("skizze")
 	version string
 )
 
@@ -33,15 +34,22 @@ func main() {
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
+			Name:        "datadir, d",
+			Value:       config.DataDir,
+			Usage:       "the data directory",
+			Destination: &datadir,
+			EnvVar:      "SKIZZE_DATA_DIR",
+		},
+		cli.StringFlag{
 			Name:        "host",
-			Value:       "localhost",
+			Value:       config.Host,
 			Usage:       "the host interface to bind to",
 			Destination: &host,
 			EnvVar:      "SKIZZE_HOST",
 		},
 		cli.IntFlag{
 			Name:        "port, p",
-			Value:       3596,
+			Value:       config.Port,
 			Usage:       "the port to bind to",
 			Destination: &port,
 			EnvVar:      "SKIZZE_PORT",
@@ -51,10 +59,11 @@ func main() {
 	app.Action = func(*cli.Context) {
 		// FIXME: Allow specifying datadir and infodir
 		logger.Infof("Starting Skizze...")
-		logger.Infof("Using data dir: %s", config.GetConfig().DataDir)
+		logger.Infof("Listening on: %s:%d", host, port)
+		logger.Infof("Using data dir: %s", datadir)
 
 		mngr := manager.NewManager()
-		server.Run(mngr, host, uint(port))
+		server.Run(mngr, host, port, datadir)
 	}
 
 	if err := app.Run(os.Args); err != nil {

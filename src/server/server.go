@@ -1,7 +1,6 @@
 package server
 
 import (
-	"config"
 	"fmt"
 	"net"
 	"path/filepath"
@@ -27,10 +26,10 @@ type serverStruct struct {
 var server *serverStruct
 
 // Run ...
-func Run(manager *manager.Manager, host string, port uint) {
+func Run(manager *manager.Manager, host string, port int, datadir string) {
 	nCPU := runtime.NumCPU()
 	runtime.GOMAXPROCS(nCPU)
-	path := filepath.Join(config.GetConfig().DataDir, "skizze.aof")
+	path := filepath.Join(datadir, "skizze.aof")
 	aof := storage.NewAOF(path)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port)) // RPC port

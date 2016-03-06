@@ -44,7 +44,7 @@ func TestCreateDeleteDom(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	path := filepath.Join(config.GetConfig().DataDir, "skizze.aof")
+	path := filepath.Join(config.DataDir, "skizze.aof")
 	aof := NewAOF(path)
 	aof.Run()
 
@@ -116,7 +116,7 @@ func TestCreateDeleteSketch(t *testing.T) {
 	utils.SetupTests()
 	defer utils.TearDownTests()
 
-	path := filepath.Join(config.GetConfig().DataDir, "skizze.aof")
+	path := filepath.Join(config.DataDir, "skizze.aof")
 	aof := NewAOF(path)
 	aof.Run()
 
