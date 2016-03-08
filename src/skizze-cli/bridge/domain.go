@@ -13,10 +13,8 @@ import (
 )
 
 func createDomain(fields []string, in *pb.Domain) error {
-	if len(fields) > 5 {
-		return fmt.Errorf("Too many arguments, expected 4 got %d", len(fields))
-	} else if len(fields) < 5 {
-		return fmt.Errorf("Not enough arguments, expected 5 got %d", len(fields))
+	if len(fields) != 5 {
+		return fmt.Errorf("Expected 5 arguments got %d", len(fields))
 	}
 
 	// FIXME make last 2 arguments optional

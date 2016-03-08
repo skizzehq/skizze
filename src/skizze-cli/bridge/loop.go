@@ -23,7 +23,7 @@ import (
 )
 
 const helpString = `
-  CREATE DOM  <name> <size> <maxUniqueItems>  Create a new Domain with options
+  CREATE DOM  <name> <maxUniqueItems> <rank>  Create a new Domain with options
   DESTROY DOM <name>                          Destroy a Domain
 
   CREATE CARD <name>                          Create a Cardinality Sketch
