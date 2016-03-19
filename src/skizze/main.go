@@ -9,6 +9,7 @@ import (
 	"github.com/njpatel/loggo"
 	"golang.org/x/crypto/ssh/terminal"
 
+	"utils"
 	"config"
 	"manager"
 	"server"
@@ -57,7 +58,8 @@ func main() {
 	}
 
 	app.Action = func(*cli.Context) {
-		// FIXME: Allow specifying datadir and infodir
+		datadir = setupDirectories(datadir)
+
 		logger.Infof("Starting Skizze...")
 		logger.Infof("Listening on: %s:%d", host, port)
 		logger.Infof("Using data dir: %s", datadir)
@@ -69,6 +71,18 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		logger.Criticalf(err.Error())
 	}
+}
+
+func setupDirectories(datadir string) string {
+	// FIXME: Allow specifying infodir
+	datadir, err := utils.FullPath(datadir)
+	if err != nil {
+		panic(err)
+	}
+	if err := os.MkdirAll(datadir, os.ModePerm); err != nil {
+		panic(err)
+	}
+	return datadir
 }
 
 func setupLoggers() {
