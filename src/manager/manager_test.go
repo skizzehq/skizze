@@ -8,12 +8,13 @@ import (
 	"datamodel"
 	pb "datamodel/protobuf"
 	"utils"
+	"testutils"
 )
 
 func TestNoSketches(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 	m := NewManager()
 	if sketches := m.GetSketches(); len(sketches) != 0 {
 		t.Error("Expected 0 sketches, got", len(sketches))
@@ -22,8 +23,8 @@ func TestNoSketches(t *testing.T) {
 
 func TestCreateSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -62,8 +63,8 @@ func TestCreateSketch(t *testing.T) {
 
 func TestCreateAndSaveSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -103,8 +104,8 @@ func TestCreateAndSaveSketch(t *testing.T) {
 
 func TestCreateDuplicateSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -128,8 +129,8 @@ func TestCreateDuplicateSketch(t *testing.T) {
 
 func TestCreateInvalidSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -146,8 +147,8 @@ func TestCreateInvalidSketch(t *testing.T) {
 
 func TestDeleteNonExistingSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -166,8 +167,8 @@ func TestDeleteNonExistingSketch(t *testing.T) {
 
 func TestDeleteSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -194,8 +195,8 @@ func TestDeleteSketch(t *testing.T) {
 
 func TestCardSaveLoad(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -231,8 +232,8 @@ func TestCardSaveLoad(t *testing.T) {
 
 func TestFreqSaveLoad(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -268,8 +269,8 @@ func TestFreqSaveLoad(t *testing.T) {
 
 func TestRankSaveLoad(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -307,8 +308,8 @@ func TestRankSaveLoad(t *testing.T) {
 
 func TestMembershipSaveLoad(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
@@ -350,8 +351,8 @@ func TestMembershipSaveLoad(t *testing.T) {
 
 func TestCreateDeleteDomain(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	m := NewManager()
 	info := datamodel.NewEmptyInfo()
