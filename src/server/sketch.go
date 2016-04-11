@@ -147,10 +147,8 @@ func (s *serverStruct) ListAll(ctx context.Context, in *pb.Empty) (*pb.ListReply
 func (s *serverStruct) GetSketch(ctx context.Context, in *pb.Sketch) (*pb.Sketch, error) {
 	var err error
 	info := &datamodel.Info{Sketch: in}
-	if info, err = s.manager.GetSketch(info.ID()); err != nil {
-		return in, err
-	}
-	return in, nil
+	info, err = s.manager.GetSketch(info.ID())
+	return in, err
 }
 
 func (s *serverStruct) List(ctx context.Context, in *pb.ListRequest) (*pb.ListReply, error) {

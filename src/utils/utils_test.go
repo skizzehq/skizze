@@ -23,7 +23,7 @@ func TestFullPath(t *testing.T) {
 		t.Error("Expected no error, got", err)
 	}
 
-	if !strings.HasPrefix(p, "/home/") {
+	if !strings.HasPrefix(p, "/home/") && !strings.HasPrefix(p, "/Users/") {
 		t.Error("expected an absolute path, got ", p)
 	}
 	if !strings.HasSuffix(p, "hometest.txt") {
