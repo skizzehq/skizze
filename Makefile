@@ -46,7 +46,7 @@ setup-lint:
 
 lint:
 	@GOPATH=$(GOPATH) && \
-		gometalinter ./src/* -D gocyclo -D gotype -D dupl --deadline=5s
+		gometalinter ./src/* -D gocyclo -D gotype -D dupl --deadline=120s
 
 clean:
 	@rm ./bin/*
