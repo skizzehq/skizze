@@ -23,7 +23,7 @@ import (
 )
 
 const helpString = `
-  CREATE DOM  <name> <size> <maxUniqueItems>  Create a new Domain with options
+  CREATE DOM  <name> <maxUniqueItems> <rank>  Create a new Domain with options
   DESTROY DOM <name>                          Destroy a Domain
 
   CREATE CARD <name>                          Create a Cardinality Sketch
@@ -57,7 +57,7 @@ EXAMPLES:
   CREATE DOM users 100 100000
   ADD DOM users neil seif martin conor neil conor seif seif seif
   GET FREQ users neil
-  GET RANK users      
+  GET RANK users
   GET CARD users
 `
 
