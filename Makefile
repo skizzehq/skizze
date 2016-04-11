@@ -34,6 +34,16 @@ proto:
 
 dist: build-dep vendor all
 
+setup-lint:
+	@GOPATH=$(GOPATH) && \
+		go get github.com/alecthomas/gometalinter
+	@GOPATH=$(GOPATH) && \
+		gometalinter --install --update
+
+lint:
+	@GOPATH=$(GOPATH) && \
+		gometalinter ./src/* -D gocyclo -D gotype -D dupl --deadline=5s
+
 clean:
 	@rm ./bin/*
 

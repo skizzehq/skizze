@@ -9,6 +9,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 
 	"utils"
+	"testutils"
 )
 
 func createDom(id string) *pb.Domain {
@@ -41,8 +42,8 @@ func createSketch(id string, typ pb.SketchType) *pb.Sketch {
 
 func TestCreateDeleteDom(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	path := filepath.Join(config.DataDir, "skizze.aof")
 	aof := NewAOF(path)
@@ -71,7 +72,7 @@ func TestCreateDeleteDom(t *testing.T) {
 			}
 			break
 		}
-		dom := &pb.Domain{}
+		dom = &pb.Domain{}
 		err = proto.Unmarshal(e.raw, dom)
 		if err != nil {
 			t.Error("Expected no error, got", err)
@@ -113,8 +114,8 @@ func TestCreateDeleteDom(t *testing.T) {
 
 func TestCreateDeleteSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	path := filepath.Join(config.DataDir, "skizze.aof")
 	aof := NewAOF(path)
@@ -142,7 +143,7 @@ func TestCreateDeleteSketch(t *testing.T) {
 			}
 			break
 		}
-		sketch := &pb.Sketch{}
+		sketch = &pb.Sketch{}
 		err = proto.Unmarshal(e.raw, sketch)
 		if err != nil {
 			t.Error("Expected no error, got", err)

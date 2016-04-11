@@ -7,11 +7,12 @@ import (
 	"datamodel"
 	pb "datamodel/protobuf"
 	"utils"
+	"testutils"
 )
 
 func TestAddBloom(t *testing.T) {
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	info := datamodel.NewEmptyInfo()
 	info.Properties.MaxUniqueItems = utils.Int64p(1024)
@@ -62,8 +63,8 @@ func TestAddBloom(t *testing.T) {
 }
 
 func TestStressBloom(t *testing.T) {
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	values := make([][]byte, 10)
 	for i := 0; i < 1024; i++ {
@@ -88,8 +89,8 @@ func TestStressBloom(t *testing.T) {
 }
 
 func BenchmarkBloom(b *testing.B) {
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 	values := make([][]byte, 10)
 	for i := 0; i < 1024; i++ {
 		avenger := "avenger" + strconv.Itoa(i)

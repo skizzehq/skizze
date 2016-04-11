@@ -7,11 +7,12 @@ import (
 	"datamodel"
 	pb "datamodel/protobuf"
 	"utils"
+	"testutils"
 )
 
 func TestAddTopK(t *testing.T) {
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	info := datamodel.NewEmptyInfo()
 	info.Properties.Size = utils.Int64p(3)

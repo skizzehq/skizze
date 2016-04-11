@@ -8,9 +8,12 @@ import (
 
 	pb "datamodel/protobuf"
 	"manager"
+	"testutils"
 )
 
+
 func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
+	testutils.SetupTests()
 	m := manager.NewManager()
 	datadir := config.DataDir
 	go Run(m, "127.0.0.1", 7777, datadir)
@@ -27,4 +30,5 @@ func setupClient() (pb.SkizzeClient, *grpc.ClientConn) {
 func tearDownClient(conn *grpc.ClientConn) {
 	_ = conn.Close()
 	Stop()
+	testutils.TearDownTests()
 }

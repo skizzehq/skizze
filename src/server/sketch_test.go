@@ -8,13 +8,13 @@ import (
 
 	"config"
 	pb "datamodel/protobuf"
-	"utils"
+	"testutils"
 )
 
 func TestCreateSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	client, conn := setupClient()
 	defer tearDownClient(conn)
@@ -38,8 +38,8 @@ func TestCreateSketch(t *testing.T) {
 
 func TestCreateAddInvalidSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	client, conn := setupClient()
 	defer tearDownClient(conn)
@@ -79,8 +79,8 @@ func TestCreateAddInvalidSketch(t *testing.T) {
 
 func TestCreateAddDeleteAddSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	client, conn := setupClient()
 	defer tearDownClient(conn)
@@ -139,8 +139,8 @@ func TestCreateAddDeleteAddSketch(t *testing.T) {
 
 func TestAddGetCardSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	client, conn := setupClient()
 	defer tearDownClient(conn)
@@ -189,8 +189,8 @@ func TestAddGetCardSketch(t *testing.T) {
 
 func TestAddGetMembSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	client, conn := setupClient()
 	defer tearDownClient(conn)
@@ -245,8 +245,8 @@ func TestAddGetMembSketch(t *testing.T) {
 
 func TestAddGetFreqSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	client, conn := setupClient()
 	defer tearDownClient(conn)
@@ -302,8 +302,8 @@ func TestAddGetFreqSketch(t *testing.T) {
 
 func TestAddGetRankSketch(t *testing.T) {
 	config.Reset()
-	utils.SetupTests()
-	defer utils.TearDownTests()
+	testutils.SetupTests()
+	defer testutils.TearDownTests()
 
 	client, conn := setupClient()
 	defer tearDownClient(conn)

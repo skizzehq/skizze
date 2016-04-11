@@ -3,6 +3,10 @@ package utils
 import (
 	"io"
 	"os"
+	"os/user"
+	"strings"
+	"path"
+	"path/filepath"
 
 	"github.com/njpatel/loggo"
 )
@@ -67,4 +71,21 @@ func Int64p(i int64) *int64 {
 // Boolp as above
 func Boolp(b bool) *bool {
 	return &b
+}
+
+// FullPath returns the full path with ~ expanded and relative paths made abspath
+func FullPath(p string) (string, error) {
+	if strings.HasPrefix(p, "~/") {
+		usr, err := user.Current()
+		if err != nil {
+			return "", err
+		}
+		p = strings.Replace(p, "~/", "", 1)
+		p = path.Join(usr.HomeDir, p)
+	}
+	p, err := filepath.Abs(p)
+	if err != nil {
+		return "", err
+	}
+	return p, nil
 }
