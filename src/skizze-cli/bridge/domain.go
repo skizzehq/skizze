@@ -41,6 +41,9 @@ func createDomain(fields []string, in *pb.Domain) error {
 	}
 
 	_, err = client.CreateDomain(context.Background(), in)
+	if err == nil {
+		fmt.Println("done")
+	}
 	return err
 }
 
@@ -53,6 +56,9 @@ func addToDomain(fields []string, in *pb.Domain) error {
 		Values: fields[3:],
 	}
 	_, err := client.Add(context.Background(), addRequest)
+	if err == nil {
+		fmt.Println("done")
+	}
 	return err
 }
 
