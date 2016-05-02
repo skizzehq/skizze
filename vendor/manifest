@@ -14,12 +14,6 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "github.com/boltdb/bolt",
-			"repository": "https://github.com/boltdb/bolt",
-			"revision": "6465994716bf6400605746e79224cf1e7ed68725",
-			"branch": "master"
-		},
-		{
 			"importpath": "github.com/codegangsta/cli",
 			"repository": "https://github.com/codegangsta/cli",
 			"revision": "a2943485b110df8842045ae0600047f88a3a56a1",
@@ -84,12 +78,6 @@
 			"path": "/proto/testdata"
 		},
 		{
-			"importpath": "github.com/juju/loggo",
-			"repository": "https://github.com/juju/loggo",
-			"revision": "8477fc936adf0e382d680310047ca27e128a309a",
-			"branch": "master"
-		},
-		{
 			"importpath": "github.com/martinpinto/liner",
 			"repository": "https://github.com/martinpinto/liner",
 			"revision": "488c6d3e1cd42b7f917c1eab570360f744fa508b",
@@ -123,12 +111,6 @@
 			"importpath": "github.com/skizzehq/count-min-log",
 			"repository": "https://github.com/skizzehq/count-min-log",
 			"revision": "",
-			"branch": "master"
-		},
-		{
-			"importpath": "github.com/willf/bitset",
-			"repository": "https://github.com/willf/bitset",
-			"revision": "bb0da3785c4fe9d26f6029c77c8fce2aa4d0b291",
 			"branch": "master"
 		},
 		{
