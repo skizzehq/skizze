@@ -28,7 +28,11 @@ func (d *BloomSketch) Add(values [][]byte) (bool, error) {
 	success := true
 	dict := make(map[string]uint)
 	if d.threshold != nil {
-		d.threshold.Add(values)
+		s, err := d.threshold.Add(values)
+		success = s
+		if err != nil {
+			return false, err
+		}
 		if !d.threshold.IsFull() {
 			return true, nil
 		}
@@ -52,14 +56,14 @@ func (d *BloomSketch) Add(values [][]byte) (bool, error) {
 
 // Get ...
 func (d *BloomSketch) Get(data interface{}) (interface{}, error) {
+	if d.threshold != nil {
+		return d.threshold.Get(data)
+	}
+
 	values := data.([][]byte)
 	tmpRes := make(map[string]*pb.Membership)
 	res := &pb.MembershipResult{
 		Memberships: make([]*pb.Membership, len(values), len(values)),
-	}
-
-	if d.threshold != nil {
-		return d.threshold.Get(data)
 	}
 
 	for i, v := range values {
