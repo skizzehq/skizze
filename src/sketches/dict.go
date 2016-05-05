@@ -52,6 +52,8 @@ func (d *Dict) Get(data interface{}) (interface{}, error) {
 	switch datamodel.GetTypeString(typ) {
 	case datamodel.Bloom:
 		return d.getMemb(data)
+	case datamodel.CML:
+		return d.getFreq(data)
 	}
 	return nil, fmt.Errorf("Unknown error: %v", d.Info.GetType().String()) // FIXME: return some error
 }
@@ -73,6 +75,27 @@ func (d *Dict) getMemb(data interface{}) (interface{}, error) {
 			IsMember: utils.Boolp(ok),
 		}
 		tmpRes[string(v)] = res.Memberships[i]
+	}
+	return res, nil
+}
+
+func (d *Dict) getFreq(data interface{}) (interface{}, error) {
+	fmt.Println("----->")
+	values := data.([][]byte)
+	res := &pb.FrequencyResult{
+		Frequencies: make([]*pb.Frequency, len(values), len(values)),
+	}
+	tmpRes := make(map[string]*pb.Frequency)
+	for i, v := range values {
+		if r, ok := tmpRes[string(v)]; ok {
+			res.Frequencies[i] = r
+			continue
+		}
+		res.Frequencies[i] = &pb.Frequency{
+			Value: utils.Stringp(string(v)),
+			Count: utils.Int64p(int64(d.impl[string(v)])),
+		}
+		tmpRes[string(v)] = res.Frequencies[i]
 	}
 	return res, nil
 }

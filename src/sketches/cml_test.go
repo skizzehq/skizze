@@ -6,17 +6,19 @@ import (
 
 	"datamodel"
 	pb "datamodel/protobuf"
-	"utils"
 	"testutils"
+	"utils"
 )
 
-func TestAdd(t *testing.T) {
+func TestAddCML(t *testing.T) {
 	testutils.SetupTests()
 	defer testutils.TearDownTests()
 
 	info := datamodel.NewEmptyInfo()
 	info.Properties.MaxUniqueItems = utils.Int64p(1000000)
 	info.Name = utils.Stringp("marvel")
+	typ := pb.SketchType_FREQ
+	info.Type = &typ
 	sketch, err := NewCMLSketch(info)
 
 	if err != nil {
