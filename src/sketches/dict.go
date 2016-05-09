@@ -54,6 +54,8 @@ func (d *Dict) Get(data interface{}) (interface{}, error) {
 		return d.getMemb(data)
 	case datamodel.CML:
 		return d.getFreq(data)
+	case datamodel.HLLPP:
+		return d.getCard(data)
 	}
 	return nil, fmt.Errorf("Unknown error: %v", d.Info.GetType().String()) // FIXME: return some error
 }
@@ -80,7 +82,6 @@ func (d *Dict) getMemb(data interface{}) (interface{}, error) {
 }
 
 func (d *Dict) getFreq(data interface{}) (interface{}, error) {
-	fmt.Println("----->")
 	values := data.([][]byte)
 	res := &pb.FrequencyResult{
 		Frequencies: make([]*pb.Frequency, len(values), len(values)),
@@ -98,4 +99,10 @@ func (d *Dict) getFreq(data interface{}) (interface{}, error) {
 		tmpRes[string(v)] = res.Frequencies[i]
 	}
 	return res, nil
+}
+
+func (d *Dict) getCard(data interface{}) (interface{}, error) {
+	return &pb.CardinalityResult{
+		Cardinality: utils.Int64p(int64(len(d.impl))),
+	}, nil
 }

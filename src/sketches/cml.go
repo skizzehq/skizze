@@ -25,9 +25,7 @@ func NewCMLSketch(info *datamodel.Info) (*CMLSketch, error) {
 // Add ...
 func (d *CMLSketch) Add(values [][]byte) (bool, error) {
 	success := true
-
 	dict := make(map[string]uint)
-
 	if d.threshold != nil {
 		s, err := d.threshold.Add(values)
 		success = s
