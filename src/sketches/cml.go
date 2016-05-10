@@ -11,24 +11,41 @@ import (
 // CMLSketch is the toplevel Sketch to control the count-min-log implementation
 type CMLSketch struct {
 	*datamodel.Info
-	impl *cml.Sketch
+	impl      *cml.Sketch
+	threshold *Dict
 }
 
 // NewCMLSketch ...
 func NewCMLSketch(info *datamodel.Info) (*CMLSketch, error) {
-	sketch, err := cml.NewForCapacity16(uint64(info.Properties.GetMaxUniqueItems()), 0.01)
-	d := CMLSketch{info, sketch}
-	if err != nil {
-		logger.Errorf("an error has occurred while saving CMLSketch: %s", err.Error())
-	}
+	threshold := NewDict(info)
+	d := CMLSketch{info, nil, threshold}
 	return &d, nil
 }
 
 // Add ...
 func (d *CMLSketch) Add(values [][]byte) (bool, error) {
 	success := true
-
 	dict := make(map[string]uint)
+	if d.threshold != nil {
+		s, err := d.threshold.Add(values)
+		success = s
+		if err != nil {
+			return false, err
+		}
+		if !d.threshold.IsFull() {
+			return true, nil
+		}
+		values = d.threshold.Keys()
+		d.threshold = nil
+		if d.impl == nil {
+			sketch, err := cml.NewForCapacity16(uint64(d.Info.Properties.GetMaxUniqueItems()), 0.01)
+			if err != nil {
+				logger.Errorf("an error has occurred while saving CMLSketch: %s", err.Error())
+			}
+			d.impl = sketch
+		}
+	}
+
 	for _, v := range values {
 		dict[string(v)]++
 	}
@@ -42,6 +59,10 @@ func (d *CMLSketch) Add(values [][]byte) (bool, error) {
 
 // Get ...
 func (d *CMLSketch) Get(data interface{}) (interface{}, error) {
+	if d.threshold != nil {
+		return d.threshold.Get(data)
+	}
+
 	values := data.([][]byte)
 	res := &pb.FrequencyResult{
 		Frequencies: make([]*pb.Frequency, len(values), len(values)),

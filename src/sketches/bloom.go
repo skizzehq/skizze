@@ -11,14 +11,15 @@ import (
 // BloomSketch is the toplevel Sketch to control the count-min-log implementation
 type BloomSketch struct {
 	*datamodel.Info
-	impl *bloom.Bloom
+	impl      *bloom.Bloom
+	threshold *Dict
 }
 
 // NewBloomSketch ...
 func NewBloomSketch(info *datamodel.Info) (*BloomSketch, error) {
 	// FIXME: We are converting from int64 to uint
-	sketch := bloom.New(float64(info.Properties.GetMaxUniqueItems()), 4.0)
-	d := BloomSketch{info, &sketch}
+	threshold := NewDict(info)
+	d := BloomSketch{info, nil, threshold}
 	return &d, nil
 }
 
@@ -26,6 +27,23 @@ func NewBloomSketch(info *datamodel.Info) (*BloomSketch, error) {
 func (d *BloomSketch) Add(values [][]byte) (bool, error) {
 	success := true
 	dict := make(map[string]uint)
+	if d.threshold != nil {
+		s, err := d.threshold.Add(values)
+		success = s
+		if err != nil {
+			return false, err
+		}
+		if !d.threshold.IsFull() {
+			return true, nil
+		}
+		values = d.threshold.Keys()
+		d.threshold = nil
+		if d.impl == nil {
+			sketch := bloom.New(float64(d.Info.Properties.GetMaxUniqueItems()), 4.0)
+			d.impl = &sketch
+		}
+	}
+
 	for _, v := range values {
 		dict[string(v)]++
 	}
@@ -38,11 +56,16 @@ func (d *BloomSketch) Add(values [][]byte) (bool, error) {
 
 // Get ...
 func (d *BloomSketch) Get(data interface{}) (interface{}, error) {
+	if d.threshold != nil {
+		return d.threshold.Get(data)
+	}
+
 	values := data.([][]byte)
 	tmpRes := make(map[string]*pb.Membership)
 	res := &pb.MembershipResult{
 		Memberships: make([]*pb.Membership, len(values), len(values)),
 	}
+
 	for i, v := range values {
 		if r, ok := tmpRes[string(v)]; ok {
 			res.Memberships[i] = r
